@@ -1,0 +1,48 @@
+#Header {
+	background-color: rgb(201, 120, 26);
+}
+
+#PrevButton, #PlayButton, #NextButton, #VolButton {
+	border: none;
+	background: transparent;
+}
+
+#PrevButton {
+	icon: url(:/Icons/track-prev.svg);
+}
+#PrevButton:hover {
+	icon: url(:/Icons/track-prev_hover.svg);
+}
+
+#PlayButton {
+	icon: url(:/Icons/play.svg);
+}
+#PlayButton:hover {
+	icon: url(:/Icons/play_hover.svg);
+}
+#PlayButton::checked {
+	icon: url(:/Icons/pause.svg);
+}
+#PlayButton::checked:hover {
+	icon: url(:/Icons/pause_hover.svg);
+}
+
+#NextButton {
+	icon: url(:/Icons/track-next.svg);
+}
+#NextButton:hover {
+	icon: url(:/Icons/track-next_hover.svg);
+}
+
+#VolButton {
+	icon: url(:/Icons/volume-3.svg);
+}
+#VolButton:hover {
+	icon: url(:/Icons/volume-3_hover.svg);
+}
+
+#TimeLabel {
+	padding: 5px;
+	color: white;
+}
+

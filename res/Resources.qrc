@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="Icons/">
+        <file alias="play.svg">Icons/play.svg</file>
+        <file alias="track-prev.svg">Icons/track-prev.svg</file>
+		<file alias="track-next.svg">Icons/track-next.svg</file>
+		<file alias="play_hover.svg">Icons/play_hover.svg</file>
+		<file alias="track-prev_hover.svg">Icons/track-prev_hover.svg</file>
+		<file alias="track-next_hover.svg">Icons/track-next_hover.svg</file>
+    	<file alias="volume-3.svg">Icons/volume-3.svg</file>
+    	<file alias="volume-3_hover.svg">Icons/volume-3_hover.svg</file>
+        <file alias="pause.svg">Icons/pause.svg</file>
+        <file alias="pause_hover.svg">Icons/pause_hover.svg</file>
+	</qresource>
+	<qresource prefix="/">
+		<file alias="Style.qss">Style.qss</file>
+	</qresource>
+</RCC>
+
