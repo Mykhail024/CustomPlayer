@@ -1,6 +1,6 @@
 #include <QMouseEvent>
 
-#include "TimeSlider.hpp"
+#include "TimeSlider.h"
 
 namespace Widgets {
 	void TimeSlider::mousePressEvent(QMouseEvent* event)

@@ -8,9 +8,9 @@
 #include <pipewire/thread-loop.h>
 #include <spa/buffer/buffer.h>
 
-#include "PipeWire.hpp"
-#include "../TagReaders/TagReader.hpp"
-#include "../Decoders/Decoder.hpp"
+#include "PipeWire.h"
+#include "../TagReaders/TagReader.h"
+#include "../Decoders/Decoder.h"
 
 namespace AudioServers
 {

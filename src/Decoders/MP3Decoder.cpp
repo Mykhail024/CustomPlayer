@@ -1,4 +1,4 @@
-#include "Decoder.hpp"
+#include "Decoder.h"
 #include <iostream>
 #include <mpg123.h>
 #include <vector>

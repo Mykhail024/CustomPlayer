@@ -1,8 +1,8 @@
-#Header {
+#ControlsPanel {
 	background-color: rgb(201, 120, 26);
 }
 
-#PrevButton, #PlayButton, #NextButton, #VolButton {
+#PrevButton, #PlayButton, #NextButton, #MuteButton {
 	border: none;
 	background: transparent;
 }
@@ -34,15 +34,11 @@
 	icon: url(:/Icons/track-next_hover.svg);
 }
 
-#VolButton {
-	icon: url(:/Icons/volume-3.svg);
-}
-#VolButton:hover {
-	icon: url(:/Icons/volume-3_hover.svg);
-}
-
 #TimeLabel {
 	padding: 5px;
 	color: white;
 }
 
+#InfoPanel {
+	background-color: #323232;
+}

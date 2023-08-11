@@ -7,7 +7,7 @@
 
 #include <QImage>
 
-#include "TagReader.hpp"
+#include "TagReader.h"
 
 namespace TagReaders
 {

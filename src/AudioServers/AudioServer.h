@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "../Widgets/TimeSlider.hpp"
+#include "../Widgets/Controls/TimeSlider.h"
 
 namespace AudioServers
 {

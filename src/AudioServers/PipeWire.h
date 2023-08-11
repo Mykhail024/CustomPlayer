@@ -5,7 +5,7 @@
 #include <pipewire/pipewire.h>
 #include <spa/param/audio/format-utils.h>
 
-#include "AudioServer.hpp"
+#include "AudioServer.h"
 
 namespace AudioServers
 {

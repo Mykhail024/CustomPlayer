@@ -1,18 +1,21 @@
 #include <QApplication>
+#include <QCoreApplication>
+#include <iostream>
 
-#include "Widgets/MainWindow.hpp"
-#include "AudioServers/PipeWire.hpp"
+#include "Widgets/Window.h"
+#include "Config/Config.h"
+#include "Convert.cpp"
 
 int main(int argc, char** argv)
 {
-    QApplication app(argc, argv);
+	Config::init_config();
 
-	AudioServers::PipeWire *pipewire = new AudioServers::PipeWire();
+	QApplication app(argc, argv);
+	app.setStyleSheet(Convert::File::toQString(":/Style.qss"));
 
-    Widgets::MainWindow window(pipewire);
-    window.addFolder("/home/hong19/Music/");
+    Window window;
     window.show();
-    window.updateSongList();
-    return app.exec();
+
+	return app.exec();
 }
 
