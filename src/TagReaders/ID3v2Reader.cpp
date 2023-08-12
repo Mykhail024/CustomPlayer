@@ -1,3 +1,19 @@
+/***************************************************************************************
+ * CustomPlayer
+ * Copyright (c) 2023 Mykhail024
+ *
+ * This project uses the TagLib library distributed under the LGPL license.
+ * For more information about the license, see the TAGLIB_LICENSE file.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * For the full text of the GNU General Public License, please refer to the LICENSE file.
+ ***************************************************************************************/
+
+
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
