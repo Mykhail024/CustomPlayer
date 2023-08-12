@@ -14,4 +14,6 @@ This project uses third-party components such as [TagLib](https://github.com/tag
 Please review the relevant licenses for these components.
 
 This project uses icons from multiple third-party icon packs. The icons used in this project are from the following icon packs and are licensed under their respective licenses:
-- [IonIcons](https://github.com/ionic-team/ionicons) - Author: Ben Sperry, [License](./IonIcons_LICENSE)
+- [IonIcons](https://github.com/ionic-team/ionicons) - Ben Sperry, [MIT License](./MIT_LICENSE)
+- [Zondicons](https://github.com/dukestreetstudio/zondicons) - Steve Schoger, [MIT License](./MIT_LICENSE)
+- [css.gg](https://github.com/astrit/css.gg) - Astrit, [MIT License](./MIT_LICENSE)
