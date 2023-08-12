@@ -10,7 +10,7 @@ For details, please refer to the [LICENSE](./LICENSE) file.
 - [libpipewire](https://pipewire.org/)
 - [taglib](https://github.com/taglib/taglib)
 
-## Third-Party Components' Licenses
+## Third-Party Components Licenses
 This project uses third-party components such as [TagLib](https://github.com/taglib/taglib) ([TagLib License](./TAGLIB_LICENSE)) which have their own respective licenses.
 Please review the relevant licenses for these components.
 
