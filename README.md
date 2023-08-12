@@ -1,4 +1,5 @@
 # CustomPlayer
+![Screenshot](./Images/Image_0.1.png)
 This project is distributed under the GNU GPL-3.0 license.
 For details, please refer to the [LICENSE](./LICENSE) file.
 
