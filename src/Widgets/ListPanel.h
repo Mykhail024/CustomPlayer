@@ -2,6 +2,10 @@
 
 #include <QTableWidget>
 #include <QWidget>
+#include <vector>
+
+#include "../DataBase/SQLiteHandler.h"
+#include "../Config/Config.h"
 
 class ListPanel : public QTableWidget {
     Q_OBJECT
@@ -12,11 +16,15 @@ class ListPanel : public QTableWidget {
 	private slots:
 		void onUpdate();
 		void onSetupColumns();
+		void onSetupRows();
 	signals:
 		void update();
 		void setupColumns();
+		void setupRows();
 
 	private:
-		std::vector<std::pair<QString, bool>> columns;
-		QString dataBase;
+		Config::COLLUMNS columns;
+		DB::SQLiteHandler db;
+
+		std::vector<DB::SONG> songs;
 };

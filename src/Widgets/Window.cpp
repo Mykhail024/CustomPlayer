@@ -2,15 +2,16 @@
 #include <QStyleOption>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <map>
 #include <qlistview.h>
 #include <vector>
+#include <iostream>
 
 #include "InfoPanel.h"
 #include "ListPanel.h"
 #include "Window.h"
 #include "ControlsPanel.h"
 #include "../TagReaders/TagReader.h"
+#include "../Config/Config.h"
 
 Window::Window()
 {
@@ -29,10 +30,11 @@ Window::Window()
 	auto *controls_panel = new ControlsPanel();
 
 	auto *info_panel = new InfoPanel();
-	info_panel->setFixedWidth(windowWindth * 0.28);
+	info_panel->setFixedWidth(windowWindth * 0.22);
 
 	auto *list_panel = new ListPanel("");
 	list_panel->setupColumns();
+	list_panel->setupRows();
 
 	v_layout->addWidget(controls_panel, 0, Qt::AlignTop);
 	h_layout->addWidget(info_panel, 0, Qt::AlignLeft);

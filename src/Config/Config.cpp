@@ -137,28 +137,25 @@ namespace Config {
 		settings.setValue("Session/Volume", qBound(0, value, 100));
 	}
 
-	std::vector<std::pair<QString, bool>> getColumns()
+	COLLUMNS getColumns()
 	{
-		std::vector<std::pair<QString, bool>> columns;
-		std::vector<QString> colNames = {"Title", "Artist", "Album", "Length", "Modified-Date", "Year"};
-
-		for(const auto& name : colNames)
-		{
-			QVariant value = settings.value("Columns/" + name, -1);
-			if(value == -1)
-			{
-				throw std::runtime_error("Error read value: Columns/" + name.toStdString());
-			}
-			columns.emplace_back(name, value.toBool());
-		}
+		COLLUMNS columns;
+		columns.Title = settings.value("Columns/Title").toBool();
+		columns.Artist = settings.value("Columns/Artist").toBool();
+		columns.Album = settings.value("Columns/Album").toBool();
+		columns.Length = settings.value("Columns/Length").toBool();
+		columns.ModifiedDate = settings.value("Columns/Modified-Date").toBool();
+		columns.Year = settings.value("Columns/Year").toBool();
 
 		return columns;
 	}
-	void setColumns(std::vector<std::pair<QString, bool>> columns)
+	void setColumns(COLLUMNS columns)
 	{
-		for(const auto& value : columns)
-		{
-			settings.setValue("Session/" + value.first, value.second);
-		}
+		settings.setValue("Columns/Title", columns.Title);
+		settings.setValue("Columns/Artist", columns.Artist);
+		settings.setValue("Columns/Album", columns.Album);
+		settings.setValue("Columns/Length", columns.Length);
+		settings.setValue("Columns/ModifiedDate", columns.ModifiedDate);
+		settings.setValue("Columns/Year", columns.Year);
 	}
 }

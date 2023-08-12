@@ -14,8 +14,9 @@ set(CMAKE_AUTOMOC ON)
 project(${PROJECT_NAME})
 
 find_package(Qt6 COMPONENTS Core Widgets DBus REQUIRED)
-
+find_package(SQLiteCpp REQUIRED)
 find_package(PkgConfig REQUIRED)
+
 pkg_check_modules(MPG123 REQUIRED IMPORTED_TARGET libmpg123)
 pkg_check_modules(libpipewire REQUIRED IMPORTED_TARGET libpipewire-0.3)
 pkg_check_modules(taglib REQUIRED IMPORTED_TARGET taglib)
@@ -51,10 +52,11 @@ add_executable(${PROJECT_NAME}
 	src/Config/Config.cpp
 	src/Widgets/Controls/TimeSlider.cpp
 	src/TagReaders/ID3v2Reader.cpp
+	src/DataBase/SQLiteHandler.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${MPG123_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt::DBus PkgConfig::MPG123 PkgConfig::libpipewire PkgConfig::taglib)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt::DBus PkgConfig::MPG123 PkgConfig::libpipewire PkgConfig::taglib SQLiteCpp)
 
 add_custom_target(run
     COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}

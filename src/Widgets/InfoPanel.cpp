@@ -31,7 +31,7 @@ InfoPanel::InfoPanel(QWidget *parent) : QWidget(parent)
 
 void InfoPanel::onSetImage(QImage image)
 {
-	QPixmap pixmap = QPixmap::fromImage(image.scaledToWidth(imageLabel->width()/2, Qt::SmoothTransformation));
+	QPixmap pixmap = QPixmap::fromImage(image.scaledToWidth(imageLabel->width() * 0.35, Qt::SmoothTransformation));
 	imageLabel->resize(pixmap.size());
 	imageLabel->setPixmap(pixmap);
 }

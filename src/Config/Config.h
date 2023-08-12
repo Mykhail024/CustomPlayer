@@ -1,9 +1,19 @@
+#pragma once
+
 #include <map>
 #include <QString>
 #include <unordered_map>
 
 namespace Config {
-
+	struct COLLUMNS
+	{
+		bool Title;
+		bool Artist;
+		bool Album;
+		bool Length;
+		bool ModifiedDate;
+		bool Year;
+	};
 	enum AUDIO_SERVERS
 	{
 		PIPEWIRE,
@@ -25,6 +35,6 @@ namespace Config {
 	int getVolume();
 	void setVolume(int value);
 
-	std::vector<std::pair<QString, bool>> getColumns();
-	void setColumns(std::vector<std::pair<QString, bool>> columns);
+	COLLUMNS getColumns();
+	void setColumns(COLLUMNS columns);
 }
