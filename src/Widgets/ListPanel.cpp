@@ -3,6 +3,21 @@
 #include "../Convert.cpp"
 #include "ListPanel.h"
 
+static int findColumn(QTableWidget *widget,const QString& name)
+{
+	int result = -1;
+	for(int i = 0; i < widget->columnCount(); i++)
+	{
+		auto headerItem = widget->horizontalHeaderItem(i);
+		if(headerItem && headerItem->text() == name)
+		{
+			result = i;
+			break;
+		}
+	}
+	return result;
+}
+
 ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableWidget(parent), columns(Config::getColumns())
 {
 	db.Open("main.db3");
@@ -41,10 +56,20 @@ void ListPanel::onSetupColumns()
 	this->setColumnCount(headerLabels.size());
 	this->setHorizontalHeaderLabels(headerLabels);
 
-	this->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-	for (int i = 1; i < headerLabels.size(); ++i)
+	for (const auto& label : headerLabels)
 	{
-		this->horizontalHeader()->setSectionResizeMode(i, QHeaderView::Interactive);
+		int column = findColumn(this, label);
+		if (column != -1)
+		{
+			if (label == "Title")
+			{
+				this->horizontalHeader()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
+			}
+			else
+			{
+				this->horizontalHeader()->setSectionResizeMode(column, QHeaderView::Stretch);
+			}
+		}
 	}
 }
 
