@@ -14,20 +14,9 @@ namespace Config {
 		bool ModifiedDate;
 		bool Year;
 	};
-	enum AUDIO_SERVERS
-	{
-		PIPEWIRE,
-		PULSEAUDIO,
-		JACK,
-		ALSA,
-		UNKNOWN_SERVER
-	};
 
 	void init_config();
 	QString getConfigPath();
-
-	AUDIO_SERVERS getAudioServer();
-	void setAudioServer(AUDIO_SERVERS server);
 
 	bool getLoopStatus();
 	void setLoopStatus(bool value);

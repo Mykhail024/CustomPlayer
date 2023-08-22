@@ -20,10 +20,6 @@ namespace Config {
 	void init_config()
 	{
 		//Global
-		if(settings.value("audio_server", "err") == "err")
-		{
-			settings.setValue("sound_server", "pipewire");
-		}
 		if(settings.value("lang", "err") == "err")
 		{
 			settings.setValue("lang", "en");
@@ -73,42 +69,6 @@ namespace Config {
 	QString getConfigPath()
 	{
 		return QFileInfo(settings.fileName()).path();
-	}
-
-	AUDIO_SERVERS getAudioServer()
-	{
-		QString value = settings.value("audio_server", "unknown").toString();
-		if(value == "pipewire")
-		{
-			return PIPEWIRE;
-		}
-		else if (value == "pulseaudio")
-		{
-			return PULSEAUDIO;
-		}
-		else if (value == "jack")
-		{
-			return JACK;
-		}
-		else if (value == "alsa") {
-			return ALSA;
-		}
-		return UNKNOWN_SERVER;
-	}
-
-	void setAudioServer(AUDIO_SERVERS server)
-	{
-		QString value;
-		if(server == PIPEWIRE) value = "pipewire";
-		else if (server == PULSEAUDIO) value = "pulseaudio";
-		else if (server == JACK) value = "jack";
-		else if (server == ALSA) value = "alsa";
-		else
-		{
-			throw std::invalid_argument("Invalid audio server value");
-		}
-
-		settings.setValue("audio_server", value);
 	}
 
 	bool getLoopStatus()

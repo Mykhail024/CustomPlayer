@@ -14,17 +14,28 @@ class ListPanel : public QTableWidget {
 		ListPanel(QString dataBase, QWidget *parent = nullptr);
 
 	private slots:
-		void onUpdate();
+		//Input
+		void onUpdate(QString path);
 		void onSetupColumns();
 		void onSetupRows();
+
+		//Output
+		void Play();
 	signals:
-		void update();
+		//Input
+		void update(QString path);
 		void setupColumns();
 		void setupRows();
+
+		//Output
+		void onPlay(std::string path);
 
 	private:
 		Config::COLLUMNS columns;
 		DB::SQLiteHandler db;
 
 		std::vector<DB::SONG> songs;
+
+		QString db_path;
+		QString music_path;
 };

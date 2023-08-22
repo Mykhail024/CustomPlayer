@@ -22,6 +22,7 @@
 #include <taglib/attachedpictureframe.h>
 
 #include <QImage>
+#include <QDebug>
 
 #include "TagReader.h"
 
@@ -45,7 +46,6 @@ namespace TagReaders
 				return image;
 			}
 		}
-		delete id3v2Tag;
 	return QImage();
 	}
 

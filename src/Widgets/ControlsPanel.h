@@ -17,11 +17,11 @@ class ControlsPanel : public QWidget
 
 
 	private slots:
-		void onUpdateTimeSlider(int data) { timeSlider->setValue(data); }
+		void onUpdateTimeSlider(int data) { timeSlider->setValueDontMove(data); }
 		void onUpdateTimeLabel(int data);
 		void onUpdateMaxTime(int data);
 
-		void onTimeSliderValueChanged(int data);
+		void onTimeSliderValueChanged();
 		void onVolumeSliderValueChanged(int data);
 
 		void onPreviousButtonClicked();

@@ -2,6 +2,7 @@
 #include <QDir>
 #include <SQLiteCpp/Database.h>
 #include <SQLiteCpp/Transaction.h>
+#include <qdir.h>
 #include <vector>
 #include <iostream>
 
@@ -17,10 +18,21 @@ namespace DB {
 
 	void SQLiteHandler::Open(const QString& dbPath, bool create_new)
 	{
-		QString path = Config::getConfigPath() + "/Playlists/" + dbPath;
+		QString playlistsPath = Config::getConfigPath() + "/Playlists";
+		QDir playlistsDir = QDir(playlistsPath);
+		if(!playlistsDir.exists())
+		{
+			playlistsDir.mkpath(".");
+		}
+
+		QString path = playlistsPath + "/" + dbPath;
 		if(create_new)
 		{
 			QFile::remove(path);
+		}
+		if (db) {
+			delete db;
+			db = nullptr;
 		}
 		db = new SQLite::Database(path.toStdString(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 

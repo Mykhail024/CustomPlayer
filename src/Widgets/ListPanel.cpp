@@ -1,4 +1,6 @@
 #include <QHeaderView>
+#include <QStandardPaths>
+#include <QFileInfo>
 
 #include "../Convert.cpp"
 #include "ListPanel.h"
@@ -18,14 +20,15 @@ static int findColumn(QTableWidget *widget,const QString& name)
 	return result;
 }
 
-ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableWidget(parent), columns(Config::getColumns())
+ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableWidget(parent), columns(Config::getColumns()), db_path(dataBase)
 {
-	db.Open("main.db3");
+	db.Open(db_path);
 	songs = db.ReadSongs();
 
 	connect(this, &ListPanel::update, &ListPanel::onUpdate);
 	connect(this, &ListPanel::setupColumns, &ListPanel::onSetupColumns);
 	connect(this, &ListPanel::setupRows, &ListPanel::onSetupRows);
+	connect(this, &QTableWidget::itemSelectionChanged, this, &ListPanel::Play);
 
 	this->verticalHeader()->setVisible(false);
 	this->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -33,19 +36,22 @@ ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableWidget(parent), 
 	this->setSelectionBehavior(QAbstractItemView::SelectRows);
 	this->setShowGrid(false);
 	this->setAlternatingRowColors(true);
+
+	this->setupColumns();
+	this->setupRows();
 }
 
-void ListPanel::onUpdate()
+void ListPanel::onUpdate(QString path)
 {
-	//db.updateSongs("/home/hong19/Music/");
-	auto songs = db.ReadSongs();
+	db.Open(db_path, true);
+	db.updateSongs(path);
+	songs = db.ReadSongs();
 	onSetupRows();
 }
 
 void ListPanel::onSetupColumns()
 {
 	QStringList headerLabels;
-
 	if(columns.Title) headerLabels << "Title";
 	if(columns.Artist) headerLabels << "Artist";
 	if(columns.Album) headerLabels << "Album";
@@ -81,7 +87,15 @@ void ListPanel::onSetupRows()
 		int column = 0;
 		if(columns.Title)
 		{
-			this->setItem(row, column, new QTableWidgetItem(QString::fromStdString(songs[row].Title)));
+			if(!songs[row].Title.empty())
+			{
+				this->setItem(row, column, new QTableWidgetItem(QString::fromStdString(songs[row].Title)));
+			}
+			else
+			{
+				QString name = QFileInfo(QString::fromStdString(songs[row].filePath)).baseName();
+				this->setItem(row, column, new QTableWidgetItem(name));
+			}
 			column++;
 		}
 		if(columns.Artist)
@@ -110,4 +124,16 @@ void ListPanel::onSetupRows()
 			column++;
 		}
 	}
+}
+void ListPanel::Play()
+{
+    QModelIndexList selectedIndexes = this->selectedIndexes();
+
+    if (!selectedIndexes.isEmpty()) {
+        int selectedRow = selectedIndexes[0].row();
+
+        if (selectedRow >= 0 && selectedRow < songs.size()) {
+            emit onPlay(songs[selectedRow].filePath);
+        }
+    }
 }

@@ -24,7 +24,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	timeLabel->setObjectName("TimeLabel");
 	timeLabel->setDisabled(true);
 
-	const int buttonSize = this->width() * .060;
+	const int buttonSize = this->width() * 0.06;
 	const int iconSize = buttonSize * 0.8;
 
 	muteBtn = new QPushButton();
@@ -49,6 +49,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	playBtn->setFixedSize(buttonSize, buttonSize);
 	playBtn->setIconSize(QSize(iconSize, iconSize));
 	playBtn->setCheckable(true);
+	playBtn->setEnabled(false);
 
 	nextBtn = new QPushButton();
 	nextBtn->setObjectName("NextButton");
@@ -85,7 +86,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	connect(this, &ControlsPanel::setVolume, &ControlsPanel::onSetVolume);
 
 	//Output signals
-	connect(timeSlider, &QSlider::valueChanged, this, &ControlsPanel::onTimeSliderValueChanged);
+	connect(timeSlider, &QSlider::sliderReleased, this, &ControlsPanel::onTimeSliderValueChanged);
 	connect(volumeSlider, &QSlider::valueChanged, this, &ControlsPanel::onVolumeSliderValueChanged);
 
 	connect(nextBtn, &QPushButton::clicked, this, &ControlsPanel::onNextButtonClicked);
@@ -94,7 +95,6 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 
 	connect(muteBtn, &QPushButton::clicked, this, &ControlsPanel::onMuteButtonClicked);
 
-	volumeSlider->setValue(100);
 }
 ControlsPanel::~ControlsPanel()
 {
@@ -105,11 +105,12 @@ void ControlsPanel::setEnabled(bool state)
 {
 	timeSlider->setEnabled(state);
 	timeLabel->setEnabled(state);
+	playBtn->setEnabled(state);
 }
 
 void ControlsPanel::onUpdateTimeLabel(int data)
 {
-	timeLabel->setText(Convert::Seconds::toMinutes(data / 1000) + "/" + Convert::Seconds::toMinutes(m_length / 1000));
+	timeLabel->setText(Convert::Seconds::toMinutes(data) + "/" + Convert::Seconds::toMinutes(m_length));
 }
 
 void ControlsPanel::onUpdateMaxTime(int data)
@@ -118,13 +119,14 @@ void ControlsPanel::onUpdateMaxTime(int data)
 	timeSlider->setMaximum(m_length);
 }
 
-void ControlsPanel::onTimeSliderValueChanged(int data) { emit timeSliderValueChanged(data); }
+void ControlsPanel::onTimeSliderValueChanged() { emit timeSliderValueChanged(timeSlider->value()); }
 void ControlsPanel::onVolumeSliderValueChanged(int data)
 {
 	QString iconPath;
 	if (data == 0)
 	{
 		iconPath = ":/Icons/volume-mute.svg";
+		muteBtn->setChecked(true);
 	}
 	else if (data <= 33)
 	{
@@ -152,7 +154,7 @@ void ControlsPanel::onNextButtonClicked() { emit nextButtonClick(); }
 
 void ControlsPanel::onMuteButtonClicked(bool state)
 {
-	if(state == true)
+	if(state)
 	{
 		no_mute_volume = volumeSlider->value();
 		volumeSlider->setValue(0);
@@ -161,6 +163,7 @@ void ControlsPanel::onMuteButtonClicked(bool state)
 	{
 		volumeSlider->setValue(no_mute_volume);
 	}
+
 	emit muteButtonChecked(state);
 }
 
