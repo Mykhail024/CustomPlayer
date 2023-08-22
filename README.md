@@ -3,6 +3,13 @@
 This project is distributed under the GNU GPL-3.0 license.
 For details, please refer to the [LICENSE](./LICENSE) file.
 
+# Build
+```
+git clone https://github.com/Mykhail024/CustomPlayer.git && cd CustomPlayer
+mkdir build && cd build
+cmake .. && make
+```
+
 # Used Libraries
 - [Qt6](https://github.com/qt/qtbase)
 - [SQLiteCpp](https://github.com/SRombauts/SQLiteCpp)
