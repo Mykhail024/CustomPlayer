@@ -3,7 +3,7 @@
  * Copyright (c) 2023 Mykhail024
  *
  * This project uses the TagLib library distributed under the LGPL license.
- * For more information about the license, see the TAGLIB_LICENSE file.
+ * For more information about the license, see the ./licenses/TAGLIB_LICENSE file.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
