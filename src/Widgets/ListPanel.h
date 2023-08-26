@@ -1,13 +1,15 @@
 #pragma once
 
 #include <QTableWidget>
+#include <QStandardItemModel>
+#include <QTableView>
 #include <QWidget>
 #include <vector>
 
 #include "../DataBase/SQLiteHandler.h"
 #include "../Config/Config.h"
 
-class ListPanel : public QTableWidget {
+class ListPanel : public QTableView {
     Q_OBJECT
 
 	public:
@@ -20,7 +22,7 @@ class ListPanel : public QTableWidget {
 		void onSetupRows();
 
 		//Output
-		void Play();
+		void Play(const QItemSelection &selected, const QItemSelection &deselected);
 	signals:
 		//Input
 		void update(QString path);
@@ -31,6 +33,8 @@ class ListPanel : public QTableWidget {
 		void onPlay(std::string path);
 
 	private:
+		QStandardItemModel *model;
+
 		Config::COLLUMNS columns;
 		DB::SQLiteHandler db;
 
