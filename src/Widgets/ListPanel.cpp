@@ -35,6 +35,7 @@ ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableView(parent), co
 	connect(this->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ListPanel::Play);
 
 	this->verticalHeader()->setVisible(false);
+	this->verticalHeader()->setDefaultSectionSize(this->height() * 0.06);
 	this->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	this->setSelectionMode(QAbstractItemView::SingleSelection);
 	this->setSelectionBehavior(QAbstractItemView::SelectRows);
