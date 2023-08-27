@@ -2,6 +2,7 @@
 #include <QStyleOption>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QShortcut>
 #include <qdatetime.h>
 #include <qfileinfo.h>
 #include <qimage.h>
@@ -62,7 +63,7 @@ Window::Window(Audio::AudioServer *server) : audio_server(server)
 	audio_server->setVolume(static_cast<float>(volume) / 100.0f);
 	audio_server->setLooped(Config::getLoopStatus());
 
-	autosaveInterval = 5;
+	autosaveInterval = Config::getAutosaveInterval();
 	enableAutoSaveConfig();
 }
 
@@ -115,7 +116,7 @@ void Window::Resume()
 	m_is_playing = audio_server->resume();
 	controls_panel->setPlayButtonChecked(m_is_playing);
 }
-void Window::PlayPause(bool state)
+void Window::PlayPause()
 {
 	if(m_is_playing)
 	{
@@ -171,29 +172,23 @@ void Window::openFolder()
 void Window::enableAutoSaveConfig()
 {
 	disableAutoSaveConfig();
+	if(autosaveInterval == 0)
+	{
+		return;
+	}
 
-	ConfigAutoSaveThread = new QThread();
-	QObject::connect(ConfigAutoSaveThread, &QThread::finished, [=]() {
-				ConfigAutoSaveThread->deleteLater();
-				ConfigAutoSaveThread = nullptr;
-			});
-	QObject::connect(ConfigAutoSaveThread, &QThread::started, [=]() {
-				while (!ConfigAutoSaveThread->isInterruptionRequested()) {
-					saveConfig();
-					QThread::msleep(autosaveInterval * 1000);
-				}
-			});
-	ConfigAutoSaveThread->start();
-
-
+    ConfigAutoSaveTimer = new QTimer(this);
+    connect(ConfigAutoSaveTimer, &QTimer::timeout, this, &Window::saveConfig);
+    ConfigAutoSaveTimer->start(autosaveInterval * 1000);
 }
 void Window::disableAutoSaveConfig()
 {
-	if(ConfigAutoSaveThread && ConfigAutoSaveThread->isRunning())
-	{
-		ConfigAutoSaveThread->requestInterruption();
-		ConfigAutoSaveThread->wait(100);
-	}
+	if (ConfigAutoSaveTimer)
+    {
+        ConfigAutoSaveTimer->stop();
+        ConfigAutoSaveTimer->deleteLater();
+        ConfigAutoSaveTimer = nullptr;
+    }
 }
 
 void Window::saveConfig()
@@ -202,10 +197,6 @@ void Window::saveConfig()
 	Config::setLoopStatus(audio_server->getLoopStatus());
 }
 
-void Window::keyPressEvent(QKeyEvent* event)
-{
-	QWidget::keyPressEvent(event);
-}
 void Window::paintEvent(QPaintEvent *pe)
 {
 	QStyleOption o;

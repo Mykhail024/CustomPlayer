@@ -38,6 +38,10 @@ namespace Config {
 		{
 			settings.setValue("Session/SortBy", "Title");
 		}
+		if(settings.value("Session/AutosaveInterval", -1) == -1)
+		{
+			settings.setValue("Session/AutosaveInterval", 5);
+		}
 
 		//Columns
 		if(settings.value("Columns/Title", -1) == -1)
@@ -117,5 +121,14 @@ namespace Config {
 		settings.setValue("Columns/Length", columns.Length);
 		settings.setValue("Columns/ModifiedDate", columns.ModifiedDate);
 		settings.setValue("Columns/Year", columns.Year);
+	}
+
+	unsigned int getAutosaveInterval()
+	{
+		return settings.value("Session/AutosaveInterval", 0).toUInt();
+	}
+	void setAutosaveInterval(unsigned int value)
+	{
+		settings.setValue("Session/AutosaveInterval", value);
 	}
 }

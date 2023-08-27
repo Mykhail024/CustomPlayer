@@ -26,4 +26,7 @@ namespace Config {
 
 	COLLUMNS getColumns();
 	void setColumns(COLLUMNS columns);
+
+	unsigned int getAutosaveInterval();
+	void setAutosaveInterval(unsigned int value);
 }

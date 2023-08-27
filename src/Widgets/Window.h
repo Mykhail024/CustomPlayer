@@ -4,6 +4,7 @@
 #include <QGuiApplication>
 #include <QScreen>
 #include <qthread.h>
+#include <qtimer.h>
 #include <string>
 
 #include "ControlsPanel.h"
@@ -28,7 +29,7 @@ class Window : public QWidget
 		void Play(std::string path);
 		void Pause();
 		void Resume();
-		void PlayPause(bool state);
+		void PlayPause();
 		void Next();
 		void Prev();
 		void setVolume(int data);
@@ -42,7 +43,6 @@ class Window : public QWidget
 		void updateMaxTime(float time);
 
 	protected:
-		void keyPressEvent(QKeyEvent* event) override;
 		void paintEvent(QPaintEvent *pa) override;
 
 	private:
@@ -57,6 +57,6 @@ class Window : public QWidget
 
 		Audio::AudioServer *audio_server;
 
-		QThread *ConfigAutoSaveThread = nullptr;
+		QTimer *ConfigAutoSaveTimer = nullptr;
 };
 
