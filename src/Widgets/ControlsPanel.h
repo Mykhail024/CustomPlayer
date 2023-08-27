@@ -4,6 +4,7 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QLabel>
+#include <qtmetamacros.h>
 
 #include "Controls/TimeSlider.h"
 
@@ -29,6 +30,7 @@ class ControlsPanel : public QWidget
 		void onNextButtonClicked();
 
 		void onMuteButtonClicked(bool state);
+		void onRepeatButtonClicked(bool state) { emit repeatButtonChecked(state); };
 
 		void onSetPlayButtonChecked(bool state) { playBtn->setChecked(state); }
 
@@ -40,6 +42,7 @@ class ControlsPanel : public QWidget
 		void onSetTimeSliderEnabled(bool state) { timeSlider->setEnabled(state); }
 
 		void onSetVolume(int data) { volumeSlider->setValue(data); }
+		void onSetRepeatButtonChecked(bool state) { repeatBtn->setChecked(state); }
 
 	signals:
 		//Input signals
@@ -47,6 +50,7 @@ class ControlsPanel : public QWidget
 		void updateMaxTime(int data);
 
 		void setVolume(int data);
+		void setRepeatButtonChecked(bool state);
 
 		void setPlayButtonChecked(bool state);
 
@@ -66,6 +70,7 @@ class ControlsPanel : public QWidget
 		void nextButtonClick();
 
 		void muteButtonChecked(bool state);
+		void repeatButtonChecked(bool state);
 
 	protected:
 		void paintEvent(QPaintEvent *pe) override;
@@ -78,6 +83,7 @@ class ControlsPanel : public QWidget
 		QLabel *timeLabel;
 		QPushButton *muteBtn;
 		QSlider *volumeSlider;
+		QPushButton *repeatBtn;
 
 		QPushButton *prevBtn;
 		QPushButton *playBtn;

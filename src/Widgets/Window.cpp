@@ -57,11 +57,12 @@ Window::Window(Audio::AudioServer *server) : audio_server(server)
 	connect(audio_server, &Audio::AudioServer::onTotalTimeChange, this, &Window::updateMaxTime);
 	connect(audio_server, &Audio::AudioServer::onCurrentTimeChange, this, &Window::updateCurrentTime);
 	connect(list_control_panel, &ListControlsPanel::openFolderButtonClick, this, &Window::openFolder);
+	connect(controls_panel, &ControlsPanel::repeatButtonChecked, this, &Window::setRepeatState);
 
 	int volume = Config::getVolume();
 	controls_panel->setVolume(volume);
 	audio_server->setVolume(static_cast<float>(volume) / 100.0f);
-	audio_server->setLooped(Config::getLoopStatus());
+	setRepeatState(Config::getLoopStatus());
 
 	autosaveInterval = Config::getAutosaveInterval();
 	enableAutoSaveConfig();
@@ -152,6 +153,12 @@ void Window::updateMaxTime(float time)
 	controls_panel->updateMaxTime(time / 1000);
 }
 
+void Window::setRepeatState(bool state)
+{
+	audio_server->setLooped(state);
+	controls_panel->setRepeatButtonChecked(state);
+}
+
 void Window::openFolder()
 {
 	QString folder = QFileDialog::getExistingDirectory(nullptr, "Select Folder", QDir::homePath());
@@ -195,6 +202,7 @@ void Window::saveConfig()
 {
 	Config::setVolume(audio_server->getVolume() * 100);
 	Config::setLoopStatus(audio_server->getLoopStatus());
+	Config::setAutosaveInterval(autosaveInterval);
 }
 
 void Window::paintEvent(QPaintEvent *pe)

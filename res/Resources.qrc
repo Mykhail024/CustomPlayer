@@ -19,6 +19,11 @@
 		<file alias="volume-high_hover.svg">Icons/volume-high_hover.svg</file>
 		<file alias="volume-mute_hover.svg">Icons/volume-mute_hover.svg</file>
 
+		<file alias="repeat.svg">Icons/repeat.svg</file>
+		<file alias="repeat_hover.svg">Icons/repeat_hover.svg</file>
+		<file alias="repeat-disabled.svg">Icons/repeat-disabled.svg</file>
+		<file alias="repeat-disabled_hover.svg">Icons/repeat-disabled_hover.svg</file>
+
 		<file alias="folder-open.svg">Icons/folder-open.svg</file>
 		<file alias="folder-open_hover.svg">Icons/folder-open_hover.svg</file>
 	</qresource>

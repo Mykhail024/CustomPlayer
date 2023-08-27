@@ -2,7 +2,7 @@
 	background-color: rgb(201, 120, 26);
 }
 
-#PrevButton, #PlayButton, #NextButton, #MuteButton, #OpenFolderButton {
+#PrevButton, #PlayButton, #NextButton, #MuteButton, #OpenFolderButton, #RepeatButton {
 	border: none;
 	background: transparent;
 }
@@ -33,6 +33,25 @@
 #NextButton:hover {
 	icon: url(:/Icons/track-next_hover.svg);
 }
+
+#RepeatButton:checked
+{
+	icon: url(:/Icons/repeat.svg);
+}
+#RepeatButton:checked:hover
+{
+	icon: url(:/Icons/repeat_hover.svg);
+}
+
+#RepeatButton
+{
+	icon: url(:/Icons/repeat-disabled.svg);
+}
+#RepeatButton:hover
+{
+	icon: url(:/Icons/repeat-disabled_hover.svg);
+}
+
 
 #OpenFolderButton
 {

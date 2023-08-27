@@ -38,6 +38,12 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	volumeSlider->setMinimum(0);
 	volumeSlider->setMaximum(100);
 
+	repeatBtn = new QPushButton();
+	repeatBtn->setObjectName("RepeatButton");
+	repeatBtn->setCheckable(true);
+	repeatBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
+	repeatBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
+
 	prevBtn = new QPushButton();
 	prevBtn->setObjectName("PrevButton");
 	prevBtn->setFixedSize(buttonSize, buttonSize);
@@ -62,6 +68,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	layout->addWidget(nextBtn);
 	layout->addWidget(timeSlider);
 	layout->addWidget(timeLabel);
+	layout->addWidget(repeatBtn);
 	layout->addWidget(muteBtn);
 	layout->addWidget(volumeSlider, 0, Qt::AlignLeft);
 
@@ -94,7 +101,8 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	connect(prevBtn, &QPushButton::clicked, this, &ControlsPanel::onPreviousButtonClicked);
 
 	connect(muteBtn, &QPushButton::clicked, this, &ControlsPanel::onMuteButtonClicked);
-
+	connect(repeatBtn, &QPushButton::clicked, this, &ControlsPanel::onRepeatButtonClicked);
+	connect(this, &ControlsPanel::setRepeatButtonChecked, &ControlsPanel::onSetRepeatButtonChecked);
 }
 ControlsPanel::~ControlsPanel()
 {

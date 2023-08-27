@@ -32,6 +32,7 @@ class Window : public QWidget
 		void PlayPause();
 		void Next();
 		void Prev();
+		void setRepeatState(bool state);
 		void setVolume(int data);
 		void goTo(int data);
 		void enableAutoSaveConfig();
