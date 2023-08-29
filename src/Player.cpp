@@ -9,7 +9,6 @@
 
 int main(int argc, char** argv)
 {
-
 	Config::init_config();
 
 	QApplication app(argc, argv);
