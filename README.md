@@ -17,6 +17,7 @@ cmake .. && make
 - [libsndfile](https://github.com/libsndfile/libsndfile)
 - [libpipewire](https://pipewire.org/)
 - [taglib](https://github.com/taglib/taglib)
+- [mpris-server](https://github.com/chrg127/mpris-server)
 
 ## Third-Party Components Licenses
 This project uses third-party components such as [TagLib](https://github.com/taglib/taglib) ([TagLib License](./licenses/TAGLIB_LICENSE)) which have their own respective licenses.
