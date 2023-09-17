@@ -1,4 +1,3 @@
-
 #include <QDebug>
 #include <QTimer>
 #include <QThread>
@@ -133,7 +132,7 @@ namespace Audio {
 
 		}
 
-		data->pipewire->onCurrentTimeChange((static_cast<double>(sf_seek(data->file, 0, SEEK_CUR)) / data->fileinfo.samplerate) * 1000);
+		data->pipewire->onCurrentTimeChange((static_cast<float>(sf_seek(data->file, 0, SEEK_CUR)) / data->fileinfo.samplerate) * 1000);
 
 		b->buffer->datas[0].chunk->offset = 0;
 		b->buffer->datas[0].chunk->stride = stride;
@@ -234,6 +233,7 @@ error_after_dequeue:
 		pw_thread_loop_lock(loop);
 		pw_stream_set_active(stream, true);
 		pw_thread_loop_unlock(loop);
+		fadeIn(500);
 
 		return true;
 	}

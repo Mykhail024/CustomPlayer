@@ -2,7 +2,6 @@
 
 #include <map>
 #include <QString>
-#include <unordered_map>
 
 namespace Config {
 	struct COLLUMNS

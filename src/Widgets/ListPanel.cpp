@@ -1,7 +1,6 @@
 #include <QHeaderView>
 #include <QStandardPaths>
 #include <QFileInfo>
-#include <qitemselectionmodel.h>
 
 #include "../Convert.cpp"
 #include "ListPanel.h"
@@ -24,15 +23,17 @@ static int findColumn(QStandardItemModel *widget,const QString& name)
 ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableView(parent), columns(Config::getColumns()), db_path(dataBase)
 {
 	model = new QStandardItemModel();
-	this->setModel(model);
+	proxyModel = new QSortFilterProxyModel();
+	proxyModel->setSourceModel(model);
+	proxyModel->setFilterKeyColumn(-1);
+	proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	this->setModel(proxyModel);
 
 	db.Open(db_path);
 	songs = db.ReadSongs();
 
-	connect(this, &ListPanel::update, &ListPanel::onUpdate);
 	connect(this, &ListPanel::setupColumns, &ListPanel::onSetupColumns);
 	connect(this, &ListPanel::setupRows, &ListPanel::onSetupRows);
-	connect(this->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ListPanel::Play);
 
 	this->verticalHeader()->setVisible(false);
 	this->verticalHeader()->setDefaultSectionSize(this->height() * 0.06);
@@ -44,6 +45,14 @@ ListPanel::ListPanel(QString dataBase, QWidget *parent) : QTableView(parent), co
 
 	this->setupColumns();
 	this->setupRows();
+
+	connect(this, &ListPanel::update, &ListPanel::onUpdate);
+	connect(this->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ListPanel::Play);
+	connect(this, &ListPanel::getSelected, &ListPanel::onGetSelected);
+	connect(this, &ListPanel::setSelected, &ListPanel::onSetSelected);
+	connect(this, &ListPanel::selectNext, &ListPanel::onSelectNext);
+	connect(this, &ListPanel::selectPrev, &ListPanel::onSelectPrev);
+	connect(this, &ListPanel::find, &ListPanel::onFind);
 }
 
 void ListPanel::onUpdate(QString path)
@@ -128,18 +137,73 @@ void ListPanel::onSetupRows()
 		}
 	}
 }
+
 void ListPanel::Play(const QItemSelection &selected, const QItemSelection &deselected)
 {
+	if(while_sort)
+	{
+		return;
+	}
 	Q_UNUSED(deselected);
 
-	QModelIndexList selectedIndexes = selected.indexes();
+	QModelIndexList selectedIndexes = proxyModel->mapSelectionToSource(selected).indexes();
 
     if (!selectedIndexes.isEmpty()) {
-        int selectedRow = selectedIndexes[0].row();
+        selected_index = selectedIndexes.first();
+		int selectedRow = selected_index.row();
 
         if (selectedRow >= 0 && selectedRow < songs.size()) {
+			m_trackNumber = selectedRow;
             emit onPlay(songs[selectedRow].filePath);
         }
-    }
+	}
 }
 
+void ListPanel::onFind(const QString &text)
+{
+	while_sort = true;
+	proxyModel->setFilterFixedString(text);
+
+	if(selected_index.isValid())
+	{
+		auto index = proxyModel->mapFromSource(selected_index);
+		if(index.isValid())
+		{
+			this->setCurrentIndex(index);
+		}
+		else
+		{
+			this->selectionModel()->clearSelection();
+		}
+	}
+
+	while_sort = false;
+}
+
+int ListPanel::onGetSelected()
+{
+	QModelIndexList selected = selectedIndexes();
+	if (!selected.empty()) {
+		return selected.first().row();
+	}
+	return -1;
+}
+void ListPanel::onSetSelected(int rowIndex)
+{
+	if (rowIndex >= 0 && rowIndex < model->rowCount()) {
+		this->selectRow(rowIndex);
+	}
+}
+void ListPanel::onSelectNext() {
+	int currentRow = getSelected();
+	if (currentRow >= 0 && currentRow < model->rowCount() - 1) {
+		setSelected(currentRow + 1);
+	}
+}
+
+void ListPanel::onSelectPrev() {
+	int currentRow = getSelected();
+	if (currentRow > 0 && currentRow < model->rowCount()) {
+		setSelected(currentRow - 1);
+	}
+}

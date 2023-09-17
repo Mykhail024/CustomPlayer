@@ -1,6 +1,4 @@
 #include <QApplication>
-#include <QCoreApplication>
-#include <iostream>
 
 #include "Widgets/Window.h"
 #include "Config/Config.h"

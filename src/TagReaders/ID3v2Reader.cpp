@@ -21,9 +21,6 @@
 #include <taglib/mpegfile.h>
 #include <taglib/attachedpictureframe.h>
 
-#include <QImage>
-#include <QDebug>
-
 #include "TagReader.h"
 
 namespace TagReaders
@@ -63,14 +60,15 @@ namespace TagReaders
 			return data;
 		}
 
-		data.title = tag->title().toCString(true);
-		data.artist = tag->artist().toCString(true);
-		data.album = tag->album().toCString(true);
+		data.title = QString::fromStdString(tag->title().toCString(true));
+		data.artist = QString::fromStdString(tag->artist().toCString(true));
+		data.album = QString::fromStdString(tag->album().toCString(true));
 		data.length = file.audioProperties()->lengthInMilliseconds();
 		data.sampleRate = file.audioProperties()->sampleRate();
 		data.channels = file.audioProperties()->channels();
 		data.bitRate = file.audioProperties()->bitrate();
 		data.year = tag->year();
+		data.path = QString::fromStdString(filePath);
 
 		return data;
 	}

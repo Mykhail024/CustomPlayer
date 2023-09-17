@@ -52,7 +52,6 @@
 	icon: url(:/Icons/repeat-disabled_hover.svg);
 }
 
-
 #OpenFolderButton
 {
 	icon: url(:/Icons/folder-open.svg);
@@ -69,4 +68,11 @@
 
 #InfoPanel {
 	background-color: #323232;
+}
+
+#FindLineEdit
+{
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid white;
 }

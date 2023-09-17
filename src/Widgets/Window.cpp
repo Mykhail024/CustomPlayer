@@ -2,24 +2,18 @@
 #include <QStyleOption>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
-#include <QShortcut>
-#include <qdatetime.h>
-#include <qfileinfo.h>
-#include <qimage.h>
-#include <qlistview.h>
-#include <vector>
-#include <iostream>
-#include <thread>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QImage>
 #include <QFileDialog>
+
+#include <vector>
 
 #include "ControlsPanel.h"
 #include "ListControlsPanel.h"
 #include "Window.h"
 
-#include "../TagReaders/TagReader.h"
-#include "../Config/Config.h"
-
-Window::Window(Audio::AudioServer *server) : audio_server(server)
+Window::Window(Audio::AudioServer *server) : audio_server(server), m_playback_status(STOPPED)
 {
 	this->setObjectName("MainWindow");
 	unsigned int windowWindth = getScreenGeometry().width() * 0.8;
@@ -51,21 +45,27 @@ Window::Window(Audio::AudioServer *server) : audio_server(server)
 	this->setLayout(v_layout);
 
 	connect(list_panel, &ListPanel::onPlay, this, &Window::Play);
-	connect(controls_panel, &ControlsPanel::playButtonChecked, this, &Window::PlayPause);
+
 	connect(controls_panel, &ControlsPanel::volumeSliderValueChanged, this, &Window::setVolume);
 	connect(controls_panel, &ControlsPanel::timeSliderValueChanged, this, &Window::goTo);
+	connect(controls_panel, &ControlsPanel::repeatButtonChecked, this, &Window::setRepeatState);
+	connect(controls_panel, &ControlsPanel::playButtonChecked, this, &Window::PlayPause);
+	connect(controls_panel, &ControlsPanel::previousButtonClick, this, &Window::Prev);
+	connect(controls_panel, &ControlsPanel::nextButtonClick, this, &Window::Next);
+
 	connect(audio_server, &Audio::AudioServer::onTotalTimeChange, this, &Window::updateMaxTime);
 	connect(audio_server, &Audio::AudioServer::onCurrentTimeChange, this, &Window::updateCurrentTime);
+
 	connect(list_control_panel, &ListControlsPanel::openFolderButtonClick, this, &Window::openFolder);
-	connect(controls_panel, &ControlsPanel::repeatButtonChecked, this, &Window::setRepeatState);
+	connect(list_control_panel, &ListControlsPanel::findLineEditTextChange, list_panel, &ListPanel::find);
+
+	autosaveInterval = Config::getAutosaveInterval();
+	enableAutoSaveConfig();
 
 	int volume = Config::getVolume();
 	controls_panel->setVolume(volume);
 	audio_server->setVolume(static_cast<float>(volume) / 100.0f);
 	setRepeatState(Config::getLoopStatus());
-
-	autosaveInterval = Config::getAutosaveInterval();
-	enableAutoSaveConfig();
 }
 
 Window::~Window()
@@ -76,46 +76,147 @@ Window::~Window()
 
 void Window::Play(std::string path)
 {
-	controls_panel->setTimeSliderEnabled(false);
-	controls_panel->updateTime(0);
-	controls_panel->updateMaxTime(0);
+	Stop();
 	m_is_playing = audio_server->play(path);
 	controls_panel->setEnabled(m_is_playing);
 	controls_panel->setPlayButtonChecked(m_is_playing);
+
+#ifdef __linux__
+	if(!dbus_inited)
+	{
+		initDbus();
+	}
+#endif
+
 	if(m_is_playing)
 	{
-		auto id3v2 = TagReaders::id3v2_read(path);
-
-		QString title = QString::fromStdString(id3v2.title);
-		QString artist = QString::fromStdString(id3v2.artist);
+		setPlaybackStatus(PLAYING);
 
 		QImage image = TagReaders::id3v2_get_image(path);
 
-		if(title.isEmpty())
+		loadMetadata(path);
+
+		if(m_metadata.title.isEmpty())
 		{
-			title = QFileInfo(QString::fromStdString(path)).baseName();
+			m_metadata.title = QFileInfo(QString::fromStdString(path)).baseName();
 		}
 
+		info_panel->setInfo(m_metadata.title, m_metadata.artist);
+
+		//Set Image
 		if(image.isNull())
 		{
 			image = QImage(1, 1, QImage::Format_ARGB32);
 			image.fill(Qt::transparent);
 		}
+		else
+		{
+			info_panel->setImage(image);
 
-		info_panel->setInfo(title, artist);
-		info_panel->setImage(image);
+			m_ImageUrl.clear();
+			saveImage(image);
+		}
+
+#ifdef __linux__
+		dbus_MediaPlayer2->emitPlaybackStatusChanged();
+		dbus_MediaPlayer2->emitMetadataChanged();
+#endif
+
 	}
-	controls_panel->setTimeSliderEnabled(true);
 }
+
+#ifdef __linux__
+void Window::saveImage(const QImage &image)
+{
+	QString path;
+	QString baseDir;
+
+	if (QDir("/dev/shm").exists())
+	{
+		baseDir = "/dev/shm/CustomPlayer";
+	}
+	else
+	{
+		baseDir = Config::getConfigPath() + "/Images";
+	}
+
+	QDir dir(baseDir);
+	if (dir.exists())
+	{
+		dir.removeRecursively();
+	}
+
+	dir.mkpath(".");
+
+	qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+	path = dir.filePath("img" + QString::number(currentTime) + ".jpeg");
+
+	bool saved = image.save(path, "jpeg");
+	if (saved)
+	{
+		m_ImageUrl = QUrl::fromLocalFile(path);
+	}
+}
+#endif
+
+void Window::loadMetadata(const std::string &path)
+{
+	m_metadata = TagReaders::id3v2_read(path);
+	if(m_metadata.title.isEmpty())
+	{
+		m_metadata.title = QFileInfo(QString::fromStdString(path)).baseName();
+	}
+}
+
+void Window::resetControls()
+{
+	m_is_playing = false;
+	controls_panel->setEnabled(false);
+	info_panel->setInfo(nullptr, nullptr);
+	auto image = QImage(1, 1, QImage::Format_ARGB32);
+	image.fill(Qt::transparent);
+	info_panel->setImage(image);
+	updateMaxTime(0);
+	updateCurrentTime(0);
+}
+
+void Window::Stop()
+{
+	audio_server->stop();
+	resetControls();
+	setPlaybackStatus(STOPPED);
+#ifdef __linux__
+	if(dbus_inited)
+	{
+		dbus_MediaPlayer2->emitPlaybackStatusChanged();
+	}
+#endif
+}
+
 void Window::Pause()
 {
 	m_is_playing = !audio_server->pause();
-	controls_panel->setPlayButtonChecked(m_is_playing);
+	if(!m_is_playing)
+	{
+		controls_panel->setPlayButtonChecked(m_is_playing);
+		setPlaybackStatus(PAUSED);
+#ifdef __linux__
+		dbus_MediaPlayer2->emitPlaybackStatusChanged();
+#endif
+	}
 }
 void Window::Resume()
 {
 	m_is_playing = audio_server->resume();
-	controls_panel->setPlayButtonChecked(m_is_playing);
+	if(m_is_playing)
+	{
+		controls_panel->setPlayButtonChecked(m_is_playing);
+		setPlaybackStatus(PLAYING);
+#ifdef __linux__
+		dbus_MediaPlayer2->emitPlaybackStatusChanged();
+#endif
+	}
+
 }
 void Window::PlayPause()
 {
@@ -130,19 +231,41 @@ void Window::PlayPause()
 }
 void Window::Next()
 {
-
+	list_panel->selectNext();
 }
 void Window::Prev()
 {
-
+	list_panel->selectPrev();
 }
+
+Window::PlayBackStatus Window::getPlaybackStatus()
+{
+	return m_playback_status;
+}
+void Window::setPlaybackStatus(PlayBackStatus status)
+{
+	m_playback_status = status;
+}
+
 void Window::setVolume(int data)
 {
+	controls_panel->setVolume(data);
 	audio_server->setVolume(static_cast<float>(data) / 100.0f);
+	m_volume = data / 100.0f;
+#ifdef __linux__
+	if(dbus_inited)
+	{
+		dbus_MediaPlayer2->emitVolumeChanged();
+	}
+#endif
 }
 void Window::goTo(int data)
 {
 	audio_server->goTo(data);
+	if(!m_is_playing)
+	{
+		updateCurrentTime(data * 1000);
+	}
 }
 void Window::updateCurrentTime(float time)
 {
@@ -164,15 +287,8 @@ void Window::openFolder()
 	QString folder = QFileDialog::getExistingDirectory(nullptr, "Select Folder", QDir::homePath());
 	if(!folder.isEmpty())
 	{
+		Stop();
 		list_panel->update(folder);
-		info_panel->setInfo(nullptr, nullptr);
-		auto image = QImage(1, 1, QImage::Format_ARGB32);
-		image.fill(Qt::transparent);
-		info_panel->setImage(image);
-		audio_server->stop();
-		controls_panel->updateMaxTime(0);
-		controls_panel->updateTime(0);
-		controls_panel->setTimeSliderEnabled(false);
 	}
 }
 
@@ -204,7 +320,13 @@ void Window::saveConfig()
 	Config::setLoopStatus(audio_server->getLoopStatus());
 	Config::setAutosaveInterval(autosaveInterval);
 }
-
+#ifdef __linux__
+void Window::initDbus()
+{
+	dbus_MediaPlayer2 = new MediaPlayer2(this);
+	dbus_inited = true;
+}
+#endif
 void Window::paintEvent(QPaintEvent *pe)
 {
 	QStyleOption o;

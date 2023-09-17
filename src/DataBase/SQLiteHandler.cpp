@@ -1,10 +1,8 @@
 #include <QFile>
-#include <QDir>
 #include <SQLiteCpp/Database.h>
 #include <SQLiteCpp/Transaction.h>
 #include <qdir.h>
 #include <vector>
-#include <iostream>
 
 #include "SQLiteHandler.h"
 #include "../Config/Config.h"
@@ -79,9 +77,9 @@ namespace DB {
 		for(const auto& i : filelist)
 		{
 			auto id3v2 = TagReaders::id3v2_read(i.filePath().toStdString());
-			query.bind(1, id3v2.title);
-			query.bind(2, id3v2.artist);
-			query.bind(3, id3v2.album);
+			query.bind(1, id3v2.title.toStdString());
+			query.bind(2, id3v2.artist.toStdString());
+			query.bind(3, id3v2.album.toStdString());
 			query.bind(4, id3v2.length);
 			query.bind(5, id3v2.year);
 			query.bind(6, i.filePath().toStdString());

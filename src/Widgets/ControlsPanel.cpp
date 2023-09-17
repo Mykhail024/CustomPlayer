@@ -111,9 +111,10 @@ ControlsPanel::~ControlsPanel()
 
 void ControlsPanel::setEnabled(bool state)
 {
-	timeSlider->setEnabled(state);
-	timeLabel->setEnabled(state);
-	playBtn->setEnabled(state);
+	setTimeSliderEnabled(state);
+	setPlayButtonEnabled(state);
+	setPreviousButtonEnabled(state);
+	setNextButtonEnabled(state);
 }
 
 void ControlsPanel::onUpdateTimeLabel(int data)

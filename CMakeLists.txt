@@ -13,16 +13,15 @@ set(CMAKE_AUTOMOC ON)
 
 project(${PROJECT_NAME})
 
-find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets DBus REQUIRED)
 find_package(SQLiteCpp REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(SndFile)
-find_package(sdbus-c++ REQUIRED)
 
 pkg_check_modules(libpipewire REQUIRED IMPORTED_TARGET libpipewire-0.3)
 pkg_check_modules(taglib REQUIRED IMPORTED_TARGET taglib)
 
-add_executable(${PROJECT_NAME}
+set(source_files
 	res/Resources.qrc
     src/Player.cpp
 	src/Widgets/ControlsPanel.cpp
@@ -36,11 +35,28 @@ add_executable(${PROJECT_NAME}
 	src/TagReaders/ID3v2Reader.cpp
 	src/DataBase/SQLiteHandler.cpp
 	src/Audio/AudioServer.h
-	src/Audio/PipeWire.cpp
-
-	external/mpris-server/src/mpris_server.hpp
 )
 
+if(UNIX AND NOT APPLE)
+	list(APPEND source_files
+		src/Audio/PipeWire.cpp
+		src/DBus/MediaPlayer2.cpp
+	)
+
+	qt6_add_dbus_adaptor(source_files
+		./src/DBus/org.mpris.MediaPlayer2.xml
+		../src/DBus/MediaPlayer2.h
+		MediaPlayer2
+		mprisroot MPrisRoot)
+	qt6_add_dbus_adaptor(source_files
+		./src/DBus/org.mpris.MediaPlayer2.Player.xml
+		../src/DBus/MediaPlayer2.h
+		MediaPlayer2
+		mprisplayer MPrisPlayer)
+endif()
+
+add_executable(${PROJECT_NAME} ${source_files})
+
 target_include_directories(${PROJECT_NAME} PRIVATE ${MPG123_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets PkgConfig::taglib PkgConfig::libpipewire SQLiteCpp SndFile::sndfile SDBusCpp::sdbus-c++)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt::DBus PkgConfig::taglib PkgConfig::libpipewire SQLiteCpp SndFile::sndfile)
 

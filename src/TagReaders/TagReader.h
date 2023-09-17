@@ -1,20 +1,22 @@
 #pragma once
 
-#include <cstdint>
 #include <QImage>
+
 #include <string>
+#include <cstdint>
 
 namespace TagReaders {
 	struct Data
 	{
-		std::string title;
-		std::string artist;
-		std::string album;
+		QString title;
+		QString artist;
+		QString album;
 		unsigned int length;
 		uint32_t sampleRate;
 		unsigned int channels;
 		unsigned int bitRate;
 		unsigned int year;
+		QString path;
 	};
 
 	QImage id3v2_get_image(const std::string& filePath);

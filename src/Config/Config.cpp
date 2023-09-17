@@ -1,15 +1,7 @@
-#include <cstdlib>
-#include <map>
-#include <stdexcept>
-#include <string>
-#include <iostream>
-
 #include <QFileInfo>
 #include <QtMinMax>
 #include <QSettings>
 #include <QCoreApplication>
-#include <QDebug>
-#include <unordered_map>
 
 #include "Config.h"
 
