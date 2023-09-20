@@ -3,6 +3,11 @@
 #include "TimeSlider.h"
 
 namespace Widgets {
+
+	TimeSlider::TimeSlider(QWidget* parent) : QSlider(parent)
+	{
+		connect(this, &TimeSlider::setValueDontMove, &TimeSlider::onSetValueDontMove);
+	}
 	void TimeSlider::mousePressEvent(QMouseEvent* event)
 	{
 		if (event->button() == Qt::LeftButton)
@@ -38,7 +43,7 @@ namespace Widgets {
 			QSlider::mouseReleaseEvent(event);
 		}
 	}
-	void TimeSlider::setValueDontMove(int value) {
+	void TimeSlider::onSetValueDontMove(int value) {
 		if(!move)
 		{
 			setValue(value);

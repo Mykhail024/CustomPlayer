@@ -1,6 +1,7 @@
 #include <QHeaderView>
 #include <QStandardPaths>
 #include <QFileInfo>
+#include <QHeaderView>
 
 #include "../Convert.cpp"
 #include "ListPanel.h"
@@ -84,6 +85,11 @@ void ListPanel::onSetupColumns()
 		if (column != -1)
 		{
 			if (label == "Title")
+			{
+				//this->horizontalHeader()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
+				this->horizontalHeader()->resizeSection(column, this->size().width()*0.70);
+			}
+			else if (label == "Length")
 			{
 				this->horizontalHeader()->setSectionResizeMode(column, QHeaderView::ResizeToContents);
 			}
