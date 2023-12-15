@@ -9,7 +9,7 @@ depends=("qt6-base" "pipewire")
 makedepends=("cmake" "make" "libpipewire" "taglib" "libsndfile")
 
 source=("https://github.com/Mykhail024/CustomPlayer/archive/refs/tags/v${pkgver}.tar.gz")
-sha512sums=("5c7c70db0bfd69f1bc15c0c1a6b1d24a2e78dd428b23a191099ecd6c33659e98fb3da3962d04f98380ab7d30cbfbb1a9e2fe200059b44c2472abc7da7dd04308")
+sha512sums=("SKIP")
 
 prepare() {
   mkdir -p "$pkgname-$pkgver/build"
