@@ -5,7 +5,14 @@
 
 #include "../Convert.cpp"
 
+#include "Controls/TimeSlider.h"
+#include "Controls/Slider.h"
+#include "../Core/EventHandler.h"
+#include "../Core/Globals.h"
+
 #include "ControlsPanel.h"
+
+#include "moc_ControlsPanel.cpp"
 
 ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 {
@@ -13,7 +20,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 
 	auto *layout = new QHBoxLayout(this);
 
-	timeSlider = new Widgets::TimeSlider();
+	timeSlider = new Controls::TimeSlider();
 	timeSlider->setOrientation(Qt::Horizontal);
 	timeSlider->setObjectName("TimeSlider");
 	timeSlider->setMinimum(0);
@@ -33,16 +40,27 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	muteBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
 	muteBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
 
-	volumeSlider = new QSlider(Qt::Horizontal);
+	volumeSlider = new Controls::Slider(Qt::Horizontal);
 	volumeSlider->setObjectName("VolumeSlider");
 	volumeSlider->setMinimum(0);
 	volumeSlider->setMaximum(100);
+	float volume = globals()->volume() * 100;
+	volumeSlider->setValue(volume);
+	updateVolumeIcon(volume);
 
 	repeatBtn = new QPushButton();
 	repeatBtn->setObjectName("RepeatButton");
 	repeatBtn->setCheckable(true);
+	repeatBtn->setChecked(globals()->loopState());
 	repeatBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
 	repeatBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
+
+	shuffleBtn = new QPushButton();
+	shuffleBtn->setObjectName("ShuffleButton");
+	shuffleBtn->setCheckable(true);
+	shuffleBtn->setChecked(globals()->shuffleState());
+	shuffleBtn->setFixedSize(buttonSize * 0.5, buttonSize * 0.5);
+	shuffleBtn->setIconSize(QSize(iconSize * 0.5, iconSize * 0.5));
 
 	prevBtn = new QPushButton();
 	prevBtn->setObjectName("PrevButton");
@@ -69,73 +87,69 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	layout->addWidget(timeSlider);
 	layout->addWidget(timeLabel);
 	layout->addWidget(repeatBtn);
+	layout->addWidget(shuffleBtn);
 	layout->addWidget(muteBtn);
 	layout->addWidget(volumeSlider, 0, Qt::AlignLeft);
 
 	layout->setSpacing(0);
-	this->setLayout(layout);
 
-	//Input Signals
-	connect(this, &ControlsPanel::updateTime, &ControlsPanel::onUpdateTimeSlider);
-	connect(this, &ControlsPanel::updateTime, &ControlsPanel::onUpdateTimeLabel);
+	connect(eventHandler(), &EventHandler::onPlaySong, this, [=]{
+				if(globals()->playbackStatus().state != PLAYBACK_STATE::STOPPED)
+				{
+					m_length = globals()->metadata().Length / 1e3;
+					timeSlider->setMaximum(m_length);
+					timeSlider->setEnabled(true);
+				}
+			});
+	connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, [=]{
+				auto status = globals()->playbackStatus();
+				prevBtn->setEnabled(status.canPrev);
+				playBtn->setEnabled(status.canPlay);
+				nextBtn->setEnabled(status.canNext);
+				playBtn->setChecked((status.state == PLAYBACK_STATE::PLAYING ? true : false));
+			});
+	connect(eventHandler(), &EventHandler::onStop, this, &ControlsPanel::reset);
+	connect(eventHandler(), &EventHandler::onEndSong, this, &ControlsPanel::reset);
+	connect(eventHandler(), &EventHandler::onPositionChange, this, &ControlsPanel::updateTime);
+	connect(eventHandler(), &EventHandler::onSeek, this, &ControlsPanel::updateTime);
+	connect(timeSlider, &Controls::TimeSlider::sliderReleased, [=]{
+				eventHandler()->emitSeek(timeSlider->value() * 1e3);
+			});
+	connect(volumeSlider, &Controls::Slider::valueChanged, this, [=](int value){
+				eventHandler()->emitVolumeChange((float)value / 100.0f);
+				updateVolumeIcon(value);
+			});
+	connect(muteBtn, &QPushButton::clicked, eventHandler(), &EventHandler::emitVolumeMuteUnmute);
+	connect(eventHandler(), &EventHandler::onVolumeChange, this, [=](const float &volume){
+				volumeSlider->setValue(volume * 100);
+			});
+	connect(repeatBtn, &QPushButton::clicked, eventHandler(), &EventHandler::emitLoopStateChange);
+	connect(eventHandler(), &EventHandler::onLoopStateChange, repeatBtn, &QPushButton::setChecked);
+	connect(shuffleBtn, &QPushButton::clicked, eventHandler(), &EventHandler::emitShuffleStateChange);
+	connect(eventHandler(), &EventHandler::onShuffleStateChange, shuffleBtn, &QPushButton::setChecked);
 
-	connect(this, &ControlsPanel::updateMaxTime, &ControlsPanel::onUpdateMaxTime);
-
-	connect(this, &ControlsPanel::setPlayButtonChecked, &ControlsPanel::onSetPlayButtonChecked);
-
-	connect(this, &ControlsPanel::setPreviousButtonEnabled, &ControlsPanel::onSetPreviousButtonEnabled);
-	connect(this, &ControlsPanel::setPlayButtonEnabled, &ControlsPanel::onSetPlayButtonEnabled);
-	connect(this, &ControlsPanel::setNextButtonEnabled, &ControlsPanel::onSetNextButtonEnabled);
-
-	connect(this, &ControlsPanel::setVolumeSliderEnabled, &ControlsPanel::onSetVolumeSliderEnabled);
-	connect(this, &ControlsPanel::setTimeSliderEnabled, &ControlsPanel::onSetTimeSliderEnabled);
-
-	connect(this, &ControlsPanel::setVolume, &ControlsPanel::onSetVolume);
-
-	//Output signals
-	connect(timeSlider, &QSlider::sliderReleased, this, &ControlsPanel::onTimeSliderValueChanged);
-	connect(volumeSlider, &QSlider::valueChanged, this, &ControlsPanel::onVolumeSliderValueChanged);
-
-	connect(nextBtn, &QPushButton::clicked, this, &ControlsPanel::onNextButtonClicked);
-	connect(playBtn, &QPushButton::clicked, this, &ControlsPanel::onPlayButtonClicked);
-	connect(prevBtn, &QPushButton::clicked, this, &ControlsPanel::onPreviousButtonClicked);
-
-	connect(muteBtn, &QPushButton::clicked, this, &ControlsPanel::onMuteButtonClicked);
-	connect(repeatBtn, &QPushButton::clicked, this, &ControlsPanel::onRepeatButtonClicked);
-	connect(this, &ControlsPanel::setRepeatButtonChecked, &ControlsPanel::onSetRepeatButtonChecked);
+	connect(playBtn, &QPushButton::clicked, eventHandler(), &EventHandler::emitPlayPause);
+	connect(nextBtn, &QPushButton::clicked, eventHandler(), &EventHandler::emitNextSong);
+	connect(prevBtn, &QPushButton::clicked, eventHandler(), &EventHandler::emitPrevSong);
 }
 ControlsPanel::~ControlsPanel()
 {
 
 }
 
-void ControlsPanel::setEnabled(bool state)
+void ControlsPanel::reset()
 {
-	setTimeSliderEnabled(state);
-	setPlayButtonEnabled(state);
-	setPreviousButtonEnabled(state);
-	setNextButtonEnabled(state);
+	timeSlider->setEnabled(false);
+	playBtn->setEnabled(false);
+	timeLabel->setText("0:00/0:00");
 }
 
-void ControlsPanel::onUpdateTimeLabel(int data)
-{
-	timeLabel->setText(Convert::Seconds::toMinutes(data) + "/" + Convert::Seconds::toMinutes(m_length));
-}
-
-void ControlsPanel::onUpdateMaxTime(int data)
-{
-	m_length = data;
-	timeSlider->setMaximum(m_length);
-}
-
-void ControlsPanel::onTimeSliderValueChanged() { emit timeSliderValueChanged(timeSlider->value()); }
-void ControlsPanel::onVolumeSliderValueChanged(int data)
+void ControlsPanel::updateVolumeIcon(const int &data)
 {
 	QString iconPath;
 	if (data == 0)
 	{
 		iconPath = ":/Icons/volume-mute.svg";
-		muteBtn->setChecked(true);
 	}
 	else if (data <= 33)
 	{
@@ -151,29 +165,15 @@ void ControlsPanel::onVolumeSliderValueChanged(int data)
 	}
 
 	muteBtn->setStyleSheet(QString("#MuteButton { icon: url(%1); }"
-								   "#MuteButton:hover { icon: url(%2)}")
-								   .arg(iconPath)
-								   .arg(iconPath.replace(".svg", "_hover.svg")));
-	emit volumeSliderValueChanged(data);
+				"#MuteButton:hover { icon: url(%2)}")
+			.arg(iconPath)
+			.arg(iconPath.replace(".svg", "_hover.svg")));
 }
 
-void ControlsPanel::onPreviousButtonClicked() { emit previousButtonClick(); }
-void ControlsPanel::onPlayButtonClicked(bool state) { emit playButtonChecked(state); }
-void ControlsPanel::onNextButtonClicked() { emit nextButtonClick(); }
-
-void ControlsPanel::onMuteButtonClicked(bool state)
+void ControlsPanel::updateTime(const int &time)
 {
-	if(state)
-	{
-		no_mute_volume = volumeSlider->value();
-		volumeSlider->setValue(0);
-	}
-	else
-	{
-		volumeSlider->setValue(no_mute_volume);
-	}
-
-	emit muteButtonChecked(state);
+	timeLabel->setText(Convert::Seconds::toMinutes(time / 1e3) + "/" + Convert::Seconds::toMinutes(m_length));
+	timeSlider->setValueDontMove(time / 1e3);
 }
 
 void ControlsPanel::paintEvent(QPaintEvent *pe)

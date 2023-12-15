@@ -1,139 +1,240 @@
 #include <QDBusConnection>
 #include <QStringLiteral>
 #include <QDBusMessage>
+#include <QDebug>
+#include <qlatin1stringview.h>
 
 #include "../../build/mprisroot.h"
 #include "../../build/mprisplayer.h"
 
+#include "../Core/EventHandler.h"
+#include "../Core/Globals.h"
+
 #include "MediaPlayer2.h"
-#include "../Widgets/Window.h"
 
-MediaPlayer2::MediaPlayer2(Window *parent)
-    : QDBusAbstractAdaptor(parent)
-    , window(parent)
-    , mpris_root(new MPrisRoot(this))
-    , mpris_player(new MPrisPlayer(this))
+#include "moc_MediaPlayer2.cpp"
+
+MediaPlayer2::MediaPlayer2() : QDBusAbstractAdaptor(eventHandler())
 {
-    QDBusConnection connection = QDBusConnection::sessionBus();
+	const QString PLAYER_NAME(QStringLiteral("CustomPlayer"));
+	const QString MPRIS2_NANE(QStringLiteral("org.mpris.MediaPlayer2.") + PLAYER_NAME);
 
-    connection.registerService("org.mpris.MediaPlayer2.CustomPlayer");
-    connection.registerObject("/org/mpris/MediaPlayer2", this);
+	bool success = QDBusConnection::sessionBus().registerService(MPRIS2_NANE);
 
-    QDBusConnection::sessionBus().connect(
-        "org.mpris.MediaPlayer2.CustomPlayer",
-        "/org/mpris/MediaPlayer2",
-        "org.freedesktop.DBus.Properties",
-        "PropertiesChanged",
-        this,
-        SLOT(OnPropertiesChanged(QString, QVariantMap, QStringList))
-    );
+	if(!success)
+	{
+		success = QDBusConnection::sessionBus().registerService(MPRIS2_NANE + QLatin1String(".instance") + QString::number(getpid()));
+	}
 
-	connect(this, &MediaPlayer2::emitPlaybackStatusChanged, &MediaPlayer2::onPlaybackStatusChanged);
-	connect(this, &MediaPlayer2::emitMetadataChanged, &MediaPlayer2::onMetadataChanged);
-	connect(this, &MediaPlayer2::emitVolumeChanged, &MediaPlayer2::onVolumeChanged);
+	if (success) {
+        mpris_root = new MPrisRoot(this);
+        mpris_player = new MPrisPlayer(this);
+
+        QDBusConnection::sessionBus().registerObject(QStringLiteral("/org/mpris/MediaPlayer2"), this, QDBusConnection::ExportAdaptors);
+
+		connect(eventHandler(), &EventHandler::onVolumeChange, this, &MediaPlayer2::onVolumeChanged);
+		connect(eventHandler(), &EventHandler::onPlaySong, this, &MediaPlayer2::onMetadataChanged);
+		connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, &MediaPlayer2::onPlaybackStatusChanged);
+		connect(eventHandler(), &EventHandler::onSeek, this, &MediaPlayer2::onPositionChanged);
+		connect(eventHandler(), &EventHandler::onLoopStateChange, this, &MediaPlayer2::onLoopChanged);
+		connect(eventHandler(), &EventHandler::onShuffleStateChange, this, &MediaPlayer2::onShuffleChanged);
+	}
 }
-
-void MediaPlayer2::OnPropertiesChanged(const QString& interface, const QVariantMap& changedProperties, const QStringList& invalidatedProperties)
+MediaPlayer2::~MediaPlayer2()
 {
+	delete mpris_root;
+	delete mpris_player;
 }
 
 void MediaPlayer2::sendPropertiesChanged(const QString &propertyName, const QVariant &propertyValue)
 {
 	QVariantMap changedProperties;
 	changedProperties.insert(propertyName, propertyValue);
-	QStringList invalidatedProperties;
-	QDBusMessage signal = QDBusMessage::createSignal("/org/mpris/MediaPlayer2",
-			"org.freedesktop.DBus.Properties", "PropertiesChanged");
+
+	QDBusMessage signal = QDBusMessage::createSignal(QStringLiteral("/org/mpris/MediaPlayer2"),
+			QStringLiteral("org.freedesktop.DBus.Properties"), QStringLiteral("PropertiesChanged"));
+
 	signal.setArguments({
-			QVariant::fromValue(QString("org.mpris.MediaPlayer2.CustomPlayer")),
+			QVariant::fromValue(QStringLiteral("org.mpris.MediaPlayer2.CustomPlayer")),
 			QVariant::fromValue(changedProperties),
-			QVariant::fromValue(invalidatedProperties)
+			QVariant::fromValue(QStringList())
 			});
+
 	QDBusConnection::sessionBus().send(signal);
 }
 
 void MediaPlayer2::Raise()
 {
-	window->activateWindow();
+	eventHandler()->emitRise();
 }
 
 void MediaPlayer2::Next()
 {
-	window->Next();
+	eventHandler()->emitNextSong();
 }
 void MediaPlayer2::Previous()
 {
-	window->Prev();
+	eventHandler()->emitPrevSong();
 }
 void MediaPlayer2::Pause()
 {
-	window->Pause();
+	eventHandler()->emitPause();
 }
 void MediaPlayer2::PlayPause()
 {
-	window->PlayPause();
+	eventHandler()->emitPlayPause();
 }
 void MediaPlayer2::Stop()
 {
-	window->Stop();
+	eventHandler()->emitStop();
 }
 void MediaPlayer2::Play()
 {
-	window->Resume();
+	eventHandler()->emitPlay();
+}
+void MediaPlayer2::OpenFile(const QString &filePath)
+{
+	eventHandler()->emitPlaySong(filePath);
+}
+
+void MediaPlayer2::onPositionChanged(const unsigned long int &time)
+{
+	sendPropertiesChanged(QStringLiteral("Position"), time * 1e3);
+}
+void MediaPlayer2::Seek(const long int &time)
+{
+	eventHandler()->emitSeek(globals()->songPosition() + (time / 1e3));
+}
+void MediaPlayer2::SetPosition(QDBusObjectPath path, const unsigned long int &time)
+{
+	eventHandler()->emitSeek(time / 1e3);
+}
+unsigned long int MediaPlayer2::position()
+{
+	return static_cast<unsigned long int>((globals()->songPosition()) / 1e3) * 1e6;
+}
+
+QString MediaPlayer2::loopStatus() const
+{
+	if(globals()->loopState())
+	{
+		return QStringLiteral("Track");
+	}
+	return QStringLiteral("None");
+}
+void MediaPlayer2::setLoopStatus(const QString &status)
+{
+	if(status != QStringLiteral("None"))
+	{
+		eventHandler()->emitLoopStateChange(true);
+	}
+	else
+	{
+		eventHandler()->emitLoopStateChange(false);
+	}
+	onLoopChanged();
+}
+bool MediaPlayer2::shuffle()
+{
+	return globals()->shuffleState();
+}
+void MediaPlayer2::setShuffle(const bool &state)
+{
+	eventHandler()->emitShuffleStateChange(state);
+	onShuffleChanged();
+}
+void MediaPlayer2::onLoopChanged()
+{
+	sendPropertiesChanged(QStringLiteral("LoopStatus"), loopStatus());
+}
+void MediaPlayer2::onShuffleChanged()
+{
+	sendPropertiesChanged(QStringLiteral("Shuffle"), shuffle());
 }
 QString MediaPlayer2::playbackStatus() const
 {
-	switch (window->getPlaybackStatus()) {
-		case Window::PlayBackStatus::PLAYING:
-			return "Playing";
+	switch (globals()->playbackStatus().state) {
+		case PLAYING:
+			return QStringLiteral("Playing");
 			break;
-		case Window::PlayBackStatus::PAUSED:
-			return "Paused";
+		case PAUSED:
+			return QStringLiteral("Paused");
 			break;
-		case Window::PlayBackStatus::STOPPED:
-			return "Stopped";
+		case STOPPED:
+			return QStringLiteral("Stopped");
 			break;
 	}
 }
 
 void MediaPlayer2::onPlaybackStatusChanged()
 {
-	sendPropertiesChanged("PlaybackStatus", QVariant::fromValue(playbackStatus()));
+	sendPropertiesChanged(QStringLiteral("PlaybackStatus"), QVariant::fromValue(playbackStatus()));
+	sendPropertiesChanged(QStringLiteral("CanPlay"), QVariant::fromValue(canPlay()));
+	sendPropertiesChanged(QStringLiteral("CanGoNext"), QVariant::fromValue(canGoNext()));
+	sendPropertiesChanged(QStringLiteral("CanGoPrevious"), QVariant::fromValue(canGoPrevious()));
 }
 
 void MediaPlayer2::onMetadataChanged()
 {
-	sendPropertiesChanged("Metadata", QVariant::fromValue(metadata()));
+	sendPropertiesChanged(QStringLiteral("Metadata"), QVariant::fromValue(metadata()));
 }
 
 void MediaPlayer2::onVolumeChanged()
 {
-	sendPropertiesChanged("Volume", QVariant::fromValue(static_cast<double>(volume())));
+	sendPropertiesChanged(QStringLiteral("Volume"), QVariant::fromValue(static_cast<double>(volume())));
 }
 
 float MediaPlayer2::volume() const
 {
-	return window->volume();
+	return globals()->volume();
 }
-
+bool MediaPlayer2::canPlay() const
+{
+	return globals()->playbackStatus().canPlay;
+}
+bool MediaPlayer2::canGoNext() const
+{
+	return globals()->playbackStatus().canNext;
+}
+bool MediaPlayer2::canGoPrevious() const
+{
+	return globals()->playbackStatus().canPrev;
+}
 void MediaPlayer2::setVolume(float volume)
 {
-	window->setVolume(volume * 100);
+	eventHandler()->emitVolumeChange(volume);
 }
 
 QVariantMap MediaPlayer2::metadata() const
 {
 	QVariantMap metadataMap;
 
-	auto metadata = window->metadata();
-
-	metadataMap.insert("mpris:trackid", "/org/mpris/MediaPlayer2/TrackList/NoTrack");
-	metadataMap.insert("xesam:title", metadata.title);
-	metadataMap.insert("xesam:artist", QStringList{metadata.artist});
-	metadataMap.insert("xesam:album", metadata.album);
-    metadataMap.insert("mpris:artUrl", QVariant::fromValue(window->imageUrl().toDisplayString()));
-	metadataMap.insert("xesam:url", metadata.path);
+	auto metadata = globals()->metadata();
+	metadataMap.insert(QStringLiteral("mpris:trackid"), QDBusObjectPath(QStringLiteral("/org/mpris/MediaPlayer2/CurrentTrack")));
+	metadataMap.insert(QStringLiteral("xesam:title"), metadata.Title);
+	metadataMap.insert(QStringLiteral("xesam:artist"), QStringList{metadata.Artist});
+	metadataMap.insert(QStringLiteral("xesam:album"), metadata.Album);
+	metadataMap.insert(QStringLiteral("xesam:url"), metadata.Path);
+	metadataMap.insert(QStringLiteral("mpris:length"), metadata.Length * 1e3);
+	metadataMap.insert(QStringLiteral("mpris:artUrl"), metadata.ArtUrl);
 
 	return metadataMap;
 }
 
+MediaPlayer2 *dbus_service;
+
+void initDBusService()
+{
+	dbus_service = new MediaPlayer2();
+}
+void deinitDBusService()
+{
+	if(dbus_service)
+	{
+		delete dbus_service;
+	}
+}
+MediaPlayer2* dbusService()
+{
+	return dbus_service;
+}

@@ -12,29 +12,28 @@
 
 namespace Audio {
 	class PipeWire : public AudioServer
-
 	{
 		Q_OBJECT
 		public:
 			PipeWire();
 			~PipeWire();
-			bool play(std::string filePath) override;
+
+
+		public slots:
+			void setVolume(const float &volume) override;
+			void fadeIn(unsigned int milliseconds) override;
+			void stopFadeIn() override;
+			void goTo(const unsigned int &time) override;
+			bool play(const QString &filePath) override;
 			bool pause() override;
 			bool resume() override;
-			void setVolume(float volume) override;
-			void goTo(int time) override;
-			float getVolume() const override;
-			void setLooped(bool is_loop) override;
-			bool getLoopStatus() override { return m_is_looped; }
-			void fadeIn(unsigned int milliseconds) override;
-			void stopFadeIn();
 			void stop() override;
 
 		private:
-			void setVolumeInternal(float volume);
+			void setSoftwareVolume(float volume);
+			void setPipewireVolume(float volume);
 			float m_volume = 1.0f;
-			bool m_is_looped = false;
-			int time_goto = -1;
+			unsigned long int time_goto = -1;
 
             bool started = false;
 

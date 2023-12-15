@@ -3,24 +3,26 @@
 #include <QSlider>
 #include <QPropertyAnimation>
 
-namespace Widgets {
-	class TimeSlider : public QSlider{
+namespace Controls {
+
+	class TimeSlider : public QSlider
+	{
 		Q_OBJECT
 		public:
-			TimeSlider(QWidget* parent = nullptr);
+			TimeSlider(QWidget *parent = nullptr) : QSlider(parent){}
 
 		public slots:
-			void onSetValueDontMove(int value);
-
-		signals:
 			void setValueDontMove(int value);
 
 		protected:
 			void mousePressEvent(QMouseEvent* event) override;
 			void mouseMoveEvent(QMouseEvent* event) override;
 			void mouseReleaseEvent(QMouseEvent* event) override;
+			void keyPressEvent(QKeyEvent *event) override;
+			void wheelEvent(QWheelEvent *event) override;
 
 		private:
 			bool move = false;
 	};
+
 }

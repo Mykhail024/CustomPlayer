@@ -13,7 +13,6 @@
  * For the full text of the GNU General Public License, please refer to the LICENSE file.
  ***************************************************************************************/
 
-
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
@@ -21,16 +20,55 @@
 #include <taglib/mpegfile.h>
 #include <taglib/attachedpictureframe.h>
 
+#include <QDir>
+#include <QImage>
+
+#include "../Core/Globals.h"
 #include "TagReader.h"
 
 namespace TagReaders
 {
-	QImage id3v2_get_image(const std::string& filePath)
+	QString saveImage(const QImage &image)
 	{
-		TagLib::MPEG::File file(filePath.c_str());
-		if (!file.isValid()) {
-			return QImage();
+		QString path;
+		QString baseDir;
+
+		if (QDir("/dev/shm").exists())
+		{
+			baseDir = "/dev/shm/CustomPlayer";
 		}
+		else
+		{
+			baseDir = Config::getConfigPath() + "/Images";
+		}
+
+		QDir dir(baseDir);
+		if (dir.exists())
+		{
+			dir.removeRecursively();
+		}
+
+		dir.mkpath(".");
+
+		qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+		path = dir.filePath("img" + QString::number(currentTime) + ".jpeg");
+
+		bool saved = image.save(path, "jpeg");
+		if (saved)
+		{
+			return path;
+		}
+		return "";
+	}
+
+	QString id3v2_get_image_path(const QString &filePath)
+	{
+		TagLib::MPEG::File file(filePath.toStdString().c_str());
+		if (!file.isValid()) {
+			return "";
+		}
+
+		QImage image;
 
 		TagLib::ID3v2::Tag *id3v2Tag = file.ID3v2Tag();
 		if (id3v2Tag) {
@@ -38,19 +76,18 @@ namespace TagReaders
 			if (!frameList.isEmpty()) {
 				TagLib::ID3v2::AttachedPictureFrame *coverFrame = static_cast<TagLib::ID3v2::AttachedPictureFrame *>(frameList.front());
 				TagLib::ByteVector imageData = coverFrame->picture();
-				QImage image;
 				image.loadFromData(reinterpret_cast<const uchar *>(imageData.data()), static_cast<int>(imageData.size()));
-				return image;
+				return saveImage(image);
 			}
 		}
-	return QImage();
+		return "";
 	}
 
-	Data id3v2_read(const std::string& filePath)
+	SONG_METADATA id3v2_read(const QString &filePath)
 	{
-		Data data;
+		SONG_METADATA data;
 
-		TagLib::MPEG::File file(filePath.c_str());
+		TagLib::MPEG::File file(filePath.toStdString().c_str());
 		if (!file.isValid()) {
 			return data;
 		}
@@ -60,15 +97,16 @@ namespace TagReaders
 			return data;
 		}
 
-		data.title = QString::fromStdString(tag->title().toCString(true));
-		data.artist = QString::fromStdString(tag->artist().toCString(true));
-		data.album = QString::fromStdString(tag->album().toCString(true));
-		data.length = file.audioProperties()->lengthInMilliseconds();
-		data.sampleRate = file.audioProperties()->sampleRate();
-		data.channels = file.audioProperties()->channels();
-		data.bitRate = file.audioProperties()->bitrate();
-		data.year = tag->year();
-		data.path = QString::fromStdString(filePath);
+		data.Title = QString::fromStdString(tag->title().toCString(true));
+		data.Artist = QString::fromStdString(tag->artist().toCString(true));
+		data.Album = QString::fromStdString(tag->album().toCString(true));
+		data.Length = file.audioProperties()->lengthInMilliseconds();
+		data.SampleRate = file.audioProperties()->sampleRate();
+		data.Channels = file.audioProperties()->channels();
+		data.BitRate = file.audioProperties()->bitrate();
+		data.Year = tag->year();
+		data.Path = filePath;
+		data.ModifiedDate = QFileInfo(filePath).lastModified().toSecsSinceEpoch();
 
 		return data;
 	}

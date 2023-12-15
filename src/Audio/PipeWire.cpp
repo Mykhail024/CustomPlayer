@@ -2,11 +2,19 @@
 #include <QTimer>
 #include <QThread>
 #include <chrono>
+#include <math.h>
 #include <pipewire/stream.h>
 #include <pipewire/thread-loop.h>
+#include <qlogging.h>
 #include <thread>
 
+#include "../Core/EventHandler.h"
+#include "../Core/Globals.h"
+
 #include "PipeWire.h"
+
+#include "moc_PipeWire.cpp"
+
 namespace Audio {
 	PipeWire::PipeWire()
 	{
@@ -112,19 +120,19 @@ namespace Audio {
 			{
 				if (sf_seek(data->file, 0, SEEK_CUR) == data->fileinfo.frames)
 				{
-					if(data->pipewire->m_is_looped)
+					if(globals()->loopState())
 					{
 						if (sf_seek(data->file, 0, SEEK_SET) < 0)
 						{
 							qWarning() << "file seek error";
 							goto error_after_dequeue;
 						}
-						data->pipewire->fadeIn(1000);
+						emit eventHandler()->emitFadeIn(false);
 					}
 					else
 					{
 						pw_thread_loop_signal(data->pipewire->loop, 0);
-						emit data->pipewire->onEndOFile();
+						emit eventHandler()->emitEndSong();
 						return;
 					}
 				}
@@ -132,7 +140,12 @@ namespace Audio {
 
 		}
 
-		data->pipewire->onCurrentTimeChange((static_cast<float>(sf_seek(data->file, 0, SEEK_CUR)) / data->fileinfo.samplerate) * 1000);
+		eventHandler()->emitPositionChange(sf_seek(data->file, 0, SEEK_CUR) * 1000 / data->fileinfo.samplerate);
+
+		for (uint32_t i = 0; i < n_frames * data->fileinfo.channels; i++)
+		{
+			buf[i] *= data->pipewire->m_volume;
+		}
 
 		b->buffer->datas[0].chunk->offset = 0;
 		b->buffer->datas[0].chunk->stride = stride;
@@ -153,14 +166,14 @@ error_after_dequeue:
 		pw_thread_loop_stop(data->pipewire->loop);
 	}
 
-	bool PipeWire::play(std::string filePath)
+	bool PipeWire::play(const QString &filePath)
 	{
         pw_thread_loop_lock(loop);
 
 		clear();
 
 		memset(&data.fileinfo, 0, sizeof(data.fileinfo));
-		data.file = sf_open(filePath.c_str(), SFM_READ, &data.fileinfo);
+		data.file = sf_open(filePath.toStdString().c_str(), SFM_READ, &data.fileinfo);
 		if(!data.file)
 		{
 			qCritical() << "Error open file";
@@ -205,9 +218,8 @@ error_after_dequeue:
 
         pw_thread_loop_unlock(loop);
 
-		onTotalTimeChange((static_cast<float>(data.fileinfo.frames) / data.fileinfo.samplerate) * 1000);
-
-		fadeIn(2000);
+		eventHandler()->emitVolumeChange(globals()->volume());
+		emit eventHandler()->emitFadeIn(true);
 
         started = true;
 		return true;
@@ -233,18 +245,27 @@ error_after_dequeue:
 		pw_thread_loop_lock(loop);
 		pw_stream_set_active(stream, true);
 		pw_thread_loop_unlock(loop);
-		fadeIn(500);
 
 		return true;
 	}
-	void PipeWire::setVolume(float volume)
+	void PipeWire::setVolume(const float &volume)
 	{
-		stopFadeIn();
-		m_volume = volume;
-		setVolumeInternal(volume);
+		if(globals()->softwareVolumeControl())
+		{
+			setPipewireVolume(1.0f);
+			setSoftwareVolume(volume);
+		}
+		else
+		{
+			if(m_volume != 1.0f)
+			{
+				m_volume = 1.0f;
+			}
+			setPipewireVolume(volume);
+		}
 	}
 
-	void PipeWire::setVolumeInternal(float volume)
+	void PipeWire::setPipewireVolume(float volume)
 	{
 		if(!stream)
 		{
@@ -268,25 +289,19 @@ error_after_dequeue:
 		pw_stream_set_control(stream, SPA_PROP_channelVolumes, data.fileinfo.channels, volumes, nullptr);
 		pw_thread_loop_unlock(loop);
 	}
-	float PipeWire::getVolume() const
+
+	void PipeWire::setSoftwareVolume(float volume)
 	{
-		return m_volume;
-	}
-	void PipeWire::setLooped(bool is_loop)
-	{
-		m_is_looped = is_loop;
+		m_volume = volume;
 	}
 
-	void PipeWire::goTo(int time)
+	void PipeWire::goTo(const unsigned int &time)
 	{
-		fadeIn(250);
-		time_goto = (time * data.fileinfo.samplerate);
+		time_goto = (time / 1000 * data.fileinfo.samplerate);
 	}
 
 	void PipeWire::fadeIn(unsigned int milliseconds)
 	{
-		stopFadeIn();
-
 		fadeThread = new QThread;
 
 		QObject::connect(fadeThread, &QThread::finished, [=]() {
@@ -299,11 +314,11 @@ error_after_dequeue:
 					float targetVolume = m_volume;
 					float step = targetVolume / milliseconds;
 					while (currentVolume < targetVolume && !fadeThread->isInterruptionRequested()) {
-						setVolumeInternal(currentVolume);
+						setSoftwareVolume(currentVolume);
 						currentVolume += step;
 						QThread::msleep(1);
 					}
-					setVolumeInternal(targetVolume);
+					setSoftwareVolume(targetVolume);
 
 					fadeThread->quit();
 				});

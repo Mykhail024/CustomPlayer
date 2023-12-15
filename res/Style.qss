@@ -1,8 +1,13 @@
-#ControlsPanel, ListControlsPanel {
+#MainWindow
+{
+	background-color: #2a2e32;
+}
+
+#ControlsPanel, #PlaylistControl{
 	background-color: rgb(201, 120, 26);
 }
 
-#PrevButton, #PlayButton, #NextButton, #MuteButton, #OpenFolderButton, #RepeatButton {
+#PrevButton, #PlayButton, #NextButton, #MuteButton, #OpenFolderButton, #RepeatButton, #ShuffleButton, #AddSongButton {
 	border: none;
 	background: transparent;
 }
@@ -52,13 +57,21 @@
 	icon: url(:/Icons/repeat-disabled_hover.svg);
 }
 
-#OpenFolderButton
+#ShuffleButton
 {
-	icon: url(:/Icons/folder-open.svg);
+	icon: url(:/Icons/shuffle-disabled.svg)
 }
-#OpenFolderButton:hover
+#ShuffleButton:hover
 {
-	icon: url(:/Icons/folder-open_hover.svg);
+	icon: url(:/Icons/shuffle-disabled_hover.svg)
+}
+#ShuffleButton:checked
+{
+	icon: url(:/Icons/shuffle.svg)
+}
+#ShuffleButton:checked:hover
+{
+	icon: url(:/Icons/shuffle_hover.svg)
 }
 
 #TimeLabel {
@@ -66,13 +79,107 @@
 	color: white;
 }
 
-#InfoPanel {
-	background-color: #323232;
+QSlider:horizontal
+{
+	height: 18px;
 }
 
-#FindLineEdit
+QSlider::sub-page:horizontal
+{
+	background: rgba(151, 70, 0, 1);
+    height: 8px;
+	border-radius: 4px;
+}
+QSlider::add-page:horizontal
+{
+	background: transparent;
+    height: 8px;
+	border-radius: 4px;
+}
+
+QSlider::groove:horizontal
+{
+	background: rgba(151, 70, 0, 0.4);
+    height: 8px;
+    border-radius: 4px;
+}
+
+QSlider::handle:horizontal
+{
+	background: rgba(100, 70, 0, 1);
+	height: 16px;
+	width: 16px;
+	border-radius: 8px;
+	margin-bottom: -4px;
+	margin-top: -4px;
+}
+
+QSlider::handle:disabled:horizontal
+{
+	background: transparent;
+}
+QSlider::sub-page:disabled:horizontal
+{
+	background: transparent;
+}
+
+#VolumeSlider:horizontal
+{
+	height: 18px;
+}
+
+#VolumeSlider::sub-page:horizontal
+{
+	border-radius: 3px;
+	background: rgba(151, 70, 0, 1);
+    height: 6px;
+}
+#VolumeSlider::add-page:horizontal
+{
+	border-radius: 3px;
+	background: transparent;
+    height: 6px;
+}
+
+#VolumeSlider::groove:horizontal
+{
+	border-radius: 3px;
+	background: rgba(151, 70, 0, 0.4);
+    height: 6px;
+}
+
+#VolumeSlider::handle:horizontal
+{
+	background: rgba(100, 70, 0, 1);
+	height: 12px;
+	width: 14px;
+	margin-bottom: -4px;
+	margin-top: -4px;
+	border-radius: 7px;
+}
+
+#VolumeSlider::handle:disabled:horizontal
+{
+	background: transparent;
+}
+#VolumeSlider::sub-page:disabled:horizontal
+{
+	background: transparent;
+}
+
+#PlaylistControl QLineEdit
 {
 	background: transparent;
 	border: none;
-	border-bottom: 1px solid white;
+	border-bottom: 1.3px solid white;
+	font-size: 16px;
+}
+
+#AddSongButton {
+	color: white;
+	font-weight: bold;
+	font-size: 35px;
+}
+#AddSongButton:hover {
+	color: rgb(220, 220, 220);
 }

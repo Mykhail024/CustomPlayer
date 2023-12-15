@@ -26,6 +26,11 @@
 
 		<file alias="folder-open.svg">Icons/folder-open.svg</file>
 		<file alias="folder-open_hover.svg">Icons/folder-open_hover.svg</file>
+
+		<file alias="shuffle.svg">Icons/shuffle.svg</file>
+		<file alias="shuffle_hover.svg">Icons/shuffle_hover.svg</file>
+		<file alias="shuffle-disabled.svg">Icons/shuffle-disabled.svg</file>
+		<file alias="shuffle-disabled_hover.svg">Icons/shuffle-disabled_hover.svg</file>
 	</qresource>
 	<qresource prefix="/">
 		<file alias="Style.qss">Style.qss</file>

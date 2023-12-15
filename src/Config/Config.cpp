@@ -16,6 +16,22 @@ namespace Config {
 		{
 			settings.setValue("lang", "en");
 		}
+		if(settings.value("SoftwareVolumeControl", -1) == -1)
+		{
+			settings.setValue("SoftwareVolumeControl", false);
+		}
+		if(settings.value("FadeInTime_Primary", -1) == -1)
+		{
+			settings.setValue("FadeInTime_Primary", 2000);
+		}
+		if(settings.value("FadeInTime_Secondary", -1) == -1)
+		{
+			settings.setValue("FadeInTime_Secondary", 500);
+		}
+		if(settings.value("Forward_Backward_Time", -1) == -1)
+		{
+			settings.setValue("Forward_Backward_Time", 5);
+		}
 
 		//Session
 		if(settings.value("Session/isLoop", -1) == -1)
@@ -24,15 +40,15 @@ namespace Config {
 		}
 		if(settings.value("Session/Volume", -1) == -1)
 		{
-			settings.setValue("Session/Volume", 80);
+			settings.setValue("Session/Volume", 0.5);
 		}
 		if(settings.value("Session/SortBy", -1) == -1)
 		{
 			settings.setValue("Session/SortBy", "Title");
 		}
-		if(settings.value("Session/AutosaveInterval", -1) == -1)
+		if(settings.value("Session/ShuffleState", -1) == -1)
 		{
-			settings.setValue("Session/AutosaveInterval", 5);
+			settings.setValue("Session/ShuffleState", false);
 		}
 
 		//Columns
@@ -67,6 +83,11 @@ namespace Config {
 		return QFileInfo(settings.fileName()).path();
 	}
 
+	QString getPlaylistsPath()
+	{
+		return getConfigPath() + "/Playlists";
+	}
+
 	bool getLoopStatus()
 	{
 		return settings.value("Session/isLoop", false).toBool();
@@ -77,20 +98,20 @@ namespace Config {
 		settings.setValue("Session/isLoop", value);
 	}
 
-	int getVolume()
+	float getVolume()
 	{
-		int value = settings.value("Session/Volume", -1).toInt();
+		float value = settings.value("Session/Volume", -1).toFloat();
 		if(value == -1)
 		{
-			qWarning() << "Not Volume value in config, changing to default value: 80";
-			settings.setValue("Session/Volume", 80);
-			value = 80;
+			qWarning() << "Not Volume value in config, changing to default value: 0.5";
+			settings.setValue("Session/Volume", 0.5);
+			value = 0.5;
 		}
 		return value;
 	}
-	void setVolume(int value)
+	void setVolume(const float &value)
 	{
-		settings.setValue("Session/Volume", qBound(0, value, 100));
+		settings.setValue("Session/Volume", value);
 	}
 
 	COLLUMNS getColumns()
@@ -111,16 +132,57 @@ namespace Config {
 		settings.setValue("Columns/Artist", columns.Artist);
 		settings.setValue("Columns/Album", columns.Album);
 		settings.setValue("Columns/Length", columns.Length);
-		settings.setValue("Columns/ModifiedDate", columns.ModifiedDate);
+		settings.setValue("Columns/Modified-Date", columns.ModifiedDate);
 		settings.setValue("Columns/Year", columns.Year);
 	}
 
-	unsigned int getAutosaveInterval()
+	bool getShuffleState()
 	{
-		return settings.value("Session/AutosaveInterval", 0).toUInt();
+		return settings.value("Session/ShuffleState", false).toBool();
 	}
-	void setAutosaveInterval(unsigned int value)
+	void setShuffleState(bool state)
 	{
-		settings.setValue("Session/AutosaveInterval", value);
+		settings.setValue("Session/ShuffleState", state);
+	}
+
+	bool getSoftwareVolumeControl()
+	{
+		return settings.value("SoftwareVolumeControl", false).toBool();
+	}
+	void setSoftwareVolumeControl(bool state)
+	{
+		settings.setValue("SoftwareVolumeControl", state);
+	}
+
+	void setFadeIn_Primary(const int &time)
+	{
+		settings.setValue("FadeInTime_Primary", time);
+	}
+	int getFadeIn_Primary()
+	{
+		return settings.value("FadeInTime_Primary", 2000).toInt();
+	}
+	void setFadeIn_Secondary(const int &time)
+	{
+		settings.setValue("FadeInTime_Secondary", time);
+	}
+	int getFadeIn_Secondary()
+	{
+		return settings.value("FadeInTime_Secondary", 500).toInt();
+	}
+
+	unsigned int getForward_Backward_Time()
+	{
+		return settings.value("Forward_Backward_Time", 5).toUInt();
+	}
+	void setForward_Backward_Time(const unsigned int &time)
+	{
+		if(time <= 0)
+		{
+			qWarning() << "Error: value equal to 0";
+			return;
+		}
+		settings.setValue("Forward_Backward_Time", time);
 	}
 }
+

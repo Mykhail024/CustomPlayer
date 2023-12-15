@@ -1,0 +1,30 @@
+pkgname="CustomPlayer"
+pkgver="0.2"
+pkgrel=1
+pkgdesc="Music Player"
+arch=("x86_64")
+license=('GPL3')
+url="https://github.com/Mykhail024/CustomPlayer"
+depends=("qt6-base" "pipewire")
+makedepends=("cmake" "make" "libpipewire" "taglib" "libsndfile")
+
+source=("https://github.com/Mykhail024/CustomPlayer/archive/refs/tags/v${pkgver}.tar.gz")
+sha512sums=("56e71952d3d2c0741299e77935ca1e8c5ad923ba77da643ca1e9b2d7e2ef3f6b8f9ad40d2e51926bf5c438a26edaa882016f58b43da67a475f006da32497c7ec")
+
+prepare() {
+  mkdir -p "$pkgname-$pkgver/build"
+  cd "$pkgname-$pkgver/build"
+  cmake ".." \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release
+}
+
+build() {
+  cd "$pkgname-$pkgver/build"
+  make -j2
+}
+
+package() {
+  cd "$pkgname-$pkgver/build"
+  make DESTDIR="${pkgdir}" install
+}

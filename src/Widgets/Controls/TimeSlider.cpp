@@ -1,13 +1,14 @@
 #include <QMouseEvent>
 
+#include "../../Core/EventHandler.h"
+#include "../../Core/Globals.h"
+
 #include "TimeSlider.h"
 
-namespace Widgets {
+#include "moc_TimeSlider.cpp"
 
-	TimeSlider::TimeSlider(QWidget* parent) : QSlider(parent)
-	{
-		connect(this, &TimeSlider::setValueDontMove, &TimeSlider::onSetValueDontMove);
-	}
+namespace Controls {
+
 	void TimeSlider::mousePressEvent(QMouseEvent* event)
 	{
 		if (event->button() == Qt::LeftButton)
@@ -34,6 +35,7 @@ namespace Widgets {
 			QSlider::mouseMoveEvent(event);
 		}
 	}
+
 	void TimeSlider::mouseReleaseEvent(QMouseEvent* event) {
 		if (event->button() == Qt::LeftButton) {
 			move = false;
@@ -43,10 +45,45 @@ namespace Widgets {
 			QSlider::mouseReleaseEvent(event);
 		}
 	}
-	void TimeSlider::onSetValueDontMove(int value) {
+	void TimeSlider::setValueDontMove(int value) {
 		if(!move)
 		{
 			setValue(value);
 		}
 	}
+	void TimeSlider::wheelEvent(QWheelEvent *event)
+	{
+        int delta = event->angleDelta().y();
+		if(event->modifiers() == Qt::ControlModifier)
+		{
+			eventHandler()->emitSeek(globals()->songPosition() + ((delta > 0) ? 1000 : -1000));
+		}
+		else
+		{
+			if(delta > 0)
+			{
+				eventHandler()->emitForward();
+			}
+			else
+			{
+				eventHandler()->emitBackward();
+			}
+		}
+    }
+	void TimeSlider::keyPressEvent(QKeyEvent *event)
+	{
+		if(event->key() == Qt::Key_Left)
+		{
+			eventHandler()->emitBackward();
+			return;
+		}
+		else if(event->key() == Qt::Key_Right)
+		{
+			eventHandler()->emitForward();
+			return;
+		}
+
+		QWidget::keyPressEvent(event);
+	}
+
 }
