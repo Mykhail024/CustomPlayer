@@ -18,6 +18,7 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
 	Q_PROPERTY(bool CanQuit READ canQuit)
 	Q_PROPERTY(bool HasTrackList READ hasTrackList)
 	Q_PROPERTY(QString Identity READ identity)
+	Q_PROPERTY(QString DesktopEntry READ desktopEntry)
 	Q_PROPERTY(QStringList SupportedUriSchemes READ supportedUriSchemes)
 	Q_PROPERTY(QStringList SupportedMimeTypes READ supportedMimeTypes)
 
@@ -53,7 +54,8 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
 		bool canQuit() const { return true; }
 		bool canRaise() const { return true; }
 		bool hasTrackList() const { return false; }
-		QString identity() const { return QStringLiteral("CustomPlayer"); }
+		QString identity() const { return QStringLiteral("Custom Player"); }
+		QString desktopEntry() const { return QStringLiteral("customplayer"); }
 		QStringList supportedUriSchemes() const
 		{
 			return {QStringLiteral("file")};

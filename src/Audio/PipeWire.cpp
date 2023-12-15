@@ -192,8 +192,9 @@ error_after_dequeue:
 					PW_KEY_MEDIA_TYPE, "Audio",
 					PW_KEY_MEDIA_CATEGORY, "Playback",
 					PW_KEY_MEDIA_ROLE, "Music",
-					PW_KEY_NODE_NAME, "Audio source",
-					PW_KEY_NODE_RATE, rate_str,
+					PW_KEY_APP_ID, "customplayer",
+					PW_KEY_APP_ICON_NAME, "customplayer",
+					PW_KEY_APP_NAME, "Custom Player",
 					nullptr));
 
 		pw_stream_add_listener(stream, &event_listener, &stream_events, &data);

@@ -1,5 +1,5 @@
 pkgname="CustomPlayer"
-pkgver="0.3.2"
+pkgver="0.3.3"
 pkgrel=1
 pkgdesc="CustomPlayer is a player aimed at convenience and configurability, written in Qt 6. "
 arch=("x86_64")
