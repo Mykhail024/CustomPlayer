@@ -1,7 +1,7 @@
 pkgname="CustomPlayer"
 pkgver="0.2"
 pkgrel=1
-pkgdesc="Music Player"
+pkgdesc="CustomPlayer is a player aimed at convenience and configurability, written in Qt 6. "
 arch=("x86_64")
 license=('GPL3')
 url="https://github.com/Mykhail024/CustomPlayer"
