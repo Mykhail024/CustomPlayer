@@ -13,7 +13,6 @@ cmake .. && make
 
 # Used Libraries and APIs
 - [Qt6](https://github.com/qt/qtbase)
-- [SQLiteCpp](https://github.com/SRombauts/SQLiteCpp)
 - [libsndfile](https://github.com/libsndfile/libsndfile)
 - [libpipewire](https://pipewire.org/)
 - [taglib](https://github.com/taglib/taglib)
