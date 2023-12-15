@@ -20,8 +20,6 @@ namespace Controls
 
 				QLineEdit::keyPressEvent(event);
 			}
-			virtual void focusInEvent(QFocusEvent *e);
-  virtual void focusOutEvent(QFocusEvent *e);
 	};
 
 }
