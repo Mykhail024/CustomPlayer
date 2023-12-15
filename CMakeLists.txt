@@ -75,4 +75,6 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(${PROJECT_NAME} PRIVATE Qt::DBus PkgConfig::libpipewire)
 endif()
 
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "customplayer")
+
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
