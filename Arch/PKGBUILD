@@ -1,5 +1,5 @@
 pkgname="CustomPlayer"
-pkgver="0.3.1"
+pkgver="0.3.2"
 pkgrel=1
 pkgdesc="CustomPlayer is a player aimed at convenience and configurability, written in Qt 6. "
 arch=("x86_64")
@@ -27,4 +27,11 @@ build() {
 package() {
   cd "$pkgname-$pkgver/build"
   make DESTDIR="${pkgdir}" install
+
+  install -Dm644 "$srcdir/$pkgname-$pkgver/res/icon48x48.png" \
+    "$pkgdir/usr/share/icons/hicolor/48x48/apps/customplayer.png"
+  install -Dm644 "$srcdir/$pkgname-$pkgver/res/icon.svg" \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/customplayer.svg"
+  install -Dm644 "$srcdir/$pkgname-$pkgver/res/customplayer.desktop" \
+    "$pkgdir/usr/share/applications/customplayer.desktop"
 }
