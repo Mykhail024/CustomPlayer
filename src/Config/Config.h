@@ -40,4 +40,9 @@ namespace Config {
 
 	unsigned int getForward_Backward_Time();
 	void setForward_Backward_Time(const unsigned int &time);
+
+	bool isSortDescendingOrder();
+	void setSortDescendingOrder(const bool &order);
+	unsigned int getSortColumn();
+	void setSortColumn(const unsigned int &index);
 }

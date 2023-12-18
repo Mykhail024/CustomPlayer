@@ -24,7 +24,6 @@ IndexingThread::~IndexingThread()
 void IndexingThread::run()
 {
 	if(!m_playlists) return;
-	qDebug() << "Start indexing";
 	auto size = m_playlists->size();
 	for(int i = 0; i < size && !isInterruptionRequested(); i++)
 	{

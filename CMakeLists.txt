@@ -30,6 +30,7 @@ set(source_files
 	src/Core/Globals.cpp
 	src/Core/PlaylistManager.cpp
 	src/Core/PlaylistModel.cpp
+	src/Core/SortFilterProxyModel.cpp
 
 	src/Widgets/SongsWidget.cpp
 	src/Widgets/Playlist/PlaylistView.cpp

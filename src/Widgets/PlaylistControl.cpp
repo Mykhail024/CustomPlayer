@@ -48,7 +48,7 @@ PlaylistControl::PlaylistControl(QWidget *parent)
 
 	connect(m_findLineEdit, &QLineEdit::textChanged, eventHandler(), &EventHandler::PlaylistFind);
 	connect(m_addButton, &QPushButton::clicked, this, &PlaylistControl::onAddBtnClick);
-	connect(eventHandler(), &EventHandler::onFindActivate, this, [=]{ m_findLineEdit->setFocus(); });
+	connect(eventHandler(), &EventHandler::onFindActivate, this, [&]{ m_findLineEdit->setFocus(); });
 	connect(addFiles, &QAction::triggered, this, &PlaylistControl::onAddFiles);
 	connect(newPlaylist, &QAction::triggered, this, &PlaylistControl::onNewPlaylist);
 }
@@ -63,7 +63,7 @@ void PlaylistControl::paintEvent(QPaintEvent *pe)
 
 void PlaylistControl::onAddBtnClick()
 {
-	m_addMenu->exec(QPoint(this->width() - m_addMenu->width(), this->y() - m_addMenu->height()));
+	m_addMenu->exec(QCursor::pos());
 }
 
 void PlaylistControl::onAddFiles()

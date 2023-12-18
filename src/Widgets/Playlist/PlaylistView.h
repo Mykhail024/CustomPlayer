@@ -3,12 +3,12 @@
 #include <QWidget>
 #include <QSqlTableModel>
 #include <QTableView>
-#include <QSortFilterProxyModel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPropertyAnimation>
 
 class PlaylistModel;
+class SortFilterProxyModel;
 
 class PlaylistView : public QTableView
 {
@@ -26,6 +26,6 @@ class PlaylistView : public QTableView
 
 	private:
 		PlaylistModel *m_model;
-		QSortFilterProxyModel *m_proxyModel;
+		SortFilterProxyModel *m_proxyModel;
 		QTimer *blinkAnimationTimer;
 };

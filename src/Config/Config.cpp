@@ -76,6 +76,14 @@ namespace Config {
 		{
 			settings.setValue("Columns/Modified-Date", false);
 		}
+		if(settings.value("Columns/sortColumn", -1) == -1)
+		{
+			settings.setValue("Columns/sortColumn", 0);
+		}
+		if(settings.value("Columns/sortDescendingOrder", -1) == -1)
+		{
+			settings.setValue("Columns/sortDescendingOrder", false);
+		}
 	}
 
 	QString getConfigPath()
@@ -177,12 +185,29 @@ namespace Config {
 	}
 	void setForward_Backward_Time(const unsigned int &time)
 	{
-		if(time <= 0)
+		if(time == 0)
 		{
 			qWarning() << "Error: value equal to 0";
 			return;
 		}
 		settings.setValue("Forward_Backward_Time", time);
+	}
+
+	bool isSortDescendingOrder()
+	{
+		return settings.value("Columns/sortDescendingOrder", false).toBool();
+	}
+	void setSortDescendingOrder(const bool &order)
+	{
+		settings.setValue("Columns/sortDescendingOrder", order);
+	}
+	unsigned int getSortColumn()
+	{
+		return settings.value("Columns/sortColumn", 0).toUInt();
+	}
+	void setSortColumn(const unsigned int &index)
+	{
+		settings.setValue("Columns/sortColumn", index);
 	}
 }
 

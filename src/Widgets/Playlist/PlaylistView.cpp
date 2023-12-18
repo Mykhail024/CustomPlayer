@@ -2,11 +2,11 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <QHeaderView>
-#include <qpropertyanimation.h>
 
 #include "../../Core/Globals.h"
 #include "../../Core/EventHandler.h"
 #include "../../Core/PlaylistModel.h"
+#include "../../Core/SortFilterProxyModel.h"
 
 #include "PlaylistView.h"
 
@@ -15,7 +15,7 @@
 PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 	: QTableView(parent)
 	, m_model(model)
-	, m_proxyModel(new QSortFilterProxyModel(this))
+	, m_proxyModel(new SortFilterProxyModel(this))
 	, blinkAnimationTimer(new QTimer(this))
 {
 	m_proxyModel->setSourceModel(m_model);
@@ -29,8 +29,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 	this->setObjectName("PlaylistView");
 	this->setAlternatingRowColors(true);
 
-	m_proxyModel->setFilterKeyColumn(-1);
-	m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	setupColumns();
 
 	QHeaderView *horizontalHeader = this->horizontalHeader();
 	horizontalHeader->setSectionResizeMode(0, QHeaderView::ResizeToContents);
@@ -38,13 +37,11 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 		horizontalHeader->setSectionResizeMode(i, QHeaderView::Stretch);
 	}
 
-	setupColumns();
-
 	blinkAnimationTimer->setInterval(750);
 
 	connect(eventHandler(), &EventHandler::onPlaylistFind, this, &PlaylistView::find);
 	connect(this, &QTableView::doubleClicked, this, &PlaylistView::onSelect);
-	connect(this, &QTableView::customContextMenuRequested, this, [=](const QPoint &pos){
+	connect(this, &QTableView::customContextMenuRequested, this, [&](const QPoint &pos){
 			QMenu contextMenu(this);
 			QAction deleteAction("Delete");
 			contextMenu.addAction(&deleteAction);
@@ -53,11 +50,11 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 			contextMenu.exec(mapToGlobal(pos));
 			});
 
-	connect(blinkAnimationTimer, &QTimer::timeout, this, [=]{
+	connect(blinkAnimationTimer, &QTimer::timeout, this, [&]{
 				m_model->enable_disable_Opacity();
 				this->viewport()->update();
 			});
-	connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, [=]{
+	connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, [&]{
 				auto ps = globals()->playbackStatus();
 				if(ps.state == PLAYING)
 				{
@@ -80,7 +77,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 					this->viewport()->update();
 				}
 			});
-	connect(eventHandler(), &EventHandler::onPlaySong, this, [=](const QString &path){
+	connect(eventHandler(), &EventHandler::onPlaySong, this, [&](const QString &path){
 				int index = m_model->indexFromPath(path);
 				blinkAnimationTimer->stop();
 				if(index != -1)
@@ -97,18 +94,39 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 					this->viewport()->update();
 				}
 			});
+	connect(m_proxyModel, &SortFilterProxyModel::onSortChange, this, [&](const int &column, const Qt::SortOrder &order){
+				Config::setSortColumn(m_proxyModel->mapToSource(m_proxyModel->index(0, column)).column());
+				Config::setSortDescendingOrder((order == Qt::DescendingOrder) ? true : false);
+			});
 }
 
 void PlaylistView::setupColumns()
 {
+	m_proxyModel->setFilterKeyColumn(-1);
+	m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+	auto index = m_proxyModel->mapFromSource(m_model->index(0, Config::getSortColumn())).column();
+	auto sortOrder = Config::isSortDescendingOrder() ? Qt::DescendingOrder : Qt::AscendingOrder;
+
 	auto columns = globals()->columns();
 	if(!columns.Title) this->setColumnHidden(1, true);
 	if(!columns.Artist) this->setColumnHidden(2, true);
-	if(!columns.Artist) this->setColumnHidden(3, true);
+	if(!columns.Album) this->setColumnHidden(3, true);
 	if(!columns.Length) this->setColumnHidden(4, true);
 	if(!columns.ModifiedDate) this->setColumnHidden(5, true);
 	if(!columns.Year) this->setColumnHidden(6, true);
 	this->setColumnHidden(7, true);
+
+	if(this->isColumnHidden(index))
+	{
+		this->sortByColumn(0, sortOrder);
+		Config::setSortColumn(0);
+	}
+	else
+	{
+		this->sortByColumn(index, sortOrder);
+	}
+
 }
 
 void PlaylistView::find(const QString &text)

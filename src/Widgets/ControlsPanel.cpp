@@ -93,7 +93,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 
 	layout->setSpacing(0);
 
-	connect(eventHandler(), &EventHandler::onPlaySong, this, [=]{
+	connect(eventHandler(), &EventHandler::onPlaySong, this, [&]{
 				if(globals()->playbackStatus().state != PLAYBACK_STATE::STOPPED)
 				{
 					m_length = globals()->metadata().Length / 1e3;
@@ -101,7 +101,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 					timeSlider->setEnabled(true);
 				}
 			});
-	connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, [=]{
+	connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, [&]{
 				auto status = globals()->playbackStatus();
 				prevBtn->setEnabled(status.canPrev);
 				playBtn->setEnabled(status.canPlay);
@@ -112,15 +112,15 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 	connect(eventHandler(), &EventHandler::onEndSong, this, &ControlsPanel::reset);
 	connect(eventHandler(), &EventHandler::onPositionChange, this, &ControlsPanel::updateTime);
 	connect(eventHandler(), &EventHandler::onSeek, this, &ControlsPanel::updateTime);
-	connect(timeSlider, &Controls::TimeSlider::sliderReleased, [=]{
+	connect(timeSlider, &Controls::TimeSlider::sliderReleased, [&]{
 				eventHandler()->Seek(timeSlider->value() * 1e3);
 			});
-	connect(volumeSlider, &Controls::Slider::valueChanged, this, [=](int value){
+	connect(volumeSlider, &Controls::Slider::valueChanged, this, [&](int value){
 				eventHandler()->VolumeChange((float)value / 100.0f);
 				updateVolumeIcon(value);
 			});
 	connect(muteBtn, &QPushButton::clicked, eventHandler(), &EventHandler::VolumeMuteUnmute);
-	connect(eventHandler(), &EventHandler::onVolumeChange, this, [=](const float &volume){
+	connect(eventHandler(), &EventHandler::onVolumeChange, this, [&](const float &volume){
 				volumeSlider->setValue(volume * 100);
 			});
 	connect(repeatBtn, &QPushButton::clicked, eventHandler(), &EventHandler::LoopStateChange);
