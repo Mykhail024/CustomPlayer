@@ -20,10 +20,10 @@ protected:
 				switch (keyEvent->key())
 				{
 					case Qt::Key_Left:
-						eventHandler()->emitPrevPlaylist();
+						eventHandler()->PrevPlaylist();
 						return true;
 					case Qt::Key_Right:
-						eventHandler()->emitNextPlaylist();
+						eventHandler()->NextPlaylist();
 						return true;
 				}
 			}
@@ -32,22 +32,22 @@ protected:
 				switch (keyEvent->key())
 				{
 					case Qt::Key_Left:
-						eventHandler()->emitBackward();
+						eventHandler()->Backward();
 						return true;
 					case Qt::Key_Right:
-						eventHandler()->emitForward();
+						eventHandler()->Forward();
 						return true;
 					case Qt::Key_M:
-						eventHandler()->emitVolumeMuteUnmute();
+						eventHandler()->VolumeMuteUnmute();
 						return true;
 					case Qt::Key_F:
-						eventHandler()->emitFindActivate();
+						eventHandler()->FindActivate();
 						return true;
 					case Qt::Key_R:
-						eventHandler()->emitLoopStateEnableDisable();
+						eventHandler()->LoopStateEnableDisable();
 						return true;
 					case Qt::Key_S:
-						eventHandler()->emitShuffleStateEnableDisable();
+						eventHandler()->ShuffleStateEnableDisable();
 						return true;
 				}
 			}
@@ -55,10 +55,10 @@ protected:
 			{
 				switch (keyEvent->key()) {
 					case Qt::Key_Left:
-						eventHandler()->emitVolumeDown();
+						eventHandler()->VolumeDown();
 						return true;
 					case Qt::Key_Right:
-						eventHandler()->emitVolumeUp();
+						eventHandler()->VolumeUp();
 						return true;
 				}
 			}
@@ -66,10 +66,10 @@ protected:
 			{
 				switch (keyEvent->key()) {
 					case Qt::Key_Left:
-						eventHandler()->emitPrevSong();
+						eventHandler()->PrevSong();
 						return true;
 					case Qt::Key_Right:
-						eventHandler()->emitNextSong();
+						eventHandler()->NextSong();
 						return true;
 				}
 			}
@@ -77,8 +77,8 @@ protected:
 			{
 				switch (keyEvent->key()) {
 					case Qt::Key_Space:
-						if(globals()->findIsFocused()) break;
-						eventHandler()->emitPlayPause();
+						if(globals()->lineEditFocused() > 0) break;
+						eventHandler()->PlayPause();
 						return true;
 				}
 			}

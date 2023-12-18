@@ -5,7 +5,6 @@
 #include "../Audio/AudioServer.h"
 #include "Globals.h"
 #include "../TagReaders/TagReader.h"
-#include "PlaylistModel.h"
 
 #include "EventHandler.h"
 
@@ -28,7 +27,7 @@ EventHandler::EventHandler()
 
 	connect(this, &EventHandler::onSeek, globals()->audioServer(), &Audio::AudioServer::goTo);
 }
-void EventHandler::emitEndSong()
+void EventHandler::EndSong()
 {
 	emit onEndSong();
 	globals()->m_playbackStatus.state = STOPPED;
@@ -37,32 +36,32 @@ void EventHandler::emitEndSong()
 	{
 		if(globals()->m_shuffleState)
 		{
-			emitNextSongRandom();
+			NextSongRandom();
 		}
 		else
 		{
-			emitNextSong();
+			NextSong();
 		}
 	}
 }
-void EventHandler::emitPlayPause()
+void EventHandler::PlayPause()
 {
 	if(globals()->m_playbackStatus.state == PLAYING)
 	{
-		emitPause();
+		Pause();
 	}
 	else
 	{
-		emitPlay();
+		Play();
 	}
 }
-void EventHandler::emitNextSong()
+void EventHandler::NextSong()
 {
 	if(globals()->m_playbackStatus.canNext)
 	{
 		if(globals()->m_shuffleState)
 		{
-			emitNextSongRandom();
+			NextSongRandom();
 		}
 		else
 		{
@@ -70,14 +69,14 @@ void EventHandler::emitNextSong()
 		}
 	}
 }
-void EventHandler::emitPrevSong()
+void EventHandler::PrevSong()
 {
 	if(globals()->m_playbackStatus.canPrev)
 	{
 		emit onPrevSong();
 	}
 }
-bool EventHandler::emitPlaySong(const QString &path)
+bool EventHandler::PlaySong(const QString &path)
 {
 	bool ok = onPlaySong(path);
 	if(ok)
@@ -94,13 +93,13 @@ bool EventHandler::emitPlaySong(const QString &path)
 	}
 	return ok;
 }
-void EventHandler::emitNextSongRandom()
+void EventHandler::NextSongRandom()
 {
 	emit onNextSongRandom();
 }
-bool EventHandler::emitPlay()
+bool EventHandler::Play()
 {
-	emitFadeIn(false);
+	FadeIn(false);
 	bool ok = onPlay();
 	if(ok)
 	{
@@ -111,7 +110,7 @@ bool EventHandler::emitPlay()
 
 	return ok;
 }
-bool EventHandler::emitPause()
+bool EventHandler::Pause()
 {
 	bool ok = onPause();
 	if(ok)
@@ -122,16 +121,16 @@ bool EventHandler::emitPause()
 	}
 	return ok;
 }
-void EventHandler::emitStop()
+void EventHandler::Stop()
 {
 	emit onStop();
 	globals()->m_playbackStatus.state = STOPPED;
 	globals()->m_playbackStatus.canPlay = false;
 	emit onPlaybackStatusChanged();
 }
-void EventHandler::emitVolumeChange(const float& volume)
+void EventHandler::VolumeChange(const float& volume)
 {
-	emitStopFadeIn();
+	StopFadeIn();
 	globals()->m_volume = volume;
 	emit onVolumeChange(volume);
 	if(volume == 0.0f)
@@ -143,24 +142,24 @@ void EventHandler::emitVolumeChange(const float& volume)
 		globals()->m_isMuted = false;
 	}
 }
-void EventHandler::emitLoopStateChange(const bool &state)
+void EventHandler::LoopStateChange(const bool &state)
 {
 	globals()->m_loopState = state;
 	emit onLoopStateChange(state);
 }
-void EventHandler::emitShuffleStateChange(const bool &state)
+void EventHandler::ShuffleStateChange(const bool &state)
 {
 	globals()->m_shuffleState = state;
 	emit onShuffleStateChange(state);
 }
-void EventHandler::emitPositionChange(const unsigned long int &pos)
+void EventHandler::PositionChange(const unsigned long int &pos)
 {
 	globals()->m_songPosition = pos;
 	emit onPositionChange(pos);
 }
-void EventHandler::emitFadeIn(const bool &isPrimary)
+void EventHandler::FadeIn(const bool &isPrimary)
 {
-	emitStopFadeIn();
+	StopFadeIn();
 	if(isPrimary)
 	{
 		emit onFadeIn(globals()->m_fadeInTime_Primary);
@@ -170,115 +169,124 @@ void EventHandler::emitFadeIn(const bool &isPrimary)
 		emit onFadeIn(globals()->m_fadeInTime_Secondary);
 	}
 }
-void EventHandler::emitStopFadeIn()
+void EventHandler::StopFadeIn()
 {
 	emit onStopFadeIn();
 }
-void EventHandler::emitSeek(const unsigned long int &time)
+void EventHandler::Seek(const unsigned long int &time)
 {
 	if(globals()->playbackStatus().state == STOPPED) return;
 
-	emitFadeIn(false);
+	FadeIn(false);
 	emit onSeek(time);
 	globals()->m_songPosition = time;
 }
-void EventHandler::emitRise()
+void EventHandler::Rise()
 {
 
 }
-void EventHandler::emitPlaylistFind(const QString &text)
+void EventHandler::PlaylistFind(const QString &text)
 {
 	emit onPlaylistFind(text);
 }
-void EventHandler::emitNextPlaylist()
+void EventHandler::NextPlaylist()
 {
 	emit onNextPlaylist();
 }
-void EventHandler::emitPrevPlaylist()
+void EventHandler::PrevPlaylist()
 {
 	emit onPrevPlaylist();
 }
-void EventHandler::emitBackward()
+void EventHandler::Backward()
 {
 	long long newPos = globals()->m_songPosition - globals()->m_Forward_Backward_Time;
-	emitSeek((newPos > 0) ? newPos : 0);
+	Seek((newPos > 0) ? newPos : 0);
 }
-void EventHandler::emitForward()
+void EventHandler::Forward()
 {
 	auto newPos = globals()->m_songPosition + globals()->m_Forward_Backward_Time;
-	emitSeek((newPos <= globals()->m_metadata.Length) ? newPos : 0);
+	Seek((newPos <= globals()->m_metadata.Length) ? newPos : 0);
 }
-void EventHandler::emitVolumeUp()
+void EventHandler::VolumeUp()
 {
 	float newVolume = globals()->m_volume + 0.05f;
-	emitVolumeChange(newVolume <= 1.0f ? newVolume : 1.0f);
+	VolumeChange(newVolume <= 1.0f ? newVolume : 1.0f);
 }
-void EventHandler::emitVolumeDown()
+void EventHandler::VolumeDown()
 {
 	float newVolume = globals()->m_volume - 0.05f;
-	emitVolumeChange(newVolume >= 0 ? newVolume : 0);
+	VolumeChange(newVolume >= 0 ? newVolume : 0);
 }
-void EventHandler::emitFindActivate()
+
+void EventHandler::LineEditActivate()
 {
-	globals()->m_findIsFocused = true;
+	globals()->m_lineEditFocused++;
+	emit onLineEditActivate();
+}
+void EventHandler::LineEditFinish()
+{
+	if(globals()->m_lineEditFocused != 0)
+	{
+		globals()->m_lineEditFocused--;
+	}
+	emit onLineEditFinish();
+}
+void EventHandler::FindActivate()
+{
 	emit onFindActivate();
 }
-void EventHandler::emitFindFinish()
-{
-	globals()->m_findIsFocused = false;
-	emit onFindFinish();
-}
-void EventHandler::emitAddPlaylists()
+
+void EventHandler::AddPlaylists()
 {
 	emit onAddPlaylists();
 }
-void EventHandler::emitVolumeMute()
+void EventHandler::VolumeMute()
 {
 	if(globals()->m_volume != 0.0f)
 	{
 		no_mute_volume = globals()->m_volume;
-		emitVolumeChange(0.0f);
+		VolumeChange(0.0f);
 	}
 }
-void EventHandler::emitVolumeUnmute()
+void EventHandler::VolumeUnmute()
 {
 	if(globals()->m_volume == 0.0f)
 	{
-		emitVolumeChange(no_mute_volume != 0.0f ? no_mute_volume : 0.5f);
+		VolumeChange(no_mute_volume != 0.0f ? no_mute_volume : 0.5f);
 		no_mute_volume = 0.0f;
 	}
 }
-void EventHandler::emitVolumeMuteUnmute()
+void EventHandler::VolumeMuteUnmute()
 {
 	if(globals()->m_isMuted)
 	{
-		emitVolumeUnmute();
+		VolumeUnmute();
 	}
 	else
 	{
-		emitVolumeMute();
+		VolumeMute();
 	}
 }
-void EventHandler::emitLoopStateEnableDisable()
+void EventHandler::LoopStateEnableDisable()
 {
 	if(globals()->m_loopState)
 	{
-		emitLoopStateChange(false);
+		LoopStateChange(false);
 	}
 	else
 	{
-		emitLoopStateChange(true);
+		LoopStateChange(true);
 	}
 }
-void EventHandler::emitShuffleStateEnableDisable()
+void EventHandler::ShuffleStateEnableDisable()
 {
 	if(globals()->m_shuffleState)
 	{
-		emitShuffleStateChange(false);
+		ShuffleStateChange(false);
 	}
 	else
 	{
-		emitShuffleStateChange(true);
+		ShuffleStateChange(true);
 	}
 }
 

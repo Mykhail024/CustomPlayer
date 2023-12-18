@@ -46,10 +46,9 @@ PlaylistControl::PlaylistControl(QWidget *parent)
 	m_layout->setContentsMargins(3, 3, 3, 3);
 	m_layout->setSpacing(0);
 
-	connect(m_findLineEdit, &QLineEdit::textChanged, eventHandler(), &EventHandler::emitPlaylistFind);
+	connect(m_findLineEdit, &QLineEdit::textChanged, eventHandler(), &EventHandler::PlaylistFind);
 	connect(m_addButton, &QPushButton::clicked, this, &PlaylistControl::onAddBtnClick);
 	connect(eventHandler(), &EventHandler::onFindActivate, this, [=]{ m_findLineEdit->setFocus(); });
-	connect(m_findLineEdit, &QLineEdit::editingFinished, this, [=]{ eventHandler()->emitFindFinish(); });
 	connect(addFiles, &QAction::triggered, this, &PlaylistControl::onAddFiles);
 	connect(newPlaylist, &QAction::triggered, this, &PlaylistControl::onNewPlaylist);
 }
@@ -99,6 +98,6 @@ void PlaylistControl::onNewPlaylist()
 	if(ok && !name.isEmpty())
 	{
 		playlistManager()->createPlaylist(name);
-		eventHandler()->emitAddPlaylists();
+		eventHandler()->AddPlaylists();
 	}
 }

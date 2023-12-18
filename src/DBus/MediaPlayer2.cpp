@@ -65,36 +65,36 @@ void MediaPlayer2::sendPropertiesChanged(const QString &propertyName, const QVar
 
 void MediaPlayer2::Raise()
 {
-	eventHandler()->emitRise();
+	eventHandler()->Rise();
 }
 
 void MediaPlayer2::Next()
 {
-	eventHandler()->emitNextSong();
+	eventHandler()->NextSong();
 }
 void MediaPlayer2::Previous()
 {
-	eventHandler()->emitPrevSong();
+	eventHandler()->PrevSong();
 }
 void MediaPlayer2::Pause()
 {
-	eventHandler()->emitPause();
+	eventHandler()->Pause();
 }
 void MediaPlayer2::PlayPause()
 {
-	eventHandler()->emitPlayPause();
+	eventHandler()->PlayPause();
 }
 void MediaPlayer2::Stop()
 {
-	eventHandler()->emitStop();
+	eventHandler()->Stop();
 }
 void MediaPlayer2::Play()
 {
-	eventHandler()->emitPlay();
+	eventHandler()->Play();
 }
 void MediaPlayer2::OpenFile(const QString &filePath)
 {
-	eventHandler()->emitPlaySong(filePath);
+	eventHandler()->PlaySong(filePath);
 }
 
 void MediaPlayer2::onPositionChanged(const unsigned long int &time)
@@ -103,11 +103,11 @@ void MediaPlayer2::onPositionChanged(const unsigned long int &time)
 }
 void MediaPlayer2::Seek(const long int &time)
 {
-	eventHandler()->emitSeek(globals()->songPosition() + (time / 1e3));
+	eventHandler()->Seek(globals()->songPosition() + (time / 1e3));
 }
 void MediaPlayer2::SetPosition(QDBusObjectPath path, const unsigned long int &time)
 {
-	eventHandler()->emitSeek(time / 1e3);
+	eventHandler()->Seek(time / 1e3);
 }
 unsigned long int MediaPlayer2::position()
 {
@@ -126,11 +126,11 @@ void MediaPlayer2::setLoopStatus(const QString &status)
 {
 	if(status != QStringLiteral("None"))
 	{
-		eventHandler()->emitLoopStateChange(true);
+		eventHandler()->LoopStateChange(true);
 	}
 	else
 	{
-		eventHandler()->emitLoopStateChange(false);
+		eventHandler()->LoopStateChange(false);
 	}
 	onLoopChanged();
 }
@@ -140,7 +140,7 @@ bool MediaPlayer2::shuffle()
 }
 void MediaPlayer2::setShuffle(const bool &state)
 {
-	eventHandler()->emitShuffleStateChange(state);
+	eventHandler()->ShuffleStateChange(state);
 	onShuffleChanged();
 }
 void MediaPlayer2::onLoopChanged()
@@ -202,7 +202,7 @@ bool MediaPlayer2::canGoPrevious() const
 }
 void MediaPlayer2::setVolume(float volume)
 {
-	eventHandler()->emitVolumeChange(volume);
+	eventHandler()->VolumeChange(volume);
 }
 
 QVariantMap MediaPlayer2::metadata() const

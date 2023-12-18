@@ -56,17 +56,17 @@ namespace Controls {
         int delta = event->angleDelta().y();
 		if(event->modifiers() == Qt::ControlModifier)
 		{
-			eventHandler()->emitSeek(globals()->songPosition() + ((delta > 0) ? 1000 : -1000));
+			eventHandler()->Seek(globals()->songPosition() + ((delta > 0) ? 1000 : -1000));
 		}
 		else
 		{
 			if(delta > 0)
 			{
-				eventHandler()->emitForward();
+				eventHandler()->Forward();
 			}
 			else
 			{
-				eventHandler()->emitBackward();
+				eventHandler()->Backward();
 			}
 		}
     }
@@ -74,12 +74,12 @@ namespace Controls {
 	{
 		if(event->key() == Qt::Key_Left)
 		{
-			eventHandler()->emitBackward();
+			eventHandler()->Backward();
 			return;
 		}
 		else if(event->key() == Qt::Key_Right)
 		{
-			eventHandler()->emitForward();
+			eventHandler()->Forward();
 			return;
 		}
 

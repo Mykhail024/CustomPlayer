@@ -126,7 +126,7 @@ void PlaylistView::onSelect(const QModelIndex &index)
 
 		this->viewport()->update();
 
-		eventHandler()->emitPlaySong(m_model->index(sourceIndex.row(), 7).data().toString());
+		eventHandler()->PlaySong(m_model->index(sourceIndex.row(), 7).data().toString());
 
 		m_model->setBlinkRow(sourceIndex.row());
 		m_model->setOpacity(true);

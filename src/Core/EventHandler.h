@@ -12,48 +12,51 @@ class EventHandler : public QObject
 		EventHandler();
 
 	public slots:
-		void emitPlaylistFind(const QString &text);
-		void emitNextPlaylist();
-		void emitPrevPlaylist();
+		void PlaylistFind(const QString &text);
+		void NextPlaylist();
+		void PrevPlaylist();
 
-		void emitAddPlaylists();
+		void AddPlaylists();
 
-		void emitFindActivate();
-		void emitFindFinish();
+		void LineEditActivate();
+		void LineEditFinish();
 
-		void emitEndSong();
-		void emitNextSong();
-		void emitPrevSong();
-		bool emitPlaySong(const QString&);
-		void emitNextSongRandom();
-		bool emitPlay();
-		bool emitPause();
-		void emitStop();
-		void emitPlayPause();
-		void emitBackward();
-		void emitForward();
+		void FindActivate();
 
-		void emitVolumeUp();
-		void emitVolumeDown();
-		void emitVolumeMute();
-		void emitVolumeUnmute();
-		void emitVolumeMuteUnmute();
-		void emitVolumeChange(const float&);
+		void EndSong();
+		void NextSong();
+		void PrevSong();
+		bool PlaySong(const QString&);
+		void NextSongRandom();
+		bool Play();
+		bool Pause();
+		void Stop();
+		void PlayPause();
+		void Backward();
+		void Forward();
 
-		void emitLoopStateChange(const bool&);
-		void emitLoopStateEnableDisable();
-		void emitShuffleStateChange(const bool&);
-		void emitShuffleStateEnableDisable();
-		void emitFadeIn(const bool &isPrimary);
-		void emitStopFadeIn();
-		void emitSeek(const unsigned long int &time);
-		void emitRise();
-		void emitPositionChange(const unsigned long int &pos);
+		void VolumeUp();
+		void VolumeDown();
+		void VolumeMute();
+		void VolumeUnmute();
+		void VolumeMuteUnmute();
+		void VolumeChange(const float&);
+
+		void LoopStateChange(const bool&);
+		void LoopStateEnableDisable();
+		void ShuffleStateChange(const bool&);
+		void ShuffleStateEnableDisable();
+		void FadeIn(const bool &isPrimary);
+		void StopFadeIn();
+		void Seek(const unsigned long int &time);
+		void Rise();
+		void PositionChange(const unsigned long int &pos);
 
 	signals:
 		void onAddPlaylists();
 		void onFindActivate();
-		void onFindFinish();
+		void onLineEditActivate();
+		void onLineEditFinish();
 		void onNextPlaylist();
 		void onPrevPlaylist();
 		void onPlaylistFind(const QString &text);

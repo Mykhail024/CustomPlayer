@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
 	if(argc > 1)
 	{
-		eventHandler()->emitPlaySong(argv[1]);
+		eventHandler()->PlaySong(argv[1]);
 	}
 	int exit_code = app.exec();
 

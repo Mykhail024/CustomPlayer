@@ -127,12 +127,12 @@ namespace Audio {
 							qWarning() << "file seek error";
 							goto error_after_dequeue;
 						}
-						emit eventHandler()->emitFadeIn(false);
+						emit eventHandler()->FadeIn(false);
 					}
 					else
 					{
 						pw_thread_loop_signal(data->pipewire->loop, 0);
-						emit eventHandler()->emitEndSong();
+						emit eventHandler()->EndSong();
 						return;
 					}
 				}
@@ -140,7 +140,7 @@ namespace Audio {
 
 		}
 
-		eventHandler()->emitPositionChange(sf_seek(data->file, 0, SEEK_CUR) * 1000 / data->fileinfo.samplerate);
+		eventHandler()->PositionChange(sf_seek(data->file, 0, SEEK_CUR) * 1000 / data->fileinfo.samplerate);
 
 		for (uint32_t i = 0; i < n_frames * data->fileinfo.channels; i++)
 		{
@@ -219,8 +219,8 @@ error_after_dequeue:
 
         pw_thread_loop_unlock(loop);
 
-		eventHandler()->emitVolumeChange(globals()->volume());
-		emit eventHandler()->emitFadeIn(true);
+		eventHandler()->VolumeChange(globals()->volume());
+		emit eventHandler()->FadeIn(true);
 
         started = true;
 		return true;

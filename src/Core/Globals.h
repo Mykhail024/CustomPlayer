@@ -79,14 +79,14 @@ class Globals : public QObject
 
 		SONG_METADATA metadata() const { return m_metadata; }
 
-		bool findIsFocused() const { return m_findIsFocused; }
+		unsigned int lineEditFocused() const { return m_lineEditFocused; }
 
 	private:
 		friend class EventHandler;
 
 		Audio::AudioServer *m_audioServer = nullptr;
 
-		bool m_findIsFocused = false;
+		unsigned int m_lineEditFocused = false;
 		unsigned int m_Forward_Backward_Time;
 		PLAYBACK_STATUS m_playbackStatus;
 		bool m_loopState;
