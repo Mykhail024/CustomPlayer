@@ -75,6 +75,9 @@ void PlaylistManager::createPlaylist(const QString &name)
 
 void PlaylistManager::removePlaylist(const size_t &index)
 {
+	QSqlDatabase db = QSqlDatabase::database(connectionName);
+	QSqlQuery q(db);
+	q.exec(QString("DROP TABLE `%1`").arg(m_playlists[index]->name()));
 	m_playlists.erase(m_playlists.begin() + index);
 }
 size_t PlaylistManager::count()

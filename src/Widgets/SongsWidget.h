@@ -11,4 +11,8 @@ class SongsWidget : public QTabWidget
 		void selectNextTab();
 		void selectPrevTab();
 		void addPlaylists();
+		void setupTabs();
+
+	private slots:
+		void onTabClose(const int &index);
 };

@@ -44,6 +44,13 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 	connect(this, &QTableView::customContextMenuRequested, this, [&](const QPoint &pos){
 			QMenu contextMenu(this);
 			QAction deleteAction("Delete");
+
+#ifdef __linux__
+			deleteAction.setIcon(QIcon::fromTheme("edit-delete"));
+#else
+			deleteAction.setIcon(this->style()->standardIcon(QStyle::SP_TrashIcon));
+#endif
+
 			contextMenu.addAction(&deleteAction);
 			connect(&deleteAction, &QAction::triggered, this, &PlaylistView::onDelete);
 

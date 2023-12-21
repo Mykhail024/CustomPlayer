@@ -1,5 +1,5 @@
-pkgname="CustomPlayer"
-pkgver="0.3.4"
+pkgname="custom-player"
+pkgver="0.3.5"
 pkgrel=1
 pkgdesc="CustomPlayer is a player aimed at convenience and configurability, written in Qt 6. "
 arch=("x86_64")
@@ -8,30 +8,25 @@ url="https://github.com/Mykhail024/CustomPlayer"
 depends=("qt6-base" "pipewire")
 makedepends=("cmake" "make" "libpipewire" "taglib" "libsndfile")
 
-source=("https://github.com/Mykhail024/CustomPlayer/archive/refs/tags/v${pkgver}.tar.gz")
+source=("$pkgname-$pkgver.tar.gz::https://github.com/Mykhail024/CustomPlayer/archive/refs/tags/v${pkgver}.tar.gz")
 sha512sums=("SKIP")
 
+conflicts=("CustomPlayer")
+
 prepare() {
-  mkdir -p "$pkgname-$pkgver/build"
-  cd "$pkgname-$pkgver/build"
+  mkdir -p "CustomPlayer-$pkgver/build"
+  cd "CustomPlayer-$pkgver/build"
   cmake ".." \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_BUILD_TYPE=Release
 }
 
 build() {
-  cd "$pkgname-$pkgver/build"
+  cd "CustomPlayer-$pkgver/build"
   make -j2
 }
 
 package() {
-  cd "$pkgname-$pkgver/build"
+  cd "CustomPlayer-$pkgver/build"
   make DESTDIR="${pkgdir}" install
-
-  install -Dm644 "$srcdir/$pkgname-$pkgver/res/icon48x48.png" \
-    "$pkgdir/usr/share/icons/hicolor/48x48/apps/customplayer.png"
-  install -Dm644 "$srcdir/$pkgname-$pkgver/res/icon.svg" \
-    "$pkgdir/usr/share/icons/hicolor/scalable/apps/customplayer.svg"
-  install -Dm644 "$srcdir/$pkgname-$pkgver/res/customplayer.desktop" \
-    "$pkgdir/usr/share/applications/customplayer.desktop"
 }

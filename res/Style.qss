@@ -183,3 +183,14 @@ QSlider::sub-page:disabled:horizontal
 #AddSongButton:hover {
 	color: rgb(220, 220, 220);
 }
+
+QTabBar::close-button {
+	image: url(:/Icons/close.svg);
+	subcontrol-position: right;
+}
+QTabBar::close-button:hover {
+	image: url(:/Icons/close_hover.svg)
+}
+QTabBar::close-button:image {
+	margin-left: 5px;
+}

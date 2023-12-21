@@ -79,3 +79,18 @@ endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "customplayer")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/icon48x48.png
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/48x48/apps/
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        RENAME customplayer.png)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/icon.svg
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        RENAME customplayer.svg)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/customplayer.desktop
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications/
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+

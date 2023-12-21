@@ -28,6 +28,17 @@ PlaylistControl::PlaylistControl(QWidget *parent)
 	QAction *addFiles = m_addMenu->addAction(tr("Add files"));
 	QAction *addFolder = m_addMenu->addAction(tr("Add folder"));
 	QAction *newPlaylist = m_addMenu->addAction(tr("New Playlist"));
+
+#ifdef __linux__
+	addFiles->setIcon(QIcon::fromTheme("document-open"));
+	addFolder->setIcon(QIcon::fromTheme("folder-open"));
+	newPlaylist->setIcon(QIcon::fromTheme("document-new"));
+#else
+	addFiles->setIcon(this->style()->standardIcon(QStyle::SP_FileIcon));
+	addFolder->setIcon(this->style()->standardIcon(QStyle::SP_DirOpenIcon));
+	newPlaylist->setIcon(this->style()->standardIcon(QStyle::SP_FileDialogNewFolder));
+#endif
+
 	m_addMenu->adjustSize();
 
 	m_addButton->setObjectName("AddSongButton");
