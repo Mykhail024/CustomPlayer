@@ -4,11 +4,12 @@ This project is distributed under the GNU GPL-3.0 license.
 For details, please refer to the [LICENSE](./LICENSE) file.
 
 At the moment, CustomPlayer is available only on Linux with PipeWire.
-# Build
+# Build & Install
 ```
 git clone https://github.com/Mykhail024/CustomPlayer.git && cd CustomPlayer
 mkdir build && cd build
 cmake .. && make
+sudo make install
 ```
 
 # Used Libraries and APIs
