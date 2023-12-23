@@ -21,11 +21,11 @@ set(source_files
 	src/Widgets/ControlsPanel.cpp
 	src/Widgets/Window.cpp
 	src/Convert.cpp
-	src/Config/Config.cpp
 	src/Widgets/Controls/TimeSlider.cpp
 	src/Widgets/Controls/LineEdit.h
 	src/TagReaders/ID3v2Reader.cpp
 	src/Audio/AudioServer.h
+	src/Core/Config.cpp
 	src/Core/EventHandler.cpp
 	src/Core/Globals.cpp
 	src/Core/PlaylistManager.cpp

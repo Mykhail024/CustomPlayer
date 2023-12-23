@@ -5,7 +5,7 @@
 #include <QApplication>
 #include <QSqlQuery>
 
-#include "../Config/Config.h"
+#include "Config.h"
 
 #include "PlaylistManager.h"
 

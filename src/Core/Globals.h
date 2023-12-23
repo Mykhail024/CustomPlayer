@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVariantMap>
 
-#include "../Config/Config.h"
+#include "Config.h"
 
 namespace Audio {
 	class AudioServer;
