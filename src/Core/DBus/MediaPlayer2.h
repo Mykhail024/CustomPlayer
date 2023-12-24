@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QApplication>
+#include <QCoreApplication>
 
 #include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
@@ -44,7 +44,7 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
 		void sendPropertiesChanged(const QString &propertyName, const QVariant &propertyValue);
 
 		void Raise();
-		void Quit() { QApplication::quit(); }
+		void Quit() { QCoreApplication::quit(); }
 		void Seek(const long int &time);
 		void SetPosition(QDBusObjectPath path, const unsigned long int &time);
 		/**

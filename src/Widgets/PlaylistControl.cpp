@@ -83,7 +83,7 @@ void PlaylistControl::onAddFiles()
 	if(playlistManager()->count() == 0) return;
     QStringList fileNames = QFileDialog::getOpenFileNames(
         this,
-        tr("Select files"),
+        tr("Select Music Files"),
         QStandardPaths::writableLocation(QStandardPaths::MusicLocation),
         tr("Music Files (*.mp3)")
     );

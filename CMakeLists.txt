@@ -23,6 +23,8 @@ set(widgets_files
 	src/Widgets/Playlist/PlaylistView.cpp
 	src/Widgets/PlaylistControl.cpp
 	src/Widgets/GlobalEventFilter.h
+	src/Widgets/InfoWidget.cpp
+    src/Widgets/ImageWidget.cpp
 
 	src/Widgets/Controls/TimeSlider.cpp
 	src/Widgets/Controls/LineEdit.h

@@ -1,7 +1,6 @@
 #include <QApplication>
 
 #include "Core/Tools.h"
-
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
 #include "Core/PlaylistManager.h"
@@ -16,6 +15,7 @@
 int main(int argc, char** argv)
 {
 #ifdef __linux__
+	qputenv("QT_QPA_PLATFORMTHEME", "flatpak");
 	if(argc > 1)
 	{
 		if(sendPlayDBusSignal(argv[1]))
