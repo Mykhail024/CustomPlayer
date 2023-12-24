@@ -8,7 +8,7 @@ At the moment, CustomPlayer is available only on Linux with PipeWire.
 ```
 git clone https://github.com/Mykhail024/CustomPlayer.git && cd CustomPlayer
 mkdir build && cd build
-cmake .. && make
+cmake .. && make -j$(nproc)
 sudo make install
 ```
 
