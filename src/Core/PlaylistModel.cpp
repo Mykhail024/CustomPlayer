@@ -3,12 +3,12 @@
 #include <QSqlTableModel>
 #include <QSqlError>
 #include <QThread>
-#include <QApplication>
 #include <QSqlRecord>
+#include <QFont>
 
 #include "Globals.h"
-#include "../TagReaders/TagReader.h"
-#include "../Convert.cpp"
+#include "TagReaders/TagReader.h"
+#include "Tools.h"
 
 #include "PlaylistModel.h"
 
@@ -48,8 +48,6 @@ PlaylistModel::PlaylistModel(const QString &connectionName, const QString &table
 
 	connect(this, &QSqlTableModel::rowsInserted, this, &PlaylistModel::fetch);
 	fetch();
-
-	m_brush.selectionColor = QApplication::palette().color(QPalette::Highlight);
 }
 PlaylistModel::~PlaylistModel()
 {
@@ -130,7 +128,7 @@ void PlaylistModel::setSongData(const SONG_METADATA &song, const int &index)
 	this->setData(this->index(index, 1), song.Title);
 	this->setData(this->index(index, 2), song.Artist);
 	this->setData(this->index(index, 3), song.Album);
-	this->setData(this->index(index, 4), QVariant::fromValue(Convert::Seconds::toMinutes(song.Length / 1e3)));
+	this->setData(this->index(index, 4), QVariant::fromValue(secondsToMinutes(song.Length / 1e3)));
 	this->setData(this->index(index, 5), QVariant::fromValue(song.ModifiedDate));
 	this->setData(this->index(index, 6), QVariant::fromValue(song.Year));
 	this->submitAll();

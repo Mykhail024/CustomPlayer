@@ -1,14 +1,14 @@
 #include <QHBoxLayout>
 #include <QStyleOption>
 #include <QPainter>
-#include <qwidget.h>
-
-#include "../Convert.cpp"
+#include <QWidget>
 
 #include "Controls/TimeSlider.h"
 #include "Controls/Slider.h"
-#include "../Core/EventHandler.h"
-#include "../Core/Globals.h"
+
+#include "Core/EventHandler.h"
+#include "Core/Globals.h"
+#include "Core/Tools.h"
 
 #include "ControlsPanel.h"
 
@@ -172,7 +172,7 @@ void ControlsPanel::updateVolumeIcon(const int &data)
 
 void ControlsPanel::updateTime(const int &time)
 {
-	timeLabel->setText(Convert::Seconds::toMinutes(time / 1e3) + "/" + Convert::Seconds::toMinutes(m_length));
+	timeLabel->setText(secondsToMinutes(time / 1e3) + "/" + secondsToMinutes(m_length));
 	timeSlider->setValueDontMove(time / 1e3);
 }
 

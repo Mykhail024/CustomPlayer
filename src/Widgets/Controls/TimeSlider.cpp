@@ -1,7 +1,7 @@
 #include <QMouseEvent>
 
-#include "../../Core/EventHandler.h"
-#include "../../Core/Globals.h"
+#include "Core/EventHandler.h"
+#include "Core/Globals.h"
 
 #include "TimeSlider.h"
 

@@ -24,11 +24,12 @@
 #include <QDebug>
 #include <QStringLiteral>
 
+#ifdef __linux__
+#include <QDBusAbstractAdaptor>
+#include <QDBusObjectPath>
+#include <QDBusConnection>
+#include <QDBusMessage>
+#endif
+
 #include <vector>
 #include <cstdint>
-
-/*
-#ifdef NDEBUG
-#include "./src/Core/EventHandler.h"
-#include "./src/Core/Globals.h"
-#endif*/

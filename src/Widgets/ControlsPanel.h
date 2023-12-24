@@ -4,7 +4,6 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QLabel>
-#include <qtmetamacros.h>
 
 namespace Controls{
 	class TimeSlider;

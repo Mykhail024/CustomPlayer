@@ -1,7 +1,7 @@
 #include <QDebug>
 
 #ifdef __linux__
-	#include "../Audio/PipeWire.h"
+	#include "Audio/PipeWire.h"
 #endif
 
 #include "Globals.h"

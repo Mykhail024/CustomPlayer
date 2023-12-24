@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QDir>
 #include <QSqlDatabase>
-#include <QApplication>
 #include <QSqlQuery>
 
 #include "Config.h"
@@ -21,7 +20,7 @@ PlaylistManager::PlaylistManager() : QObject()
 	if(!db.open())
 	{
 		qCritical() << "Error load playlist database";
-		QApplication::exit(-1);
+		return;
 	}
 
 	auto tables = db.tables();

@@ -3,7 +3,7 @@
 #include <QLineEdit>
 #include <QKeyEvent>
 
-#include "../../Core/EventHandler.h"
+#include "Core/EventHandler.h"
 
 namespace Controls
 {

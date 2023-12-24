@@ -38,6 +38,7 @@ class PlaylistModel : public QSqlTableModel
 		bool opacity() const { return m_brush.opacity; }
 		void setBlinkRow(const int &row) { m_brush.row = row; }
 		int blinkRow() const { return m_brush.row; }
+		void setSelectionColor(const QColor &color) { m_brush.selectionColor = color; }
 
 		SONG_METADATA operator[](const size_t &index);
 

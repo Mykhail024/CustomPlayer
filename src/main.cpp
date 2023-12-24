@@ -1,28 +1,16 @@
 #include <QApplication>
 
-#include "Convert.cpp"
-#include "Widgets/Window.h"
+#include "Core/Tools.h"
+
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
 #include "Core/PlaylistManager.h"
+
 #include "Widgets/GlobalEventFilter.h"
+#include "Widgets/Window.h"
 
 #ifdef __linux__
-#include "DBus/MediaPlayer2.h"
-#include <QDBusConnection>
-#include <QDBusInterface>
-
-bool sendDbusSignalIfExists(const QString &filePath)
-{
-	QDBusConnection bus = QDBusConnection::sessionBus();
-	QDBusInterface mediaPlayer2("org.mpris.MediaPlayer2.CustomPlayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", bus);
-	if (mediaPlayer2.isValid()) {
-		mediaPlayer2.call("OpenFile", filePath);
-		return true;
-	}
-	return false;
-}
-
+#include "Core/DBus/MediaPlayer2.h"
 #endif
 
 int main(int argc, char** argv)
@@ -30,7 +18,7 @@ int main(int argc, char** argv)
 #ifdef __linux__
 	if(argc > 1)
 	{
-		if(sendDbusSignalIfExists(argv[1]))
+		if(sendPlayDBusSignal(argv[1]))
 		{
 			return 0;
 		}
@@ -39,7 +27,7 @@ int main(int argc, char** argv)
 	QApplication app(argc, argv);
 	GlobalEventFilter filter;
 	app.installEventFilter(&filter);
-	app.setStyleSheet(Convert::File::toQString(":/Style.qss"));
+	app.setStyleSheet(readTextFile(":/Style.qss"));
     QCoreApplication::setOrganizationName(QStringLiteral("Mykhail024"));
     QCoreApplication::setApplicationName(QStringLiteral("CustomPlayer"));
 

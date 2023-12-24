@@ -38,6 +38,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
 	}
 
 	blinkAnimationTimer->setInterval(750);
+	m_model->setSelectionColor(QApplication::palette().color(QPalette::Highlight));
 
 	connect(eventHandler(), &EventHandler::onPlaylistFind, this, &PlaylistView::find);
 	connect(this, &QTableView::doubleClicked, this, &PlaylistView::onSelect);

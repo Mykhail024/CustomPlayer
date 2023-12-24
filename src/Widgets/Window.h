@@ -11,11 +11,6 @@
 
 #include "ControlsPanel.h"
 
-#ifdef __linux__
-#include <QDBusConnection>
-#include <QDBusError>
-#endif
-
 class PlaylistControl;
 class SongsWidget;
 class GlobalEventFilter;

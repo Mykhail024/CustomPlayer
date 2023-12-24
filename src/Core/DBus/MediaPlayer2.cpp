@@ -2,15 +2,14 @@
 #include <QStringLiteral>
 #include <QDBusMessage>
 #include <QDebug>
-#include <qlatin1stringview.h>
 
-#include "../../build/mprisroot.h"
-#include "../../build/mprisplayer.h"
-
-#include "../Core/EventHandler.h"
-#include "../Core/Globals.h"
+#include "Core/EventHandler.h"
+#include "Core/Globals.h"
 
 #include "MediaPlayer2.h"
+
+#include "mprisroot.h"
+#include "mprisplayer.h"
 
 #include "moc_MediaPlayer2.cpp"
 

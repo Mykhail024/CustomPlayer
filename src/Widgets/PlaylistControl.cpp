@@ -7,9 +7,10 @@
 #include <QStandardPaths>
 #include <QInputDialog>
 
-#include "../Core/EventHandler.h"
+#include "Core/PlaylistManager.h"
+#include "Core/EventHandler.h"
+
 #include "Controls/LineEdit.h"
-#include "../Core/PlaylistManager.h"
 
 #include "PlaylistControl.h"
 

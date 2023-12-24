@@ -3,8 +3,8 @@
 #include <QWidget>
 #include <QKeyEvent>
 
-#include "../Core/EventHandler.h"
-#include "../Core/Globals.h"
+#include "Core/EventHandler.h"
+#include "Core/Globals.h"
 
 class GlobalEventFilter : public QObject {
     Q_OBJECT

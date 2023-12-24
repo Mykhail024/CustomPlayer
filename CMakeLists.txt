@@ -13,29 +13,32 @@ set(CMAKE_AUTOMOC ON)
 
 project(${PROJECT_NAME})
 
-set(PCH_HEADER precompiled.h)
+set(PCH_HEADER src/precompiled.h)
 
-set(source_files
-	res/Resources.qrc
-    src/Player.cpp
-	src/Widgets/ControlsPanel.cpp
+set(widgets_files
+    res/Resources.qrc
+    src/Widgets/ControlsPanel.cpp
 	src/Widgets/Window.cpp
-	src/Convert.cpp
+	src/Widgets/SongsWidget.cpp
+	src/Widgets/Playlist/PlaylistView.cpp
+	src/Widgets/PlaylistControl.cpp
+	src/Widgets/GlobalEventFilter.h
+
 	src/Widgets/Controls/TimeSlider.cpp
 	src/Widgets/Controls/LineEdit.h
-	src/TagReaders/ID3v2Reader.cpp
-	src/Audio/AudioServer.h
+	src/Widgets/Controls/Slider.h
+)
+
+set(core_files
+	src/Core/Tools.cpp
+	src/Core/SortFilterProxyModel.cpp
+	src/Core/TagReaders/ID3v2Reader.cpp
+	src/Core/Audio/AudioServer.h
 	src/Core/Config.cpp
 	src/Core/EventHandler.cpp
 	src/Core/Globals.cpp
 	src/Core/PlaylistManager.cpp
 	src/Core/PlaylistModel.cpp
-	src/Core/SortFilterProxyModel.cpp
-
-	src/Widgets/SongsWidget.cpp
-	src/Widgets/Playlist/PlaylistView.cpp
-	src/Widgets/PlaylistControl.cpp
-	src/Widgets/GlobalEventFilter.h
 )
 
 find_package(Qt6 COMPONENTS Core Widgets Sql REQUIRED)
@@ -48,28 +51,29 @@ if(UNIX AND NOT APPLE)
 	find_package(Qt6 COMPONENTS DBus REQUIRED)
 	pkg_check_modules(libpipewire REQUIRED IMPORTED_TARGET libpipewire-0.3)
 
-	list(APPEND source_files
-		src/Audio/PipeWire.cpp
-		src/DBus/MediaPlayer2.cpp
+	list(APPEND core_files
+		src/Core/Audio/PipeWire.cpp
+		src/Core/DBus/MediaPlayer2.cpp
 	)
 
-	qt6_add_dbus_adaptor(source_files
-		./src/DBus/org.mpris.MediaPlayer2.xml
-		../src/DBus/MediaPlayer2.h
+	qt6_add_dbus_adaptor(core_files
+		src/Core/DBus/org.mpris.MediaPlayer2.xml
+		Core/DBus/MediaPlayer2.h
 		MediaPlayer2
 		mprisroot MPrisRoot)
-	qt6_add_dbus_adaptor(source_files
-		./src/DBus/org.mpris.MediaPlayer2.Player.xml
-		../src/DBus/MediaPlayer2.h
+	qt6_add_dbus_adaptor(core_files
+		src/Core/DBus/org.mpris.MediaPlayer2.Player.xml
+		Core/DBus/MediaPlayer2.h
 		MediaPlayer2
 		mprisplayer MPrisPlayer)
 endif()
 
-add_executable(${PROJECT_NAME} ${source_files} ${PCH_SOURCE})
+add_executable(${PROJECT_NAME} src/main.cpp ${core_files} ${widgets_files} ${PCH_SOURCE})
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE ${PCH_HEADER})
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${MPG123_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR})
+
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt6::Sql PkgConfig::taglib SndFile::sndfile)
 
 if(UNIX AND NOT APPLE)
@@ -93,4 +97,3 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/icon.svg
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/res/customplayer.desktop
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications/
         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
-

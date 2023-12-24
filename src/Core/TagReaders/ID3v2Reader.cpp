@@ -23,7 +23,7 @@
 #include <QDir>
 #include <QImage>
 
-#include "../Core/Globals.h"
+#include "Core/Globals.h"
 #include "TagReader.h"
 
 namespace TagReaders

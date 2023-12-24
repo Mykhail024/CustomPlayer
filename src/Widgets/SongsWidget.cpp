@@ -2,9 +2,9 @@
 #include <QSortFilterProxyModel>
 #include <QHeaderView>
 
-#include "../Core/PlaylistManager.h"
-#include "../Core/PlaylistModel.h"
-#include "../Core/EventHandler.h"
+#include "Core/PlaylistManager.h"
+#include "Core/PlaylistModel.h"
+#include "Core/EventHandler.h"
 #include "Playlist/PlaylistView.h"
 
 #include "SongsWidget.h"

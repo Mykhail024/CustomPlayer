@@ -2,9 +2,9 @@
 #include <stdexcept>
 #include <QDebug>
 
-#include "../Audio/AudioServer.h"
+#include "Audio/AudioServer.h"
 #include "Globals.h"
-#include "../TagReaders/TagReader.h"
+#include "TagReaders/TagReader.h"
 
 #include "EventHandler.h"
 

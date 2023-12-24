@@ -1,8 +1,9 @@
 #pragma once
 
+#include <QApplication>
+
 #include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
-#include <QApplication>
 
 class MPrisRoot;
 class MPrisPlayer;
