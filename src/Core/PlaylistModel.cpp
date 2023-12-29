@@ -5,57 +5,35 @@
 #include <QThread>
 #include <QSqlRecord>
 #include <QFont>
+#include <QFile>
+#include <qdatetime.h>
 
+#include "EventHandler.h"
 #include "Globals.h"
-#include "TagReaders/TagReader.h"
+#include "PlaylistsCache.h"
+#include "Log.h"
 #include "Tools.h"
 
 #include "PlaylistModel.h"
 
 #include "moc_PlaylistModel.cpp"
 
-
-IndexingThread::IndexingThread(PlaylistModel *playlist, QObject *parent) : QThread(parent), m_playlists(playlist){}
-IndexingThread::~IndexingThread()
+PlaylistModel::PlaylistModel(const QString &filePath, PlaylistCache *cache, QObject *parent)
+	: QAbstractTableModel(parent), m_cache(cache)
 {
-	this->requestInterruption();
-	this->wait();
-}
-void IndexingThread::run()
-{
-	if(!m_playlists) return;
-	auto size = m_playlists->size();
-	for(int i = 0; i < size && !isInterruptionRequested(); i++)
-	{
-		if (!m_playlists) return;
-		if(m_playlists->data(m_playlists->index(i, 1)).isNull())
-		{
-			auto metadata = TagReaders::id3v2_read(m_playlists->data(m_playlists->index(i, 7)).toString());
-			m_playlists->setSongData(metadata, i);
-		}
-	}
-}
-
-PlaylistModel::PlaylistModel(const QString &connectionName, const QString &tableName, QObject *parent)
-	: QSqlTableModel(parent, QSqlDatabase::database(connectionName))
-	, m_connectionName(connectionName)
-	, m_name(tableName)
-	, playlistIndexingThread(new IndexingThread(this, this))
-{
-	setTable(tableName);
-	setEditStrategy(QSqlTableModel::OnRowChange);
-    select();
-
-	connect(this, &QSqlTableModel::rowsInserted, this, &PlaylistModel::fetch);
-	fetch();
+	load(filePath);
 }
 PlaylistModel::~PlaylistModel()
 {
-	playlistIndexingThread->requestInterruption();
-	playlistIndexingThread->wait();
-	delete playlistIndexingThread;
 }
-
+int PlaylistModel::rowCount(const QModelIndex &parent) const
+{
+	return parent.isValid() ? 0 : m_songs.size();
+}
+int PlaylistModel::columnCount(const QModelIndex &parent) const
+{
+	return parent.isValid() ? 0 : 6;
+}
 QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
@@ -64,23 +42,17 @@ QVariant PlaylistModel::headerData(int section, Qt::Orientation orientation, int
 	if (orientation == Qt::Horizontal) {
 		switch (section) {
 			case 0:
-				return tr("Id");
-			case 1:
 				return tr("Title");
-			case 2:
+			case 1:
 				return tr("Artist");
-			case 3:
+			case 2:
 				return tr("Album");
-			case 4:
+			case 3:
 				return tr("Length");
-			case 5:
+			case 4:
 				return tr("MidifiedDate");
-			case 6:
+			case 5:
 				return tr("Year");
-			case 7:
-				return tr("Path");
-			default:
-				break;
 		}
 	}
 	return QVariant();
@@ -89,30 +61,149 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 {
 	if(role == Qt::DisplayRole)
 	{
-		if(index.column() == 0)
-		{
-			return index.row() + 1;
+		auto col = index.column();
+		auto metadata = m_songs[index.row()];
+
+		switch (col) {
+			case 0:
+				if(metadata.Title.isEmpty())
+				{
+					return QFileInfo(metadata.Path).baseName();
+				}
+				return metadata.Title;
+			case 1:
+				return metadata.Artist;
+			case 2:
+				return metadata.Album;
+			case 3:
+				return secondsToMinutes(metadata.Length / 1000);
+			case 4:
+				return QDateTime::fromSecsSinceEpoch(metadata.ModifiedDate);
+			case 5:
+				return metadata.Year;
 		}
 	}
-	else if(role == Qt::FontRole)
+	return QVariant();
+}
+bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+	return false;
+}
+bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &index)
+{
+	return false;
+}
+bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &index)
+{
+	beginRemoveRows(index, position, position + rows - 1);
+	m_songs.erase(m_songs.begin() + position, m_songs.begin() + position + rows);
+	endRemoveRows();
+	return true;
+}
+Qt::ItemFlags PlaylistModel::flags(const QModelIndex &index) const
+{
+	if (!index.isValid())
 	{
-		if(index.row() == m_brush.row)
-		{
-			QFont font;
-			font.setBold(true);
-			return font;
-		}
+		return Qt::ItemIsEnabled;
 	}
-	else if(role == Qt::BackgroundRole)
+
+	return QAbstractTableModel::flags(index);
+}
+void PlaylistModel::rename(const QString &name)
+{
+	m_name = name;
+}
+bool PlaylistModel::load(const QString &filePath)
+{
+	QFile file(filePath);
+	if(!file.exists())
 	{
-		if(index.row() == m_brush.row)
-		{
-			QBrush brush(m_brush.selectionColor);
-			brush.setColor(QColor(brush.color().red(), brush.color().green(), brush.color().blue(), (m_brush.opacity ? 255 : 0)));
-			return brush;
-		}
+		Log_Warning(QString("Unable to load playlist, file %1 does not exist").arg(filePath));
+		return false;
 	}
-	return QSqlTableModel::data(index, role);
+	if(!file.open(QFile::ReadOnly | QFile::Text))
+	{
+		Log_Warning(QString("Unable to load playlist %1, %2").arg(filePath).arg(file.errorString()));
+		return false;
+	}
+
+	std::vector<SONG_METADATA> songs;
+
+	QTextStream stream(&file);
+	bool nameFinded = false;
+	while(!stream.atEnd())
+	{
+		QString line = stream.readLine();
+		if(!nameFinded && line.contains("!#"))
+		{
+			int index = line.indexOf("!#");
+            if (index != -1 && index + 2 < line.length())
+			{
+				m_name = line.mid(index + 2);
+				nameFinded = true;
+				continue;
+            }
+		}
+		if(line.isEmpty()) continue;
+		if(!QFile(line).exists())
+		{
+			Log_Warning(QString("Unable to load file, file %1 does not exist").arg(line));
+			continue;
+		}
+		songs.push_back(m_cache->getCachedSong(line));
+	}
+
+	if(nameFinded)
+	{
+		beginResetModel();
+		m_songs = songs;
+		m_filePath = filePath;
+		endResetModel();
+		Log_Info(QString("Playlist %1 (%2) loaded successfully, %3 songs loaded.").arg(m_name).arg(filePath).arg(m_songs.size()));
+	}
+	else
+	{
+		Log_Warning("No playlist name in file: " + filePath);
+		return false;
+	}
+
+	file.close();
+	return true;
+}
+bool PlaylistModel::save(const QString &filePath)
+{
+	QFile file(filePath);
+	if(!file.exists())
+	{
+		Log_Warning(QString("Unable to save playlist, file %1 does not exist").arg(filePath));
+		return false;
+	}
+	if(!file.open(QFile::WriteOnly | QFile::Text))
+	{
+		Log_Warning(QString("Unable to save playlist %1, %2").arg(filePath).arg(file.errorString()));
+		return false;
+	}
+
+	QTextStream stream(&file);
+
+	stream << QString("!#%1\n").arg(m_name);
+	for(const auto &song : m_songs)
+	{
+		stream << song.Path << "\n";
+	}
+
+	file.close();
+	Log_Info(QString("Playlist %1 (%2) successful saved").arg(m_name).arg(filePath));
+	return true;
+}
+bool PlaylistModel::save()
+{
+	if(m_filePath.isEmpty())
+	{
+		Log_Warning("Unable to save playlist, please load or create playlist before saving");
+		return false;
+	}
+	return save(m_filePath);
 }
 
 QString PlaylistModel::name() const
@@ -125,59 +216,33 @@ size_t PlaylistModel::size() const
 }
 void PlaylistModel::setSongData(const SONG_METADATA &song, const int &index)
 {
-	this->setData(this->index(index, 1), song.Title);
-	this->setData(this->index(index, 2), song.Artist);
-	this->setData(this->index(index, 3), song.Album);
-	this->setData(this->index(index, 4), QVariant::fromValue(secondsToMinutes(song.Length / 1e3)));
-	this->setData(this->index(index, 5), QVariant::fromValue(song.ModifiedDate));
-	this->setData(this->index(index, 6), QVariant::fromValue(song.Year));
-	this->submitAll();
+
 }
 void PlaylistModel::insertSong(const QString &filePath)
 {
-	insertSong(filePath, this->rowCount());
+	beginResetModel();
+	m_songs.push_back(m_cache->getCachedSong(filePath));
+	endResetModel();
+	QFile file(m_filePath);
+	if(!file.exists())
+	{
+		Log_Warning(QString("Unable add songs to playlist, playlist file %1 does not exist").arg(filePath));
+		return;
+	}
+	if(!file.open(QFile::Append | QFile::Text))
+	{
+		Log_Warning(QString("Unable to add song to playlist %1, %2").arg(filePath).arg(file.errorString()));
+		return;
+	}
+	QTextStream stream(&file);
+	stream << filePath << "\n";
+	file.close();
 }
 void PlaylistModel::insertSong(const QString &filePath, const size_t &index)
 {
-	this->insertRow(index);
-	this->setData(this->index(index, 7), filePath);
-	this->submitAll();
-}
-void PlaylistModel::startIndexing()
-{
-	playlistIndexingThread->start(QThread::LowestPriority);
-}
-void PlaylistModel::stopIndexing()
-{
-	if(playlistIndexingThread->isRunning())
-	{
-		playlistIndexingThread->requestInterruption();
-		playlistIndexingThread->wait();
-	}
+
 }
 SONG_METADATA PlaylistModel::operator[](const size_t &index)
 {
-	QString path = this->data(this->index(index, 7)).toString();
-    SONG_METADATA data = TagReaders::id3v2_read(path);
-    return data;
-}
-int PlaylistModel::indexFromPath(const QString &filePath)
-{
-    QModelIndexList indexes = match(index(0, 7), Qt::DisplayRole, filePath, 1, Qt::MatchExactly);
-
-    if (!indexes.isEmpty()) {
-        return indexes.first().row();
-    }
-
-    return -1;
-}
-
-void PlaylistModel::fetch()
-{
-    if (!this->canFetchMore(QModelIndex{})) return;
-    QTimer::singleShot(0, this, [this]{
-      if (!this->canFetchMore(QModelIndex{})) return;
-      this->fetchMore(QModelIndex());
-      fetch();
-    });
+    return m_songs[index];
 }

@@ -1,35 +1,30 @@
 #include <QFile>
-#include <QDebug>
 #include <QDir>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 
+#include <cctype>
+
 #include "Config.h"
 
+#include "Log.h"
+#include "PlaylistModel.h"
+#include "PlaylistsCache.h"
+#include "EventHandler.h"
 #include "PlaylistManager.h"
 
 #include "moc_PlaylistManager.cpp"
 
 PlaylistManager::PlaylistManager() : QObject()
 {
-	globalPlaylistsFile = Config::getPlaylistsPath() + "/" + "Playlists.db";
-
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-	db.setDatabaseName(globalPlaylistsFile);
-
-	if(!db.open())
+	m_cache = new PlaylistCache(this);
+	QDir pDir(Config::getPlaylistsPath());
+	auto files = pDir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+	for(const auto &file : files)
 	{
-		qCritical() << "Error load playlist database";
-		return;
-	}
-
-	auto tables = db.tables();
-	for(int i = 0 ; i < tables.size(); i++)
-	{
-		if(tables[i] != "sqlite_sequence")
+		if(QFileInfo(file).suffix().isEmpty())
 		{
-			PlaylistModel *p = new PlaylistModel(connectionName, tables[i], this);
-			m_playlists.push_back(p);
+			addPlaylist(pDir.absoluteFilePath(file));
 		}
 	}
 }
@@ -50,34 +45,65 @@ PlaylistManager::~PlaylistManager()
 	{
 		delete p;
 	}
-	QSqlDatabase::database(connectionName).close();
-	QSqlDatabase::removeDatabase(connectionName);
 }
 
 void PlaylistManager::createPlaylist(const QString &name)
 {
-	for(const auto p : m_playlists)
-	{
-		if(p->name() == name)
-		{
-			return;
-		}
-	}
-	QSqlDatabase db = QSqlDatabase::database(connectionName);
-	QSqlQuery q(db);
-	q.exec(QString("CREATE TABLE IF NOT EXISTS `%1` (id INTEGER PRIMARY KEY, title TEXT, artist TEXT, album TEXT, length INTEGER, ModifiedDate INTEGER, year INTEGER, path TEXT)").arg(name));
+	QString path = Config::getPlaylistsPath() + "/" + name;
 
-	PlaylistModel *p = new PlaylistModel(connectionName, name, this);
-	m_playlists.push_back(p);
-	this->setActive(this->count());
+	int counter = 0;
+	while(QFile::exists(path + (counter == 0 ? "" : QString::number(counter))))
+	{
+		counter++;
+	}
+	if(counter != 0) path += QString::number(counter);
+
+	QFile file(path);
+
+	if(file.open(QFile::WriteOnly | QFile::Text))
+	{
+		QTextStream stream(&file);
+		stream << QString("!#%1\n").arg(name);
+
+		file.close();
+		Log_Info(QString("Playlist %1 (%2) created").arg(name).arg(path));
+	}
+	else
+	{
+		Log_Warning(QString("Error creating playlist %1 (%2), %3").arg(name).arg(path).arg(file.errorString()));
+		return;
+	}
+
+	addPlaylist(path);
+}
+void PlaylistManager::addPlaylist(const QString &filePath)
+{
+	PlaylistModel *playlist = new PlaylistModel(filePath, m_cache, this);
+	m_playlists.push_back(playlist);
+
+	emit eventHandler()->onAddPlaylist();
+}
+void PlaylistManager::renamePlaylist(const size_t &index, const QString &newName)
+{
+	m_playlists[index]->rename(newName);
+	emit eventHandler()->onRenamePlaylist(index, newName);
+	m_playlists[index]->save();
 }
 
 void PlaylistManager::removePlaylist(const size_t &index)
 {
-	QSqlDatabase db = QSqlDatabase::database(connectionName);
-	QSqlQuery q(db);
-	q.exec(QString("DROP TABLE `%1`").arg(m_playlists[index]->name()));
+	auto p = m_playlists[index];
 	m_playlists.erase(m_playlists.begin() + index);
+
+	QFile file(p->filePath());
+	if(file.exists())
+	{
+		file.remove();
+		Log_Info(QString("Playlist %1 (%2) removed").arg(p->name()).arg(p->filePath()));
+	}
+
+	emit eventHandler()->onRemovePlaylist();
+	delete p;
 }
 size_t PlaylistManager::count()
 {

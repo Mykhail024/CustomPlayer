@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QTimer>
 #include <QThread>
 #include <chrono>
@@ -10,6 +9,7 @@
 
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
+#include "Core/Log.h"
 
 #include "PipeWire.h"
 
@@ -23,7 +23,7 @@ namespace Audio {
 		loop = pw_thread_loop_new("Custom-Player-PipeWire", nullptr);
 		if(!loop)
 		{
-			qCritical() << "PipeWireOut: unable to create thread loop";
+			Log_Error("PipeWireOut: unable to create thread loop");
 		}
 
 		struct pw_context *context = pw_context_new(
@@ -32,13 +32,13 @@ namespace Audio {
 				0);
 		if(!context)
 		{
-			qCritical() << "PipeWireOut: unable to create context";
+			Log_Error("PipeWireOut: unable to create context");
 		}
 
 		core = pw_context_connect(context, nullptr, 0);
 		if(!core)
 		{
-			qCritical() << "PipeWireOut: unable to connect context";
+			Log_Error("PipeWireOut: unable to connect context");
 		}
 
 		pw_loop_add_signal(pw_thread_loop_get_loop(loop), SIGINT,
@@ -78,7 +78,7 @@ namespace Audio {
 
 		if(!(b = pw_stream_dequeue_buffer(data->pipewire->stream)))
 		{
-			qDebug() << "Out of buffers";
+			Log_Debug("PipeWireOut: out of buffers");
 			return;
 		}
 
@@ -111,7 +111,7 @@ namespace Audio {
 
 			if(ret < 0)
 			{
-				qWarning() << "file reading error";
+				Log_Warning("file reading error");
 				goto error_after_dequeue;
 			}
 			current += ret;
@@ -124,7 +124,7 @@ namespace Audio {
 					{
 						if (sf_seek(data->file, 0, SEEK_SET) < 0)
 						{
-							qWarning() << "file seek error";
+							Log_Warning("file seek error");
 							goto error_after_dequeue;
 						}
 						emit eventHandler()->FadeIn(false);
@@ -176,7 +176,7 @@ error_after_dequeue:
 		data.file = sf_open(filePath.toStdString().c_str(), SFM_READ, &data.fileinfo);
 		if(!data.file)
 		{
-			qCritical() << "Error open file";
+			Log_Warning("Error open file: " + filePath);
 			pw_thread_loop_unlock(loop);
 			return false;
 		}

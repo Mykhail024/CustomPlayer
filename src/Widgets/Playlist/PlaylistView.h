@@ -27,5 +27,4 @@ class PlaylistView : public QTableView
 	private:
 		PlaylistModel *m_model;
 		SortFilterProxyModel *m_proxyModel;
-		QTimer *blinkAnimationTimer;
 };

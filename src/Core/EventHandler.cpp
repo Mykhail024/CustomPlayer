@@ -1,9 +1,8 @@
-
 #include <stdexcept>
-#include <QDebug>
 
 #include "Audio/AudioServer.h"
 #include "Globals.h"
+#include "Log.h"
 #include "TagReaders/TagReader.h"
 
 #include "EventHandler.h"
@@ -234,11 +233,6 @@ void EventHandler::LineEditFinish()
 void EventHandler::FindActivate()
 {
 	emit onFindActivate();
-}
-
-void EventHandler::AddPlaylists()
-{
-	emit onAddPlaylists();
 }
 void EventHandler::VolumeMute()
 {

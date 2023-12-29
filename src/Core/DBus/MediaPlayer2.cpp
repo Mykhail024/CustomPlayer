@@ -1,7 +1,6 @@
 #include <QDBusConnection>
 #include <QStringLiteral>
 #include <QDBusMessage>
-#include <QDebug>
 
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"

@@ -16,8 +16,6 @@ class EventHandler : public QObject
 		void NextPlaylist();
 		void PrevPlaylist();
 
-		void AddPlaylists();
-
 		void LineEditActivate();
 		void LineEditFinish();
 
@@ -53,7 +51,9 @@ class EventHandler : public QObject
 		void PositionChange(const unsigned long int &pos);
 
 	signals:
-		void onAddPlaylists();
+		void onAddPlaylist();
+		void onRemovePlaylist();
+		void onRenamePlaylist(const int &index, const QString &name);
 		void onFindActivate();
 		void onLineEditActivate();
 		void onLineEditFinish();

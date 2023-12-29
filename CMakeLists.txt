@@ -41,6 +41,7 @@ set(core_files
 	src/Core/Globals.cpp
 	src/Core/PlaylistManager.cpp
 	src/Core/PlaylistModel.cpp
+	src/Core/PlaylistsCache.cpp
 )
 
 find_package(Qt6 COMPONENTS Core Widgets Sql REQUIRED)

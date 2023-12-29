@@ -30,9 +30,9 @@ struct SONG_METADATA
 	QString Artist;
 	QString Album;
 	QString ArtUrl;
-	unsigned long int Length;
-	unsigned long int ModifiedDate;
-	unsigned long int Year;
+	unsigned int Length;
+	unsigned long long ModifiedDate;
+	unsigned int Year;
 	QString Path;
 	uint32_t SampleRate;
 	unsigned int Channels;

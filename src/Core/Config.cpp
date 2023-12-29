@@ -1,7 +1,8 @@
 #include <QFileInfo>
 #include <QtMinMax>
 #include <QSettings>
-#include <QCoreApplication>
+
+#include "Log.h"
 
 #include "Config.h"
 
@@ -41,10 +42,6 @@ namespace Config {
 		if(settings.value("Session/Volume", -1) == -1)
 		{
 			settings.setValue("Session/Volume", 0.5);
-		}
-		if(settings.value("Session/SortBy", -1) == -1)
-		{
-			settings.setValue("Session/SortBy", "Title");
 		}
 		if(settings.value("Session/ShuffleState", -1) == -1)
 		{
@@ -93,7 +90,17 @@ namespace Config {
 
 	QString getPlaylistsPath()
 	{
-		return getConfigPath() + "/Playlists";
+		QDir dir(getConfigPath() + "/Playlists");
+		if(!dir.exists())
+		{
+			Log_Warning("No playlists directory, creating...");
+			if(!dir.mkpath(dir.absolutePath()))
+			{
+				Log_Error("Unable to create playlists directory");
+			}
+			Log_Info("Playlists dir successful created");
+		}
+		return dir.absolutePath();
 	}
 
 	bool getLoopStatus()
@@ -111,7 +118,13 @@ namespace Config {
 		float value = settings.value("Session/Volume", -1).toFloat();
 		if(value == -1)
 		{
-			qWarning() << "Not Volume value in config, changing to default value: 0.5";
+			Log_Warning("Not Volume value in config, changing to default value: 0.5");
+			settings.setValue("Session/Volume", 0.5);
+			value = 0.5;
+		}
+		if(value > 1.0 || value < 0.0)
+		{
+			Log_Warning(QString("Incorrect volume value in config (%1), changing to default value: 0.5").arg(value));
 			settings.setValue("Session/Volume", 0.5);
 			value = 0.5;
 		}
@@ -185,11 +198,6 @@ namespace Config {
 	}
 	void setForward_Backward_Time(const unsigned int &time)
 	{
-		if(time == 0)
-		{
-			qWarning() << "Error: value equal to 0";
-			return;
-		}
 		settings.setValue("Forward_Backward_Time", time);
 	}
 

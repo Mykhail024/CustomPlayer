@@ -3,8 +3,10 @@
 #include <QObject>
 #include <QObjectList>
 #include <QStringList>
+#include <QPointer>
 
-#include "PlaylistModel.h"
+class PlaylistCache;
+class PlaylistModel;
 
 class PlaylistManager : public QObject
 {
@@ -14,6 +16,8 @@ class PlaylistManager : public QObject
 		~PlaylistManager();
 		void removePlaylist(const size_t &index);
 		void createPlaylist(const QString &name);
+		void addPlaylist(const QString &filePath);
+		void renamePlaylist(const size_t &index, const QString &newName);
 		int active() const;
 		void setActive(const int &index);
 		size_t count();
@@ -22,10 +26,9 @@ class PlaylistManager : public QObject
 
 	private:
 		QList<PlaylistModel*> m_playlists;
+		QPointer<PlaylistCache> m_cache;
 
 		int m_active = 0;
-		QString globalPlaylistsFile;
-		const QString connectionName = "Playlists";
 };
 
 void initPlaylistManager();

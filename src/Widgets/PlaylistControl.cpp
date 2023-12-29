@@ -8,6 +8,7 @@
 #include <QInputDialog>
 
 #include "Core/PlaylistManager.h"
+#include "Core/PlaylistModel.h"
 #include "Core/EventHandler.h"
 
 #include "Controls/LineEdit.h"
@@ -92,12 +93,10 @@ void PlaylistControl::onAddFiles()
 	int activeIndex = playlistManager()->active();
 	auto *playlist = playlistManager()->operator[](activeIndex);
 
-	playlist->stopIndexing();
 	for(const QString &file : fileNames)
 	{
 		playlist->insertSong(file);
 	}
-	playlist->startIndexing();
 }
 void PlaylistControl::onAddFolder()
 {
@@ -110,6 +109,5 @@ void PlaylistControl::onNewPlaylist()
 	if(ok && !name.isEmpty())
 	{
 		playlistManager()->createPlaylist(name);
-		eventHandler()->AddPlaylists();
 	}
 }
