@@ -44,7 +44,7 @@ set(core_files
 	src/Core/PlaylistsCache.cpp
 )
 
-find_package(Qt6 COMPONENTS Core Widgets Sql REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Sql Concurrent REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(SndFile)
 
@@ -77,7 +77,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE ${PCH_HEADER})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt6::Sql PkgConfig::taglib SndFile::sndfile)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt6::Sql Qt6::Concurrent PkgConfig::taglib SndFile::sndfile)
 
 if(UNIX AND NOT APPLE)
 	target_link_libraries(${PROJECT_NAME} PRIVATE Qt::DBus PkgConfig::libpipewire)

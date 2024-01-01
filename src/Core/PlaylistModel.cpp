@@ -6,9 +6,12 @@
 #include <QSqlRecord>
 #include <QFont>
 #include <QFile>
-#include <qdatetime.h>
+#include <QDateTime>
+#include <QtConcurrent/QtConcurrent>
+#include <QtConcurrent/QtConcurrentMap>
+#include <QFuture>
 
-#include "EventHandler.h"
+#include "Core/TagReaders/TagReader.h"
 #include "Globals.h"
 #include "PlaylistsCache.h"
 #include "Log.h"
@@ -19,12 +22,18 @@
 #include "moc_PlaylistModel.cpp"
 
 PlaylistModel::PlaylistModel(const QString &filePath, PlaylistCache *cache, QObject *parent)
-	: QAbstractTableModel(parent), m_cache(cache)
+	: QAbstractTableModel(parent), m_cache(cache), m_indexingWatcher(new QFutureWatcher<void>(this))
 {
+	connect(m_indexingWatcher, &QFutureWatcher<void>::finished, this, [&]{
+				beginResetModel(); endResetModel();
+				m_cache->update(m_songs);
+			});
 	load(filePath);
 }
 PlaylistModel::~PlaylistModel()
 {
+	stopIndexing();
+	m_indexingWatcher->waitForFinished();
 }
 int PlaylistModel::rowCount(const QModelIndex &parent) const
 {
@@ -68,7 +77,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 			case 0:
 				if(metadata.Title.isEmpty())
 				{
-					return QFileInfo(metadata.Path).baseName();
+					return QFileInfo(metadata.Path).fileName();
 				}
 				return metadata.Title;
 			case 1:
@@ -84,14 +93,6 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 		}
 	}
 	return QVariant();
-}
-bool PlaylistModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-	return false;
-}
-bool PlaylistModel::insertRows(int position, int rows, const QModelIndex &index)
-{
-	return false;
 }
 bool PlaylistModel::removeRows(int position, int rows, const QModelIndex &index)
 {
@@ -134,41 +135,67 @@ bool PlaylistModel::load(const QString &filePath)
 	while(!stream.atEnd())
 	{
 		QString line = stream.readLine();
+		if(line.isEmpty()) continue;
 		if(!nameFinded && line.contains("!#"))
 		{
 			int index = line.indexOf("!#");
-            if (index != -1 && index + 2 < line.length())
+            if (index != -1 && index + 1 < line.length())
 			{
 				m_name = line.mid(index + 2);
 				nameFinded = true;
 				continue;
             }
 		}
-		if(line.isEmpty()) continue;
 		if(!QFile(line).exists())
 		{
 			Log_Warning(QString("Unable to load file, file %1 does not exist").arg(line));
 			continue;
 		}
-		songs.push_back(m_cache->getCachedSong(line));
+		songs.push_back(m_cache->getSong(line).value_or(SONG_METADATA{.Path = line}));
 	}
+	file.close();
 
-	if(nameFinded)
+	if(!nameFinded)
 	{
-		beginResetModel();
-		m_songs = songs;
-		m_filePath = filePath;
-		endResetModel();
-		Log_Info(QString("Playlist %1 (%2) loaded successfully, %3 songs loaded.").arg(m_name).arg(filePath).arg(m_songs.size()));
-	}
-	else
-	{
+
 		Log_Warning("No playlist name in file: " + filePath);
 		return false;
 	}
 
-	file.close();
+	beginResetModel();
+	m_songs = songs;
+	m_filePath = filePath;
+	endResetModel();
+	Log_Info(QString("Playlist %1 (%2) loaded successfully, %3 songs loaded.").arg(m_name).arg(filePath).arg(m_songs.size()));
+
+	startIndexing();
+
 	return true;
+}
+void PlaylistModel::startIndexing()
+{
+	stopIndexing();
+	auto m = QtConcurrent::run([&](){
+				for(auto &song : m_songs)
+				{
+					if(m_indexingWatcher->isCanceled())
+					{
+						return;
+					}
+					if(song.Title.isEmpty())
+					{
+						song = TagReaders::id3v2_read(song.Path);
+					}
+				}
+			});
+	m_indexingWatcher->setFuture(m);
+}
+void PlaylistModel::stopIndexing()
+{
+	if(m_indexingWatcher->isRunning())
+	{
+		m_indexingWatcher->cancel();
+	}
 }
 bool PlaylistModel::save(const QString &filePath)
 {
@@ -220,9 +247,14 @@ void PlaylistModel::setSongData(const SONG_METADATA &song, const int &index)
 }
 void PlaylistModel::insertSong(const QString &filePath)
 {
+	insertSong(filePath, m_songs.size());
+}
+void PlaylistModel::insertSong(const QString &filePath, const size_t &index)
+{
 	beginResetModel();
-	m_songs.push_back(m_cache->getCachedSong(filePath));
+	m_songs.insert(m_songs.begin() + index, m_cache->getSong(filePath).value_or(SONG_METADATA{.Path = filePath}));
 	endResetModel();
+	startIndexing();
 	QFile file(m_filePath);
 	if(!file.exists())
 	{
@@ -237,10 +269,6 @@ void PlaylistModel::insertSong(const QString &filePath)
 	QTextStream stream(&file);
 	stream << filePath << "\n";
 	file.close();
-}
-void PlaylistModel::insertSong(const QString &filePath, const size_t &index)
-{
-
 }
 SONG_METADATA PlaylistModel::operator[](const size_t &index)
 {

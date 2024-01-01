@@ -2,6 +2,8 @@
 
 #include <QObject>
 
+#include <optional>
+
 #include "Globals.h"
 
 class PlaylistCache : public QObject
@@ -11,14 +13,18 @@ class PlaylistCache : public QObject
 		PlaylistCache(QObject *parent);
 		~PlaylistCache();
 
-		SONG_METADATA getCachedSong(const QString &filePath);
-		std::vector<SONG_METADATA> getCachedSongs() const;
+		std::optional<SONG_METADATA> getSong(const QString &filePath);
+
+		bool createDatabase();
+		QSqlDatabase database();
+		bool open();
+		void close();
 
 	public slots:
-		void update(const QString &path);
-		void update(const QStringList &pathes);
-		void updateAll();
+		bool update(const SONG_METADATA &metadata);
+		bool update(const std::vector<SONG_METADATA> &metadata);
 
 	private:
-		SONG_METADATA updateInternal(QSqlDatabase &db, const QString &path);
+		bool updateInternal(const SONG_METADATA &metadata);
+		std::optional<SONG_METADATA> getSongInternal(const QString &filePath);
 };
