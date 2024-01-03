@@ -85,7 +85,7 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
 			case 2:
 				return metadata.Album;
 			case 3:
-				return secondsToMinutes(metadata.Length / 1000);
+				return QTime::fromMSecsSinceStartOfDay(metadata.Length).toString("mm:ss");
 			case 4:
 				return QDateTime::fromSecsSinceEpoch(metadata.ModifiedDate);
 			case 5:

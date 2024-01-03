@@ -27,8 +27,8 @@ class ControlsPanel : public QWidget
 		void paintEvent(QPaintEvent *pe) override;
 
 	private:
-		int m_length;
-		int no_mute_volume;
+		unsigned int m_length;
+		unsigned int no_mute_volume;
 
 		Controls::TimeSlider *timeSlider;
 		Controls::Slider *volumeSlider;
