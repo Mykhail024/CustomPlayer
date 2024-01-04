@@ -97,8 +97,16 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 				if(globals()->playbackStatus().state != PLAYBACK_STATE::STOPPED)
 				{
 					m_length = globals()->metadata().Length;
-					timeSlider->setMaximum(m_length);
+					timeSlider->setMaximum(m_length / 1e3);
 					timeSlider->setEnabled(true);
+					if(m_length < 3.6e+6)
+					{
+						m_displayFormat = "mm:ss";
+					}
+					else
+					{
+						m_displayFormat = "hh:mm:ss";
+					}
 				}
 			});
 	connect(eventHandler(), &EventHandler::onPlaybackStatusChanged, this, [&]{
@@ -172,8 +180,11 @@ void ControlsPanel::updateVolumeIcon(const int &data)
 
 void ControlsPanel::updateTime(const int &time)
 {
-	timeLabel->setText(QTime::fromMSecsSinceStartOfDay(time).toString("mm:ss") + "/" + QTime::fromMSecsSinceStartOfDay(m_length).toString("mm:ss"));
-	timeSlider->setValueDontMove(time / 1e3);
+	QString currentTime = QTime::fromMSecsSinceStartOfDay(time).toString(m_displayFormat);
+	QString totalLength = QTime::fromMSecsSinceStartOfDay(m_length).toString(m_displayFormat);
+
+	timeLabel->setText(currentTime + "/" + totalLength);
+	timeSlider->setValueDontMove(qRound((float)time / 1e3));
 }
 
 void ControlsPanel::paintEvent(QPaintEvent *pe)

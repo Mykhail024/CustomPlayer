@@ -30,6 +30,8 @@ class ControlsPanel : public QWidget
 		unsigned int m_length;
 		unsigned int no_mute_volume;
 
+		QString m_displayFormat;
+
 		Controls::TimeSlider *timeSlider;
 		Controls::Slider *volumeSlider;
 		QLabel *timeLabel;
