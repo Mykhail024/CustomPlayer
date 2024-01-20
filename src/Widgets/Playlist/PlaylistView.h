@@ -8,23 +8,28 @@
 #include <QPropertyAnimation>
 
 class PlaylistModel;
-class SortFilterProxyModel;
+class PlaylistProxyModel;
 
 class PlaylistView : public QTableView
 {
-	Q_OBJECT
-	public:
-		PlaylistView(PlaylistModel *model, QWidget *parent);
-	public slots:
-		void setupColumns();
-		void find(const QString &text);
-		void onSelect(const QModelIndex &index);
-		void onDelete();
+    Q_OBJECT
+    public:
+        PlaylistView(PlaylistModel *model, QWidget *parent);
 
-	protected:
-		void keyPressEvent(QKeyEvent *event) override;
+    public slots:
+        void setupColumns();
+        inline void select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection = (QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect));
+        void find(const QString &text);
+        void onDoubleClick(const QModelIndex &index);
+        void goNext();
+        void goRand();
 
-	private:
-		PlaylistModel *m_model;
-		SortFilterProxyModel *m_proxyModel;
+        void onDelete();
+
+    protected:
+        void keyPressEvent(QKeyEvent *event) override;
+
+    private:
+        PlaylistModel *m_model;
+        PlaylistProxyModel *m_proxyModel;
 };

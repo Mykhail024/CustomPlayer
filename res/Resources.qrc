@@ -2,34 +2,34 @@
     <qresource prefix="Icons/">
         <file alias="play.svg">Icons/play.svg</file>
         <file alias="track-prev.svg">Icons/track-prev.svg</file>
-		<file alias="track-next.svg">Icons/track-next.svg</file>
-		<file alias="play_hover.svg">Icons/play_hover.svg</file>
-		<file alias="track-prev_hover.svg">Icons/track-prev_hover.svg</file>
-		<file alias="track-next_hover.svg">Icons/track-next_hover.svg</file>
+        <file alias="track-next.svg">Icons/track-next.svg</file>
+        <file alias="play_hover.svg">Icons/play_hover.svg</file>
+        <file alias="track-prev_hover.svg">Icons/track-prev_hover.svg</file>
+        <file alias="track-next_hover.svg">Icons/track-next_hover.svg</file>
         <file alias="pause.svg">Icons/pause.svg</file>
         <file alias="pause_hover.svg">Icons/pause_hover.svg</file>
 
-		<file alias="volume-low.svg">Icons/volume-low.svg</file>
-		<file alias="volume-medium.svg">Icons/volume-medium.svg</file>
-		<file alias="volume-high.svg">Icons/volume-high.svg</file>
-		<file alias="volume-mute.svg">Icons/volume-mute.svg</file>
-		<file alias="volume-low_hover.svg">Icons/volume-low_hover.svg</file>
-		<file alias="volume-medium_hover.svg">Icons/volume-medium_hover.svg</file>
-		<file alias="volume-high_hover.svg">Icons/volume-high_hover.svg</file>
-		<file alias="volume-mute_hover.svg">Icons/volume-mute_hover.svg</file>
-		<file alias="repeat.svg">Icons/repeat.svg</file>
-		<file alias="repeat_hover.svg">Icons/repeat_hover.svg</file>
-		<file alias="repeat-disabled.svg">Icons/repeat-disabled.svg</file>
-		<file alias="repeat-disabled_hover.svg">Icons/repeat-disabled_hover.svg</file>
-		<file alias="shuffle.svg">Icons/shuffle.svg</file>
-		<file alias="shuffle_hover.svg">Icons/shuffle_hover.svg</file>
-		<file alias="shuffle-disabled.svg">Icons/shuffle-disabled.svg</file>
-		<file alias="shuffle-disabled_hover.svg">Icons/shuffle-disabled_hover.svg</file>
-		<file alias="close.svg">Icons/close.svg</file>
-		<file alias="close_hover.svg">Icons/close_hover.svg</file>
-	</qresource>
-	<qresource prefix="/">
-		<file alias="Style.qss">Style.qss</file>
-	</qresource>
+        <file alias="volume-low.svg">Icons/volume-low.svg</file>
+        <file alias="volume-medium.svg">Icons/volume-medium.svg</file>
+        <file alias="volume-high.svg">Icons/volume-high.svg</file>
+        <file alias="volume-mute.svg">Icons/volume-mute.svg</file>
+        <file alias="volume-low_hover.svg">Icons/volume-low_hover.svg</file>
+        <file alias="volume-medium_hover.svg">Icons/volume-medium_hover.svg</file>
+        <file alias="volume-high_hover.svg">Icons/volume-high_hover.svg</file>
+        <file alias="volume-mute_hover.svg">Icons/volume-mute_hover.svg</file>
+        <file alias="repeat.svg">Icons/repeat.svg</file>
+        <file alias="repeat_hover.svg">Icons/repeat_hover.svg</file>
+        <file alias="repeat-disabled.svg">Icons/repeat-disabled.svg</file>
+        <file alias="repeat-disabled_hover.svg">Icons/repeat-disabled_hover.svg</file>
+        <file alias="shuffle.svg">Icons/shuffle.svg</file>
+        <file alias="shuffle_hover.svg">Icons/shuffle_hover.svg</file>
+        <file alias="shuffle-disabled.svg">Icons/shuffle-disabled.svg</file>
+        <file alias="shuffle-disabled_hover.svg">Icons/shuffle-disabled_hover.svg</file>
+        <file alias="close.svg">Icons/close.svg</file>
+        <file alias="close_hover.svg">Icons/close_hover.svg</file>
+    </qresource>
+    <qresource prefix="/">
+        <file alias="Style.qss">Style.qss</file>
+    </qresource>
 </RCC>
 

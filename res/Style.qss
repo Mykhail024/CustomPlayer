@@ -1,196 +1,198 @@
 #MainWindow
 {
-	background-color: #2a2e32;
+    background-color: #2a2e32;
 }
 
 #ControlsPanel, #PlaylistControl{
-	background-color: rgb(201, 120, 26);
+    background-color: rgb(201, 120, 26);
 }
 
 #PrevButton, #PlayButton, #NextButton, #MuteButton, #OpenFolderButton, #RepeatButton, #ShuffleButton, #AddSongButton {
-	border: none;
-	background: transparent;
+    border: none;
+    background: transparent;
 }
 
 #PrevButton {
-	icon: url(:/Icons/track-prev.svg);
+    icon: url(:/Icons/track-prev.svg);
 }
+
 #PrevButton:hover {
-	icon: url(:/Icons/track-prev_hover.svg);
+    icon: url(:/Icons/track-prev_hover.svg);
 }
 
 #PlayButton {
-	icon: url(:/Icons/play.svg);
+    icon: url(:/Icons/play.svg);
 }
+
 #PlayButton:hover {
-	icon: url(:/Icons/play_hover.svg);
+    icon: url(:/Icons/play_hover.svg);
 }
 #PlayButton::checked {
-	icon: url(:/Icons/pause.svg);
+    icon: url(:/Icons/pause.svg);
 }
 #PlayButton::checked:hover {
-	icon: url(:/Icons/pause_hover.svg);
+    icon: url(:/Icons/pause_hover.svg);
 }
 
 #NextButton {
-	icon: url(:/Icons/track-next.svg);
+    icon: url(:/Icons/track-next.svg);
 }
 #NextButton:hover {
-	icon: url(:/Icons/track-next_hover.svg);
+    icon: url(:/Icons/track-next_hover.svg);
 }
 
 #RepeatButton:checked
 {
-	icon: url(:/Icons/repeat.svg);
+    icon: url(:/Icons/repeat.svg);
 }
 #RepeatButton:checked:hover
 {
-	icon: url(:/Icons/repeat_hover.svg);
+    icon: url(:/Icons/repeat_hover.svg);
 }
 
 #RepeatButton
 {
-	icon: url(:/Icons/repeat-disabled.svg);
+    icon: url(:/Icons/repeat-disabled.svg);
 }
 #RepeatButton:hover
 {
-	icon: url(:/Icons/repeat-disabled_hover.svg);
+    icon: url(:/Icons/repeat-disabled_hover.svg);
 }
 
 #ShuffleButton
 {
-	icon: url(:/Icons/shuffle-disabled.svg)
+    icon: url(:/Icons/shuffle-disabled.svg)
 }
 #ShuffleButton:hover
 {
-	icon: url(:/Icons/shuffle-disabled_hover.svg)
+    icon: url(:/Icons/shuffle-disabled_hover.svg)
 }
 #ShuffleButton:checked
 {
-	icon: url(:/Icons/shuffle.svg)
+    icon: url(:/Icons/shuffle.svg)
 }
 #ShuffleButton:checked:hover
 {
-	icon: url(:/Icons/shuffle_hover.svg)
+    icon: url(:/Icons/shuffle_hover.svg)
 }
 
 #TimeLabel {
-	padding: 5px;
-	color: white;
+    padding: 5px;
+    color: white;
 }
 
 QSlider:horizontal
 {
-	height: 18px;
+    height: 18px;
 }
 
 QSlider::sub-page:horizontal
 {
-	background: rgba(151, 70, 0, 1);
+    background: rgba(151, 70, 0, 1);
     height: 8px;
-	border-radius: 4px;
+    border-radius: 4px;
 }
 QSlider::add-page:horizontal
 {
-	background: transparent;
+    background: transparent;
     height: 8px;
-	border-radius: 4px;
+    border-radius: 4px;
 }
 
 QSlider::groove:horizontal
 {
-	background: rgba(151, 70, 0, 0.4);
+    background: rgba(151, 70, 0, 0.4);
     height: 8px;
     border-radius: 4px;
 }
 
 QSlider::handle:horizontal
 {
-	background: rgba(100, 70, 0, 1);
-	height: 16px;
-	width: 16px;
-	border-radius: 8px;
-	margin-bottom: -4px;
-	margin-top: -4px;
+    background: rgba(100, 70, 0, 1);
+    height: 16px;
+    width: 16px;
+    border-radius: 8px;
+    margin-bottom: -4px;
+    margin-top: -4px;
 }
 
 QSlider::handle:disabled:horizontal
 {
-	background: transparent;
+    background: transparent;
 }
 QSlider::sub-page:disabled:horizontal
 {
-	background: transparent;
+    background: transparent;
 }
 
 #VolumeSlider:horizontal
 {
-	height: 18px;
+    height: 18px;
 }
 
 #VolumeSlider::sub-page:horizontal
 {
-	border-radius: 3px;
-	background: rgba(151, 70, 0, 1);
+    border-radius: 3px;
+    background: rgba(151, 70, 0, 1);
     height: 6px;
 }
 #VolumeSlider::add-page:horizontal
 {
-	border-radius: 3px;
-	background: transparent;
+    border-radius: 3px;
+    background: transparent;
     height: 6px;
 }
 
 #VolumeSlider::groove:horizontal
 {
-	border-radius: 3px;
-	background: rgba(151, 70, 0, 0.4);
+    border-radius: 3px;
+    background: rgba(151, 70, 0, 0.4);
     height: 6px;
 }
 
 #VolumeSlider::handle:horizontal
 {
-	background: rgba(100, 70, 0, 1);
-	height: 12px;
-	width: 14px;
-	margin-bottom: -4px;
-	margin-top: -4px;
-	border-radius: 7px;
+    background: rgba(100, 70, 0, 1);
+    height: 12px;
+    width: 14px;
+    margin-bottom: -4px;
+    margin-top: -4px;
+    border-radius: 7px;
 }
 
 #VolumeSlider::handle:disabled:horizontal
 {
-	background: transparent;
+    background: transparent;
 }
 #VolumeSlider::sub-page:disabled:horizontal
 {
-	background: transparent;
+    background: transparent;
 }
 
 #PlaylistControl QLineEdit
 {
-	background: transparent;
-	border: none;
-	border-bottom: 1.3px solid white;
-	font-size: 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1.3px solid white;
+    font-size: 16px;
 }
 
 #AddSongButton {
-	color: white;
-	font-weight: bold;
-	font-size: 35px;
+    color: white;
+    font-weight: bold;
+    font-size: 35px;
 }
 #AddSongButton:hover {
-	color: rgb(220, 220, 220);
+    color: rgb(220, 220, 220);
 }
 
 QTabBar::close-button {
-	image: url(:/Icons/close.svg);
-	subcontrol-position: right;
+    image: url(:/Icons/close.svg);
+    subcontrol-position: right;
 }
 QTabBar::close-button:hover {
-	image: url(:/Icons/close_hover.svg)
+    image: url(:/Icons/close_hover.svg)
 }
 QTabBar::close-button:image {
-	margin-left: 5px;
+    margin-left: 5px;
 }

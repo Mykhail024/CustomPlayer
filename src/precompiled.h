@@ -23,6 +23,9 @@
 #include <QApplication>
 #include <QDebug>
 #include <QStringLiteral>
+#include <QDateTime>
+#include <QTime>
+#include <QFile>
 
 #ifdef __linux__
 #include <QDBusAbstractAdaptor>

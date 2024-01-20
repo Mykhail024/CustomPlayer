@@ -1,41 +1,54 @@
-#ifdef __linux__
-	#include "Audio/PipeWire.h"
-#endif
+#include "Config.h"
+#include "Playlist/History.h"
 
-#include "Log.h"
+#ifdef __linux__
+    #include "Audio/PipeWire.h"
+#endif
 
 #include "Globals.h"
 
-Globals::Globals() : m_saveTimer(new QTimer(this))
+Globals::Globals()
+    : m_saveTimer(new QTimer(this))
+    , m_playbackState(STOPPED)
+    , m_canNext(false)
+    , m_canPrev(false)
+    , m_canPlay(false)
+    , m_isMuted(false)
 {
-	Config::init_config();
+    Config::init_config();
 
-	m_loopState = Config::getLoopStatus();
-	m_volume = Config::getVolume();
-	m_shuffleState = Config::getShuffleState();
-	m_columns = Config::getColumns();
-	m_softwareVolumeControl = Config::getSoftwareVolumeControl();
-	m_fadeInTime_Primary = Config::getFadeIn_Primary();
-	m_fadeInTime_Secondary = Config::getFadeIn_Secondary();
-	m_Forward_Backward_Time = Config::getForward_Backward_Time();
+    m_loopState = Config::getLoopStatus();
+    m_volume = Config::getVolume();
+    m_shuffleState = Config::getShuffleState();
+    m_columns = Config::getColumns();
+    m_softwareVolumeControl = Config::getSoftwareVolumeControl();
+    m_fadeInTime_Primary = Config::getFadeIn_Primary();
+    m_fadeInTime_Secondary = Config::getFadeIn_Secondary();
+    m_Forward_Backward_Time = Config::getForward_Backward_Time();
+    m_historyCapacity = Config::getHistoryCapacity();
 
-	m_saveTimer->setSingleShot(true);
-	connect(m_saveTimer, &QTimer::timeout, this, [=]{
-				Config::setVolume(m_volume);
-			});
+    m_saveTimer->setSingleShot(true);
+    connect(m_saveTimer, &QTimer::timeout, this, [=]{
+                Config::setVolume(m_volume);
+            });
 
-	initAudioServer();
+    initAudioServer();
+    m_history = new History(this);
 }
-void Globals::setColumns(const Config::COLLUMNS &columns)
+
+void Globals::save()
 {
-	m_columns = columns;
-	Config::setColumns(columns);
+    Config::setColumns(m_columns);
+    Config::setVolume(m_volume);
+    Config::setSoftwareVolumeControl(m_softwareVolumeControl);
+    Config::setFadeIn_Primary(m_fadeInTime_Primary);
+    Config::setFadeIn_Secondary(m_fadeInTime_Secondary);
+    Config::setLoopStatus(m_loopState);
+    Config::setShuffleState(m_shuffleState);
+    Config::setForward_Backward_Time(m_Forward_Backward_Time);
+    Config::setHistoryCapacity(m_historyCapacity);
 }
-void Globals::setForward_Backward_Time(const unsigned int &time)
-{
-	m_Forward_Backward_Time = time;
-	Config::setForward_Backward_Time(time);
-}
+
 void Globals::startVolumeSaveTimer()
 {
 	if(m_saveTimer->isActive())
@@ -44,66 +57,137 @@ void Globals::startVolumeSaveTimer()
 	}
 	m_saveTimer->start(1000);
 }
-void Globals::save()
+
+unsigned int Globals::historyCapacity() const
 {
-	Config::setColumns(m_columns);
-	Config::setVolume(m_volume);
-	Config::setSoftwareVolumeControl(m_softwareVolumeControl);
-	Config::setFadeIn_Primary(m_fadeInTime_Primary);
-	Config::setFadeIn_Secondary(m_fadeInTime_Secondary);
-	Config::setLoopStatus(m_loopState);
-	Config::setShuffleState(m_shuffleState);
-	Config::setForward_Backward_Time(m_Forward_Backward_Time);
-}
-void Globals::setSoftwareVolumeControl(const bool &enabled)
-{
-	m_softwareVolumeControl = enabled;
-	Config::setSoftwareVolumeControl(enabled);
+    return m_historyCapacity;
 }
 
-void Globals::setFadeIn_Primary(const int &time)
+SONG_METADATA Globals::currentSong() const
 {
-	m_fadeInTime_Primary = time;
-	Config::setFadeIn_Primary(time);
-}
-void Globals::setFadeIn_Secondary(const int &time)
-{
-	m_fadeInTime_Secondary = time;
-	Config::setFadeIn_Secondary(time);
+    return m_currentSong;
 }
 
-Globals *_globals = nullptr;
+PLAYBACK_STATE Globals::playbackState() const
+{
+    return m_playbackState;
+}
 
-void initGlobals()
+bool Globals::canNext() const
 {
-	_globals = new Globals();
+    return m_canNext;
 }
-void deinitGlobals()
+
+bool Globals::canPrev() const
 {
-	if(_globals)
-	{
-		delete _globals;
-		_globals = nullptr;
-	}
+    return m_canPrev;
 }
-Globals* globals()
+
+bool Globals::canPlay() const
 {
-	return _globals;
+    return m_canPlay;
+}
+
+bool Globals::loopState() const
+{
+    return m_loopState;
+}
+
+bool Globals::shuffleState() const
+{
+    return m_shuffleState;
+}
+
+float Globals::volume() const
+{
+    return m_volume;
+}
+
+COLLUMNS Globals::columns() const
+{
+    return m_columns;
+}
+
+bool Globals::softwareVolumeControl() const
+{
+    return m_softwareVolumeControl;
+}
+
+int Globals::fadeIn_Primary() const
+{
+    return m_fadeInTime_Primary;
+}
+
+int Globals::fadeIn_Secondary() const
+{
+    return m_fadeInTime_Secondary;
+}
+
+std::pair<int, int> Globals::fadeIn() const
+{
+    return std::pair<int, int> {m_fadeInTime_Primary, m_fadeInTime_Secondary};
+}
+
+unsigned int Globals::forwardTime() const
+{
+    return m_Forward_Backward_Time;
+}
+
+bool Globals::isMuted() const
+{
+    return m_isMuted;
+}
+
+unsigned long int Globals::songPosition() const
+{
+    return m_songPosition;
+}
+
+unsigned int Globals::lineEditFocused() const
+{
+    return m_lineEditFocused;
+}
+
+History* Globals::history()
+{
+    return m_history;
+}
+Audio::AudioServer* Globals::audioServer()
+{
+    return m_audioServer;
 }
 
 void Globals::initAudioServer()
 {
 #ifdef __linux__
-	m_audioServer = new Audio::PipeWire();
+    m_audioServer = new Audio::PipeWire();
 #endif
 }
 
-
 void Globals::deinitAudioServer()
 {
-	if(m_audioServer)
-	{
-		delete m_audioServer;
-		m_audioServer = nullptr;
-	}
+    if(m_audioServer) {
+        delete m_audioServer;
+        m_audioServer = nullptr;
+    }
+}
+
+
+Globals *_globals = nullptr;
+void initGlobals()
+{
+    _globals = new Globals();
+}
+
+void deinitGlobals()
+{
+    if(_globals) {
+        delete _globals;
+        _globals = nullptr;
+    }
+}
+
+Globals* globals()
+{
+    return _globals;
 }

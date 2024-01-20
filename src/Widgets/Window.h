@@ -17,22 +17,16 @@ class GlobalEventFilter;
 
 class Window : public QWidget
 {
-	Q_OBJECT
     public:
         Window();
         ~Window();
 
-	public slots:
+    protected:
+        void paintEvent(QPaintEvent *pa) override;
 
-	private slots:
-
-	protected:
-		void paintEvent(QPaintEvent *pa) override;
-
-	private:
-		ControlsPanel *m_controlsPanel;
-		PlaylistControl *m_playlistControl;
-		SongsWidget *m_songsWidget;
-
+    private:
+        ControlsPanel *m_controlsPanel;
+        PlaylistControl *m_playlistControl;
+        SongsWidget *m_songsWidget;
 };
 

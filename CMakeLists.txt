@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 set(PROJECT_NAME Player)
 
-set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,30 +17,36 @@ set(PCH_HEADER src/precompiled.h)
 set(widgets_files
     res/Resources.qrc
     src/Widgets/ControlsPanel.cpp
-	src/Widgets/Window.cpp
-	src/Widgets/SongsWidget.cpp
-	src/Widgets/Playlist/PlaylistView.cpp
-	src/Widgets/PlaylistControl.cpp
-	src/Widgets/GlobalEventFilter.h
-	src/Widgets/InfoWidget.cpp
+    src/Widgets/Window.cpp
+    src/Widgets/GlobalEventFilter.h
+    src/Widgets/InfoWidget.cpp
     src/Widgets/ImageWidget.cpp
 
-	src/Widgets/Controls/TimeSlider.cpp
-	src/Widgets/Controls/LineEdit.h
-	src/Widgets/Controls/Slider.h
+    src/Widgets/Playlist/PlaylistView.cpp
+    src/Widgets/Playlist/PlaylistControl.cpp
+    src/Widgets/Playlist/SongsWidget.cpp
+
+    src/Widgets/Controls/TimeSlider.cpp
+    src/Widgets/Controls/LineEdit.h
+    src/Widgets/Controls/Slider.h
 )
 
 set(core_files
-	src/Core/Tools.cpp
-	src/Core/SortFilterProxyModel.cpp
-	src/Core/TagReaders/ID3v2Reader.cpp
-	src/Core/Audio/AudioServer.h
-	src/Core/Config.cpp
-	src/Core/EventHandler.cpp
-	src/Core/Globals.cpp
-	src/Core/PlaylistManager.cpp
-	src/Core/PlaylistModel.cpp
-	src/Core/PlaylistsCache.cpp
+    src/Core/Tools.cpp
+    src/Core/Config.cpp
+    src/Core/EventHandler.cpp
+    src/Core/Cache.cpp
+
+    src/Core/Globals.cpp
+
+    src/Core/Audio/AudioServer.h
+
+    src/Core/TagReaders/ID3v2Reader.cpp
+
+    src/Core/Playlist/PlaylistManager.cpp
+    src/Core/Playlist/PlaylistModel.cpp
+    src/Core/Playlist/PlaylistProxyModel.cpp
+    src/Core/Playlist/History.cpp
 )
 
 find_package(Qt6 COMPONENTS Core Widgets Sql Concurrent REQUIRED)
@@ -51,24 +56,24 @@ find_package(SndFile)
 pkg_check_modules(taglib REQUIRED IMPORTED_TARGET taglib)
 
 if(UNIX AND NOT APPLE)
-	find_package(Qt6 COMPONENTS DBus REQUIRED)
-	pkg_check_modules(libpipewire REQUIRED IMPORTED_TARGET libpipewire-0.3)
+    find_package(Qt6 COMPONENTS DBus REQUIRED)
+    pkg_check_modules(libpipewire REQUIRED IMPORTED_TARGET libpipewire-0.3)
 
-	list(APPEND core_files
-		src/Core/Audio/PipeWire.cpp
-		src/Core/DBus/MediaPlayer2.cpp
-	)
+    list(APPEND core_files
+        src/Core/Audio/PipeWire.cpp
+        src/Core/DBus/MediaPlayer2.cpp
+    )
 
-	qt6_add_dbus_adaptor(core_files
-		src/Core/DBus/org.mpris.MediaPlayer2.xml
-		Core/DBus/MediaPlayer2.h
-		MediaPlayer2
-		mprisroot MPrisRoot)
-	qt6_add_dbus_adaptor(core_files
-		src/Core/DBus/org.mpris.MediaPlayer2.Player.xml
-		Core/DBus/MediaPlayer2.h
-		MediaPlayer2
-		mprisplayer MPrisPlayer)
+    qt6_add_dbus_adaptor(core_files
+        src/Core/DBus/org.mpris.MediaPlayer2.xml
+        Core/DBus/MediaPlayer2.h
+        MediaPlayer2
+        mprisroot MPrisRoot)
+    qt6_add_dbus_adaptor(core_files
+        src/Core/DBus/org.mpris.MediaPlayer2.Player.xml
+        Core/DBus/MediaPlayer2.h
+        MediaPlayer2
+        mprisplayer MPrisPlayer)
 endif()
 
 add_executable(${PROJECT_NAME} src/main.cpp ${core_files} ${widgets_files} ${PCH_SOURCE})
@@ -80,7 +85,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sr
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core Qt::Widgets Qt6::Sql Qt6::Concurrent PkgConfig::taglib SndFile::sndfile)
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries(${PROJECT_NAME} PRIVATE Qt::DBus PkgConfig::libpipewire)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt::DBus PkgConfig::libpipewire)
 endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "customplayer")
