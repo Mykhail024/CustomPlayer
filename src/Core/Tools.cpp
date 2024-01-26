@@ -21,7 +21,7 @@ bool sendPlayDBusSignal(const QString &filePath)
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
     QDBusInterface mediaPlayer2("org.mpris.MediaPlayer2.CustomPlayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", bus);
-    if (!mediaPlayer2.isValid()) {
+    if (mediaPlayer2.isValid()) {
         mediaPlayer2.call("OpenFile", filePath);
         return true;
     }
