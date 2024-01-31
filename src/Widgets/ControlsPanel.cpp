@@ -119,11 +119,12 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
             });
     connect(m_volumeSlider, &Controls::Slider::valueChanged, this, [&](int value){
                 eventHandler()->VolumeChange((float)value / 100.0f);
-                updateVolumeIcon(value);
             });
     connect(m_muteBtn, &QPushButton::clicked, eventHandler(), &EventHandler::VolumeMuteUnmute);
     connect(eventHandler(), &EventHandler::onVolumeChange, this, [&](const float &volume){
-                m_volumeSlider->setValue(volume * 100);
+                const int nVal = qRound(volume * 100.0f);
+                m_volumeSlider->setValue(nVal);
+                updateVolumeIcon(nVal);
             });
     connect(m_repeatBtn, &QPushButton::clicked, eventHandler(), &EventHandler::LoopStateChange);
     connect(eventHandler(), &EventHandler::onLoopStateChange, m_repeatBtn, &QPushButton::setChecked);
