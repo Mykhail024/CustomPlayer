@@ -31,4 +31,9 @@ jobs:
 
     - name: Compile
       run: ninja -C ${{github.workspace}}/build
-
+      
+    - name: Archive the artifacts
+      uses: actions/upload-artifact@v3
+      with:
+          name: customplayer
+          path: ${{github.workspace}}/build
