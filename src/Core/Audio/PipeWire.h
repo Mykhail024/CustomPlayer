@@ -40,12 +40,9 @@ namespace Audio {
                 .version = PW_VERSION_STREAM_EVENTS,
                 .process = on_process,
             };
-            struct data {
-                PipeWire *pipewire;
 
-                SNDFILE *file;
-                SF_INFO fileinfo;
-            };
+            SF_INFO m_fileinfo;
+            SNDFILE *m_file;
 
             float m_volume = 1.0f;
             unsigned long int m_time_goto = -1;
@@ -59,11 +56,10 @@ namespace Audio {
 
             struct spa_hook m_event_listener;
 
-            struct data m_data = {this};
-
             const static pw_stream_flags m_stream_flags = static_cast<pw_stream_flags>(
                     PW_STREAM_FLAG_AUTOCONNECT |
                     PW_STREAM_FLAG_MAP_BUFFERS |
+                    PW_DIRECTION_OUTPUT |
                     PW_STREAM_FLAG_RT_PROCESS);
 
             QThread *m_fadeThread = nullptr;

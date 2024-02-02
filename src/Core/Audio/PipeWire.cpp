@@ -1,15 +1,20 @@
+#include <format>
+
 #include <QTimer>
 #include <QThread>
-#include <chrono>
-#include <math.h>
+#include <QtMath>
+
+#include <pipewire/loop.h>
+#include <pipewire/properties.h>
 #include <pipewire/stream.h>
 #include <pipewire/thread-loop.h>
-#include <qlogging.h>
-#include <thread>
 
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
 #include "Core/Log.h"
+#include "Core/Tools.h"
+
+#define format_cstr(str, ...) std::format(str, ##__VA_ARGS__).c_str()
 
 #include "PipeWire.h"
 
@@ -18,6 +23,8 @@
 namespace Audio {
     PipeWire::PipeWire()
     {
+        memset(&m_fileinfo, 0, sizeof(m_fileinfo));
+
         pw_init(nullptr, nullptr);
 
         m_loop = pw_thread_loop_new("Custom-Player-PipeWire", nullptr);
@@ -38,8 +45,8 @@ namespace Audio {
             Log_Error("PipeWireOut: unable to connect context");
         }
 
-        pw_loop_add_signal(pw_thread_loop_get_loop(m_loop), SIGINT, do_quit, &m_data);
-        pw_loop_add_signal(pw_thread_loop_get_loop(m_loop), SIGTERM, do_quit, &m_data);
+        pw_loop_add_signal(pw_thread_loop_get_loop(m_loop), SIGINT, do_quit, this);
+        pw_loop_add_signal(pw_thread_loop_get_loop(m_loop), SIGTERM, do_quit, this);
 
         pw_thread_loop_start(m_loop);
     }
@@ -47,7 +54,7 @@ namespace Audio {
     PipeWire::~PipeWire()
     {
         stopFadeIn();
-        do_quit(&m_data, 0);
+        do_quit(this, 0);
         pw_thread_loop_lock(m_loop);
         clear();
         pw_thread_loop_unlock(m_loop);
@@ -69,11 +76,11 @@ namespace Audio {
 
     void PipeWire::on_process(void *userdata)
     {
-        struct data *data = static_cast<struct data*>(userdata);
+        PipeWire* data = static_cast<PipeWire*>(userdata);
 
         struct pw_buffer *b;
 
-        if(!(b = pw_stream_dequeue_buffer(data->pipewire->m_stream))) {
+        if(!(b = pw_stream_dequeue_buffer(data->m_stream))) {
             Log_Debug("PipeWireOut: out of buffers");
             return;
         }
@@ -83,7 +90,7 @@ namespace Audio {
             return;
         }
 
-        uint32_t stride = sizeof(float) * data->fileinfo.channels;
+        uint32_t stride = sizeof(float) * data->m_fileinfo.channels;
 
         uint32_t n_frames = b->buffer->datas[0].maxsize / stride;
         if(b->requested) {
@@ -92,13 +99,13 @@ namespace Audio {
 
         sf_count_t current = 0;
         while(current < n_frames) {
-            if(data->pipewire->m_time_goto != -1) {
-                sf_seek(data->file, data->pipewire->m_time_goto, SEEK_SET);
-                data->pipewire->m_time_goto = -1;
+            if(data->m_time_goto != -1) {
+                sf_seek(data->m_file, data->m_time_goto, SEEK_SET);
+                data->m_time_goto = -1;
             }
 
-            sf_count_t ret = sf_readf_float(data->file,
-                    &buf[current * data->fileinfo.channels],
+            sf_count_t ret = sf_readf_float(data->m_file,
+                    &buf[current * data->m_fileinfo.channels],
                     n_frames - current);
 
             if(ret < 0) {
@@ -108,54 +115,54 @@ namespace Audio {
             current += ret;
 
             if(current != n_frames) {
-                if (sf_seek(data->file, 0, SEEK_CUR) == data->fileinfo.frames) {
+                if (sf_seek(data->m_file, 0, SEEK_CUR) == data->m_fileinfo.frames) {
                     if(globals()->loopState()) {
-                        if (sf_seek(data->file, 0, SEEK_SET) < 0) {
+                        if (sf_seek(data->m_file, 0, SEEK_SET) < 0) {
                             Log_Warning("file seek error");
                             goto error;
                         }
                         emit eventHandler()->FadeIn(false);
                     } else {
-                        if(!data->pipewire->m_end_request) {
+                        if(!data->m_end_request) {
                             emit eventHandler()->EndSong();
-                            data->pipewire->m_end_request = true;
+                            data->m_end_request = true;
                         }
                         b->buffer->datas[0].chunk->offset = 0;
                         b->buffer->datas[0].chunk->stride = 0;
                         b->buffer->datas[0].chunk->size = 0;
-                        pw_stream_queue_buffer(data->pipewire->m_stream, b);
-                        data->pipewire->stop();
+                        pw_stream_queue_buffer(data->m_stream, b);
+                        data->stop();
                         return;
                     }
                 }
             }
         }
-        if(data->pipewire->m_time_goto == -1) {
-            eventHandler()->PositionChange(sf_seek(data->file, 0, SEEK_CUR) * 1000 / data->fileinfo.samplerate);
+        if(data->m_time_goto == -1) {
+            eventHandler()->PositionChange(sf_seek(data->m_file, 0, SEEK_CUR) * 1000 / data->m_fileinfo.samplerate);
         }
 
-        for (uint32_t i = 0; i < n_frames * data->fileinfo.channels; i++) {
-            buf[i] *= data->pipewire->m_volume;
+        for (uint32_t i = 0; i < n_frames * data->m_fileinfo.channels; i++) {
+            buf[i] *= data->m_volume;
         }
 
         b->buffer->datas[0].chunk->offset = 0;
         b->buffer->datas[0].chunk->stride = stride;
         b->buffer->datas[0].chunk->size = n_frames * stride;
-        pw_stream_queue_buffer(data->pipewire->m_stream, b);
+        pw_stream_queue_buffer(data->m_stream, b);
         return;
 
 error:
-        pw_thread_loop_stop(data->pipewire->m_loop);
+        pw_thread_loop_stop(data->m_loop);
         b->buffer->datas[0].chunk->offset = 0;
         b->buffer->datas[0].chunk->stride = 0;
         b->buffer->datas[0].chunk->size = 0;
-        pw_stream_queue_buffer(data->pipewire->m_stream, b);
+        pw_stream_queue_buffer(data->m_stream, b);
     }
 
     void PipeWire::do_quit(void *userdata, int signal_number)
     {
-        struct data *data = static_cast<struct data*>(userdata);
-        pw_thread_loop_stop(data->pipewire->m_loop);
+        PipeWire* data = static_cast<PipeWire*>(userdata);
+        pw_thread_loop_stop(data->m_loop);
     }
 
     void PipeWire::clear()
@@ -166,38 +173,60 @@ error:
                 pw_stream_destroy(m_stream);
                 m_stream = nullptr;
             }
-            if(m_data.file) {
-                sf_close(m_data.file);
-                m_data.file = nullptr;
+            if(m_file) {
+                sf_close(m_file);
+                m_file = nullptr;
             }
             spa_hook_remove(&m_event_listener);
             m_started = false;
         }
     }
+
+    const unsigned int getQuant(const int &rate)
+    {
+        return qMax(64, qMin(qCeil(2048 * rate / 48000.0f), 8192));
+    }
+
+    struct pw_properties* create_props(const sf_count_t &frames, const int &samplerate)
+    {
+        struct pw_properties *props =
+            pw_properties_new(
+                    PW_KEY_MEDIA_TYPE, "Audio",
+                    PW_KEY_MEDIA_CATEGORY, "Playback",
+                    PW_KEY_MEDIA_ROLE, "Music",
+                    PW_KEY_APP_ID, "customplayer",
+                    PW_KEY_APP_ICON_NAME, "customplayer",
+                    PW_KEY_APP_NAME, "Custom Player",
+                    PW_KEY_NODE_RATE, format_cstr("1/{}", samplerate),
+                    PW_KEY_NODE_LATENCY, format_cstr("{}/{}", getQuant(samplerate), samplerate),
+                    nullptr);
+        return props;
+    }
+
     bool PipeWire::play(const QString &filePath)
     {
         pw_thread_loop_lock(m_loop);
 
         SF_INFO info;
-        SNDFILE *file = sf_open(filePath.toStdString().c_str(), SFM_READ, &info);
+        SNDFILE *file;
+
+        memset(&info, 0, sizeof(info));
+        file = sf_open(filePath.toStdString().c_str(), SFM_READ, &info);
         if(!file) {
             Log_Warning("Error open file: " + filePath);
             pw_thread_loop_unlock(m_loop);
             return false;
         }
+
         if(!m_started) {
-            m_stream = pw_stream_new(
-                    m_core,
-                    "CustomPlayerStream",
-                    pw_properties_new(
-                        PW_KEY_MEDIA_TYPE, "Audio",
-                        PW_KEY_MEDIA_CATEGORY, "Playback",
-                        PW_KEY_MEDIA_ROLE, "Music",
-                        PW_KEY_APP_ID, "customplayer",
-                        PW_KEY_APP_ICON_NAME, "customplayer",
-                        PW_KEY_APP_NAME, "Custom Player",
-                        nullptr));
-            pw_stream_add_listener(m_stream, &m_event_listener, &stream_events, &m_data);
+            m_stream = pw_stream_new(m_core, "CustomPlayerStream", create_props(info.frames, info.samplerate));
+            if(!m_stream) {
+                Log_Warning("Failed create pipewire stream");
+                pw_thread_loop_unlock(m_loop);
+                return false;
+            }
+
+            pw_stream_add_listener(m_stream, &m_event_listener, &stream_events, this);
             eventHandler()->VolumeChange(globals()->volume());
         }
 
@@ -206,7 +235,7 @@ error:
 
         struct spa_audio_info_raw spa_audio_info =
             SPA_AUDIO_INFO_RAW_INIT(
-                    .format = SPA_AUDIO_FORMAT_F32,
+                    .format = SPA_AUDIO_FORMAT_F32_LE,
                     .rate = (uint32_t)info.samplerate,
                     .channels = (uint32_t)info.channels
                     );
@@ -215,19 +244,29 @@ error:
 
         if(!m_started)
         {
-            m_data.file = file;
-            m_data.fileinfo = info;
+            m_file = file;
+            memmove(&m_fileinfo, &info, sizeof(info));
             if(pw_stream_connect(m_stream, PW_DIRECTION_OUTPUT, PW_ID_ANY, m_stream_flags, params, 1) != 0) {
                 Log_Warning("Error connect stream");
             }
         } else {
             pw_stream_set_active(m_stream, false);
             pw_stream_flush(m_stream, false);
+
+            struct spa_dict_item items[] = {
+                SPA_DICT_ITEM_INIT(PW_KEY_NODE_RATE, format_cstr("1/{}", info.samplerate)),
+                SPA_DICT_ITEM_INIT(PW_KEY_NODE_LATENCY, format_cstr("{}/{}", getQuant(info.samplerate), info.samplerate))
+            };
+            const spa_dict dict = SPA_DICT_INIT(items, 2);
+
+            pw_stream_update_properties(m_stream, &dict);
             pw_stream_update_params(m_stream, params, 1);
 
-            sf_close(m_data.file);
-            m_data.file = file;
-            m_data.fileinfo = info;
+            sf_close(m_file);
+
+            m_file = file;
+            memset(&m_fileinfo, 0, sizeof(m_fileinfo));
+            memmove(&m_fileinfo, &info, sizeof(info));
 
             pw_stream_set_active(m_stream, true);
         }
@@ -283,16 +322,16 @@ error:
         }
 
         pw_thread_loop_lock(m_loop);
-        float volumes[m_data.fileinfo.channels];
-        if(m_data.fileinfo.channels == 2) {
+        float volumes[m_fileinfo.channels];
+        if(m_fileinfo.channels == 2) {
             volumes[0] = volume;
             volumes[1] = volume;
         } else {
-            for(int i = 0; i < m_data.fileinfo.channels; i++) {
+            for(int i = 0; i < m_fileinfo.channels; i++) {
                 volumes[i] = volume;
             }
         }
-        pw_stream_set_control(m_stream, SPA_PROP_channelVolumes, m_data.fileinfo.channels, volumes, nullptr);
+        pw_stream_set_control(m_stream, SPA_PROP_channelVolumes, m_fileinfo.channels, volumes, nullptr);
         pw_thread_loop_unlock(m_loop);
     }
 
@@ -303,7 +342,7 @@ error:
 
     void PipeWire::goTo(const unsigned int &time)
     {
-        m_time_goto = (time / 1000 * m_data.fileinfo.samplerate);
+        m_time_goto = (time / 1000 * m_fileinfo.samplerate);
     }
 
     void PipeWire::fadeIn(unsigned int milliseconds)
