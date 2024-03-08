@@ -349,12 +349,12 @@ error:
     {
         m_fadeThread = new QThread;
 
-        QObject::connect(m_fadeThread, &QThread::finished, [=]() {
+        QObject::connect(m_fadeThread, &QThread::finished, [&]() {
                 m_fadeThread->deleteLater();
                 m_fadeThread = nullptr;
                 });
 
-        QObject::connect(m_fadeThread, &QThread::started, [=]() {
+        QObject::connect(m_fadeThread, &QThread::started, [&]() {
                     float currentVolume = 0.0f;
                     float targetVolume = m_volume;
                     float step = targetVolume / milliseconds;

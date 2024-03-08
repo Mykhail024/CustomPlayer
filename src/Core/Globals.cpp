@@ -28,7 +28,7 @@ Globals::Globals()
     m_historyCapacity = Config::getHistoryCapacity();
 
     m_saveTimer->setSingleShot(true);
-    connect(m_saveTimer, &QTimer::timeout, this, [=]{
+    connect(m_saveTimer, &QTimer::timeout, this, [&]{
                 Config::setVolume(m_volume);
             });
 
