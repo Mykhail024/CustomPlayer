@@ -4,7 +4,6 @@
 #include <QWidget>
 
 #include "Controls/TimeSlider.h"
-#include "Controls/Slider.h"
 
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
@@ -41,7 +40,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
     m_muteBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
     m_muteBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
 
-    m_volumeSlider = new Controls::Slider(Qt::Horizontal);
+    m_volumeSlider = new QSlider(Qt::Horizontal);
     m_volumeSlider->setObjectName("VolumeSlider");
     m_volumeSlider->setMinimum(0);
     m_volumeSlider->setMaximum(100);
@@ -117,7 +116,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
     connect(m_timeSlider, &Controls::TimeSlider::sliderReleased, [&]{
                 eventHandler()->Seek(m_timeSlider->value() * 1e3);
             });
-    connect(m_volumeSlider, &Controls::Slider::valueChanged, this, [&](int value){
+    connect(m_volumeSlider, &QSlider::valueChanged, this, [&](int value){
                 eventHandler()->VolumeChange((float)value / 100.0f);
             });
     connect(m_muteBtn, &QPushButton::clicked, eventHandler(), &EventHandler::VolumeMuteUnmute);

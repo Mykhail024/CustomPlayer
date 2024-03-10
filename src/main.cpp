@@ -7,7 +7,6 @@
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
 
-#include "Widgets/GlobalEventFilter.h"
 #include "Widgets/Window.h"
 
 #ifdef __linux__
@@ -25,8 +24,6 @@ int main(int argc, char** argv)
     }
 #endif
     QApplication app(argc, argv);
-    GlobalEventFilter filter;
-    app.installEventFilter(&filter);
     app.setStyleSheet(readTextFile(":/Style.qss"));
     QCoreApplication::setOrganizationName(QStringLiteral("Mykhail024"));
     QCoreApplication::setApplicationName(QStringLiteral("CustomPlayer"));
