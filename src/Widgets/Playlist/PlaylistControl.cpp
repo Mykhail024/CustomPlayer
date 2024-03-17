@@ -83,7 +83,10 @@ void PlaylistControl::onAddBtnClick()
 
 void PlaylistControl::onAddFiles()
 {
-    if(playlistManager()->count() == 0) return;
+    if(playlistManager()->count() == 0) {
+        if(!onNewPlaylist()) return;
+    }
+
     QStringList fileNames = QFileDialog::getOpenFileNames(
         this,
         tr("Select Music Files"),
@@ -105,11 +108,12 @@ void PlaylistControl::onAddFolder()
 
 }
 
-void PlaylistControl::onNewPlaylist()
+bool PlaylistControl::onNewPlaylist()
 {
     bool ok;
     QString name = QInputDialog::getText(this, tr("New Playlist"), tr("Playlist Name:"), QLineEdit::Normal, "", &ok);
     if(ok && !name.isEmpty()) {
         playlistManager()->createPlaylist(name);
     }
+    return ok;
 }

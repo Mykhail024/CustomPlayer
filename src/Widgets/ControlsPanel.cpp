@@ -8,8 +8,6 @@
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
 
-#include "Core/Playlist/PlaylistModel.h"
-
 #include "ControlsPanel.h"
 
 #include "moc_ControlsPanel.cpp"

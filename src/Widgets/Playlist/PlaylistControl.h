@@ -20,7 +20,7 @@ class PlaylistControl : public QWidget
         void onAddBtnClick();
         void onAddFiles();
         void onAddFolder();
-        void onNewPlaylist();
+        bool onNewPlaylist();
 
     protected:
         void paintEvent(QPaintEvent *pe) override;
