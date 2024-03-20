@@ -18,7 +18,7 @@ class PlaylistView : public QTableView
 
     public slots:
         void setupColumns();
-        inline void select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection = (QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect));
+        inline void _select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection = (QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect));
         void find(const QString &text);
         void onDoubleClick(const QModelIndex &index);
         void goNext();

@@ -71,7 +71,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
                 if(proxy_index.isValid())
                 {
                     Log_Debug(QString("Selected row: proxy - %1, source - %2").arg(proxy_index.row()).arg(index.row()));
-                    this->select(proxy_index, flags);
+                    this->_select(proxy_index, flags);
                 }
             });
     connect(m_model, &PlaylistModel::onSelectNext, this, &PlaylistView::goNext);
@@ -126,11 +126,17 @@ void PlaylistView::keyPressEvent(QKeyEvent *event)
     QTableView::keyPressEvent(event);
 }
 
-inline void PlaylistView::select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection)
+inline void PlaylistView::_select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection)
 {
-    if(index.isValid())
+    int column = m_proxyModel->columnCount()-1;
+    while(column >= 0 && this->isColumnHidden(column)) {
+        --column;
+    }
+
+    QModelIndex _index = m_proxyModel->index(index.row(), column);
+    if(_index.isValid())
     {
-        this->selectionModel()->setCurrentIndex(index, selection);
+        this->selectionModel()->setCurrentIndex(_index, selection);
     }
 }
 
