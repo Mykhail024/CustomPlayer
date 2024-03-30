@@ -28,20 +28,18 @@ int main(int argc, char** argv)
     QCoreApplication::setOrganizationName(QStringLiteral("Mykhail024"));
     QCoreApplication::setApplicationName(QStringLiteral("CustomPlayer"));
 
-#ifdef __linux__
-    initDBusService();
-#endif
     Window window;
     window.show();
 
     if(argc > 1) {
         eventHandler().PlayFile(argv[1]);
     }
-    int exit_code = app.exec();
 
 #ifdef __linux__
-    deinitDBusService();
+    dbusService();
 #endif
+
+    int exit_code = app.exec();
 
     return exit_code;
 }

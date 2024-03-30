@@ -250,21 +250,8 @@ QVariantMap MediaPlayer2::metadata() const
     return metadataMap;
 }
 
-MediaPlayer2 *dbus_service;
-
-void initDBusService()
+MediaPlayer2& dbusService()
 {
-    dbus_service = new MediaPlayer2();
-}
-
-void deinitDBusService()
-{
-    if(dbus_service) {
-        delete dbus_service;
-    }
-}
-
-MediaPlayer2* dbusService()
-{
-    return dbus_service;
+    static MediaPlayer2 INSTANCE;
+    return INSTANCE;
 }

@@ -38,10 +38,6 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
     Q_PROPERTY(QVariantMap Metadata READ metadata)
     Q_PROPERTY(bool CanSeek READ canSeek)
 
-    public:
-        MediaPlayer2();
-        ~MediaPlayer2();
-
     public slots:
         void sendPropertiesChanged(const QString &propertyName, const QVariant &propertyValue);
 
@@ -101,10 +97,11 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
         void onCanGoPreviousChanged(const bool &canPrev);
 
     private:
+        friend MediaPlayer2& dbusService();
+        MediaPlayer2();
+        ~MediaPlayer2();
         MPrisRoot *mpris_root;
         MPrisPlayer *mpris_player;
 };
 
-void initDBusService();
-void deinitDBusService();
-MediaPlayer2* dbusService();
+MediaPlayer2& dbusService();
