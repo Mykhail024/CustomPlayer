@@ -83,7 +83,7 @@ void PlaylistControl::onAddBtnClick()
 
 void PlaylistControl::onAddFiles()
 {
-    if(playlistManager()->count() == 0) {
+    if(playlistManager().count() == 0) {
         if(!onNewPlaylist()) return;
     }
 
@@ -95,8 +95,8 @@ void PlaylistControl::onAddFiles()
     );
     if(fileNames.empty()) return;
 
-    int activeIndex = playlistManager()->active();
-    auto *playlist = playlistManager()->operator[](activeIndex);
+    int activeIndex = playlistManager().active();
+    auto *playlist = playlistManager().operator[](activeIndex);
 
     for(const QString &file : fileNames) {
         playlist->insertSong(file);
@@ -113,7 +113,7 @@ bool PlaylistControl::onNewPlaylist()
     bool ok;
     QString name = QInputDialog::getText(this, tr("New Playlist"), tr("Playlist Name:"), QLineEdit::Normal, "", &ok);
     if(ok && !name.isEmpty()) {
-        playlistManager()->createPlaylist(name);
+        playlistManager().createPlaylist(name);
     }
     return ok;
 }

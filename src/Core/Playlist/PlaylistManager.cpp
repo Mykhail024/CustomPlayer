@@ -15,7 +15,7 @@
 
 #include "moc_PlaylistManager.cpp"
 
-PlaylistManager::PlaylistManager() : QObject()
+PlaylistManager::PlaylistManager() : QObject(&eventHandler())
 {
     m_cache = new Cache(this);
     QDir pDir(Config::getPlaylistsPath());
@@ -109,24 +109,9 @@ PlaylistModel* PlaylistManager::operator[](const size_t &index)
     return m_playlists[index];
 }
 
-
-PlaylistManager *_playlistManager = nullptr;
-void initPlaylistManager()
+PlaylistManager& playlistManager()
 {
-    _playlistManager = new PlaylistManager();
-}
-
-void deinitPlaylistManager()
-{
-    if(_playlistManager)
-    {
-        delete _playlistManager;
-        _playlistManager = nullptr;
-    }
-}
-
-PlaylistManager *playlistManager()
-{
-    return _playlistManager;
+    static PlaylistManager INSTANCE;
+    return INSTANCE;
 }
 

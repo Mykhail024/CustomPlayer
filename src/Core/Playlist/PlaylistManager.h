@@ -12,8 +12,6 @@ class PlaylistManager : public QObject
 {
     Q_OBJECT
     public:
-        PlaylistManager();
-        ~PlaylistManager();
         void removePlaylist(const size_t &index);
         void createPlaylist(const QString &name);
         void addPlaylist(const QString &filePath);
@@ -26,12 +24,14 @@ class PlaylistManager : public QObject
         PlaylistModel *operator[](const size_t &index);
 
     private:
+        friend PlaylistManager& playlistManager();
+        PlaylistManager();
+        ~PlaylistManager();
+
         QList<PlaylistModel*> m_playlists;
         QPointer<Cache> m_cache;
 
         int m_active = 0;
 };
 
-void initPlaylistManager();
-void deinitPlaylistManager();
-PlaylistManager *playlistManager();
+PlaylistManager& playlistManager();

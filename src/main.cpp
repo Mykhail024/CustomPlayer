@@ -28,7 +28,6 @@ int main(int argc, char** argv)
     QCoreApplication::setOrganizationName(QStringLiteral("Mykhail024"));
     QCoreApplication::setApplicationName(QStringLiteral("CustomPlayer"));
 
-    initPlaylistManager();
 #ifdef __linux__
     initDBusService();
 #endif
@@ -43,7 +42,6 @@ int main(int argc, char** argv)
 #ifdef __linux__
     deinitDBusService();
 #endif
-    deinitPlaylistManager();
 
     return exit_code;
 }
