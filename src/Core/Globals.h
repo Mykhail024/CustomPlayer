@@ -48,6 +48,9 @@ class Globals : public QObject
         void initAudioServer();
         void deinitAudioServer();
 
+        Globals(const Globals&) = delete;
+        Globals& operator=(const Globals&) = delete;
+
     public slots:
         void startVolumeSaveTimer();
         void save();

@@ -10,6 +10,10 @@ struct SONG_METADATA;
 class EventHandler : public QObject
 {
     Q_OBJECT
+    public:
+        EventHandler(const EventHandler&) = delete;
+        EventHandler& operator=(const EventHandler&) = delete;
+
     public slots:
         void PlaylistFind(const QString &text);
         void FindClear();

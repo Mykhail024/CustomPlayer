@@ -23,6 +23,9 @@ class PlaylistManager : public QObject
 
         PlaylistModel *operator[](const size_t &index);
 
+        PlaylistManager(const PlaylistManager&) = delete;
+        PlaylistManager& operator=(const PlaylistManager&) = delete;
+
     private:
         friend PlaylistManager& playlistManager();
         PlaylistManager();

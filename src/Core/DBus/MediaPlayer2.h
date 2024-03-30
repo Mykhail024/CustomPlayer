@@ -38,6 +38,10 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
     Q_PROPERTY(QVariantMap Metadata READ metadata)
     Q_PROPERTY(bool CanSeek READ canSeek)
 
+    public:
+        MediaPlayer2(const MediaPlayer2&) = delete;
+        MediaPlayer2& operator=(const MediaPlayer2&) = delete;
+
     public slots:
         void sendPropertiesChanged(const QString &propertyName, const QVariant &propertyValue);
 
