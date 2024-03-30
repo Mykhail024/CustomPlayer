@@ -14,14 +14,12 @@ namespace Controls {
     void LineEdit::focusInEvent(QFocusEvent *e)
     {
         emit onFocusIn();
-        eventHandler()->LineEditActivate();
         QLineEdit::focusInEvent(e);
     }
 
     void LineEdit::focusOutEvent(QFocusEvent *e)
     {
         emit onFocusOut();
-        eventHandler()->LineEditFinish();
         QLineEdit::focusOutEvent(e);
     }
 }

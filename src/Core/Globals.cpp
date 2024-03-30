@@ -143,11 +143,6 @@ unsigned long int Globals::songPosition() const
     return m_songPosition;
 }
 
-unsigned int Globals::lineEditFocused() const
-{
-    return m_lineEditFocused;
-}
-
 History* Globals::history()
 {
     return m_history;

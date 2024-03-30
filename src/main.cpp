@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     QCoreApplication::setApplicationName(QStringLiteral("CustomPlayer"));
 
     initGlobals();
-    initEventHandler();
+    eventHandler();
     initPlaylistManager();
 #ifdef __linux__
     initDBusService();
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     window.show();
 
     if(argc > 1) {
-        eventHandler()->PlayFile(argv[1]);
+        eventHandler().PlayFile(argv[1]);
     }
     int exit_code = app.exec();
 
@@ -46,7 +46,6 @@ int main(int argc, char** argv)
     deinitDBusService();
 #endif
     deinitPlaylistManager();
-    deinitEventHandler();
     deinitGlobals();
 
     return exit_code;

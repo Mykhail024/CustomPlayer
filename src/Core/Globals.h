@@ -85,8 +85,6 @@ class Globals : public QObject
         unsigned long int songPosition() const;
         SONG_METADATA currentSong() const;
 
-        unsigned int lineEditFocused() const;
-
         Audio::AudioServer* audioServer();
         History* history();
     private:
@@ -96,7 +94,6 @@ class Globals : public QObject
         History *m_history = nullptr;
 
         unsigned int m_historyCapacity;
-        unsigned int m_lineEditFocused;
         unsigned int m_Forward_Backward_Time;
         PLAYBACK_STATE m_playbackState;
         bool m_loopState;

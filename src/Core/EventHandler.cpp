@@ -181,7 +181,7 @@ void EventHandler::HistoryCapacityChange(const unsigned int &size)
 
 void EventHandler::FindClear()
 {
-    eventHandler()->onFindClear();
+    eventHandler().onFindClear();
 }
 
 void EventHandler::ForwardTimeChange(const unsigned int &time)
@@ -310,20 +310,6 @@ void EventHandler::VolumeDown()
     VolumeChange(newVolume >= 0 ? newVolume : 0);
 }
 
-void EventHandler::LineEditActivate()
-{
-    globals()->m_lineEditFocused++;
-    emit onLineEditActivate();
-}
-
-void EventHandler::LineEditFinish()
-{
-    if(globals()->m_lineEditFocused != 0) {
-        globals()->m_lineEditFocused--;
-    }
-    emit onLineEditFinish();
-}
-
 void EventHandler::FindActivate()
 {
     emit onFindActivate();
@@ -372,25 +358,8 @@ void EventHandler::ShuffleStateEnableDisable()
     }
 }
 
-
-EventHandler *_eventHandler = nullptr;
-void initEventHandler()
+EventHandler& eventHandler()
 {
-    if(!globals()) {
-        Log_Error("Error: Globals must be initialized before the EventHandler!");
-    }
-    _eventHandler = new EventHandler();
-}
-
-void deinitEventHandler()
-{
-    if(_eventHandler) {
-        delete _eventHandler;
-        _eventHandler = nullptr;
-    }
-}
-
-EventHandler* eventHandler()
-{
-    return _eventHandler;
+    static EventHandler INSTANCE;
+    return INSTANCE;
 }

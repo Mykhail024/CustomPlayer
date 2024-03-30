@@ -21,10 +21,10 @@ SongsWidget::SongsWidget(QWidget *parent) : QTabWidget(parent)
 
     setupTabs();
 
-    connect(eventHandler(), &EventHandler::onNextPlaylist, this, &SongsWidget::selectNextTab);
-    connect(eventHandler(), &EventHandler::onPrevPlaylist, this, &SongsWidget::selectPrevTab);
-    connect(eventHandler(), &EventHandler::onAddPlaylist, this, &SongsWidget::addPlaylist);
-    connect(eventHandler(), &EventHandler::onRenamePlaylist, this, &SongsWidget::setTabText);
+    connect(&eventHandler(), &EventHandler::onNextPlaylist, this, &SongsWidget::selectNextTab);
+    connect(&eventHandler(), &EventHandler::onPrevPlaylist, this, &SongsWidget::selectPrevTab);
+    connect(&eventHandler(), &EventHandler::onAddPlaylist, this, &SongsWidget::addPlaylist);
+    connect(&eventHandler(), &EventHandler::onRenamePlaylist, this, &SongsWidget::setTabText);
     connect(this, &QTabWidget::currentChanged, playlistManager(), &PlaylistManager::setActive);
     connect(this, &QTabWidget::tabCloseRequested, this, &SongsWidget::onTabClose);
     connect(this->tabBar(), &QTabBar::tabBarDoubleClicked, this, &SongsWidget::renameTab);

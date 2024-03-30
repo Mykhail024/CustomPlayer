@@ -74,13 +74,13 @@ void PlaylistManager::addPlaylist(const QString &filePath)
     PlaylistModel *playlist = new PlaylistModel(filePath, m_cache, this);
     m_playlists.push_back(playlist);
 
-    emit eventHandler()->onAddPlaylist();
+    emit eventHandler().onAddPlaylist();
 }
 
 void PlaylistManager::renamePlaylist(const size_t &index, const QString &newName)
 {
     m_playlists[index]->rename(newName);
-    emit eventHandler()->onRenamePlaylist(index, newName);
+    emit eventHandler().onRenamePlaylist(index, newName);
     m_playlists[index]->save();
 }
 
@@ -95,7 +95,7 @@ void PlaylistManager::removePlaylist(const size_t &index)
         Log_Info(QString("Playlist %1 (%2) removed").arg(p->name()).arg(p->filePath()));
     }
 
-    emit eventHandler()->onRemovePlaylist();
+    emit eventHandler().onRemovePlaylist();
     delete p;
 }
 

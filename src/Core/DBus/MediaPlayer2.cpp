@@ -12,7 +12,7 @@
 
 #include "moc_MediaPlayer2.cpp"
 
-MediaPlayer2::MediaPlayer2() : QDBusAbstractAdaptor(eventHandler())
+MediaPlayer2::MediaPlayer2() : QDBusAbstractAdaptor(&eventHandler())
 {
     const QString PLAYER_NAME(QStringLiteral("CustomPlayer"));
     const QString MPRIS2_NANE(QStringLiteral("org.mpris.MediaPlayer2.") + PLAYER_NAME);
@@ -29,16 +29,16 @@ MediaPlayer2::MediaPlayer2() : QDBusAbstractAdaptor(eventHandler())
 
         QDBusConnection::sessionBus().registerObject(QStringLiteral("/org/mpris/MediaPlayer2"), this, QDBusConnection::ExportAdaptors);
 
-        connect(eventHandler(), &EventHandler::onVolumeChange, this, &MediaPlayer2::onVolumeChanged);
-        connect(eventHandler(), &EventHandler::onPlaySong, this, &MediaPlayer2::onMetadataChanged);
-        connect(eventHandler(), &EventHandler::onSeek, this, &MediaPlayer2::onPositionChanged);
-        connect(eventHandler(), &EventHandler::onLoopStateChange, this, &MediaPlayer2::onLoopChanged);
-        connect(eventHandler(), &EventHandler::onShuffleStateChange, this, &MediaPlayer2::onShuffleChanged);
+        connect(&eventHandler(), &EventHandler::onVolumeChange, this, &MediaPlayer2::onVolumeChanged);
+        connect(&eventHandler(), &EventHandler::onPlaySong, this, &MediaPlayer2::onMetadataChanged);
+        connect(&eventHandler(), &EventHandler::onSeek, this, &MediaPlayer2::onPositionChanged);
+        connect(&eventHandler(), &EventHandler::onLoopStateChange, this, &MediaPlayer2::onLoopChanged);
+        connect(&eventHandler(), &EventHandler::onShuffleStateChange, this, &MediaPlayer2::onShuffleChanged);
 
-        connect(eventHandler(), &EventHandler::onPlaybackStateChanged, this, &MediaPlayer2::onPlaybackStateChanged);
-        connect(eventHandler(), &EventHandler::onCanPlayChanged, this, &MediaPlayer2::onCanPlayChanged);
-        connect(eventHandler(), &EventHandler::onCanNextChanged, this, &MediaPlayer2::onCanGoNextChanged);
-        connect(eventHandler(), &EventHandler::onCanPrevChanged, this, &MediaPlayer2::onCanGoPreviousChanged);
+        connect(&eventHandler(), &EventHandler::onPlaybackStateChanged, this, &MediaPlayer2::onPlaybackStateChanged);
+        connect(&eventHandler(), &EventHandler::onCanPlayChanged, this, &MediaPlayer2::onCanPlayChanged);
+        connect(&eventHandler(), &EventHandler::onCanNextChanged, this, &MediaPlayer2::onCanGoNextChanged);
+        connect(&eventHandler(), &EventHandler::onCanPrevChanged, this, &MediaPlayer2::onCanGoPreviousChanged);
     }
 }
 
@@ -67,42 +67,42 @@ void MediaPlayer2::sendPropertiesChanged(const QString &propertyName, const QVar
 
 void MediaPlayer2::Raise()
 {
-    eventHandler()->Rise();
+    eventHandler().Rise();
 }
 
 void MediaPlayer2::Next()
 {
-    eventHandler()->NextSong();
+    eventHandler().NextSong();
 }
 
 void MediaPlayer2::Previous()
 {
-    eventHandler()->PrevSong();
+    eventHandler().PrevSong();
 }
 
 void MediaPlayer2::Pause()
 {
-    eventHandler()->Pause();
+    eventHandler().Pause();
 }
 
 void MediaPlayer2::PlayPause()
 {
-    eventHandler()->PlayPause();
+    eventHandler().PlayPause();
 }
 
 void MediaPlayer2::Stop()
 {
-    eventHandler()->Stop();
+    eventHandler().Stop();
 }
 
 void MediaPlayer2::Play()
 {
-    eventHandler()->Play();
+    eventHandler().Play();
 }
 
 void MediaPlayer2::OpenFile(const QString &filePath)
 {
-    eventHandler()->PlayFile(filePath);
+    eventHandler().PlayFile(filePath);
 }
 
 void MediaPlayer2::onPositionChanged(const unsigned long int &time)
@@ -112,12 +112,12 @@ void MediaPlayer2::onPositionChanged(const unsigned long int &time)
 
 void MediaPlayer2::Seek(const long int &time)
 {
-    eventHandler()->Seek(globals()->songPosition() + (time / 1e3));
+    eventHandler().Seek(globals()->songPosition() + (time / 1e3));
 }
 
 void MediaPlayer2::SetPosition(QDBusObjectPath path, const unsigned long int &time)
 {
-    eventHandler()->Seek(time / 1e3);
+    eventHandler().Seek(time / 1e3);
 }
 
 unsigned long int MediaPlayer2::position()
@@ -136,9 +136,9 @@ QString MediaPlayer2::loopStatus() const
 void MediaPlayer2::setLoopStatus(const QString &status)
 {
     if(status != QStringLiteral("None")) {
-        eventHandler()->LoopStateChange(true);
+        eventHandler().LoopStateChange(true);
     } else {
-        eventHandler()->LoopStateChange(false);
+        eventHandler().LoopStateChange(false);
     }
     onLoopChanged();
 }
@@ -150,7 +150,7 @@ bool MediaPlayer2::shuffle()
 
 void MediaPlayer2::setShuffle(const bool &state)
 {
-    eventHandler()->ShuffleStateChange(state);
+    eventHandler().ShuffleStateChange(state);
     onShuffleChanged();
 }
 
@@ -231,7 +231,7 @@ bool MediaPlayer2::canGoPrevious() const
 
 void MediaPlayer2::setVolume(float volume)
 {
-    eventHandler()->VolumeChange(volume);
+    eventHandler().VolumeChange(volume);
 }
 
 QVariantMap MediaPlayer2::metadata() const

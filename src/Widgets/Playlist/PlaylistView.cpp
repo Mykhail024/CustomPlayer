@@ -45,7 +45,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
         horizontalHeader->setSectionResizeMode(i, QHeaderView::Stretch);
     }
 
-    connect(eventHandler(), &EventHandler::onPlaylistFind, this, &PlaylistView::find);
+    connect(&eventHandler(), &EventHandler::onPlaylistFind, this, &PlaylistView::find);
     connect(this, &QTableView::doubleClicked, this, &PlaylistView::onDoubleClick);
     connect(this, &QTableView::customContextMenuRequested, this, [&](const QPoint &pos){
             QMenu contextMenu(this);
@@ -144,19 +144,19 @@ void PlaylistView::onDoubleClick(const QModelIndex &index)
 {
     auto sourceIndex = m_proxyModel->mapToSource(index);
     if(sourceIndex.isValid()) {
-        eventHandler()->PlayPlaylistEntry(sourceIndex, true);
+        eventHandler().PlayPlaylistEntry(sourceIndex, true);
     }
 }
 
 void PlaylistView::goNext()
 {
-    eventHandler()->FindClear();
+    eventHandler().FindClear();
     auto index = m_proxyModel->mapFromSource(globals()->history()->entry());
     onDoubleClick(index.siblingAtRow(index.row()+1));
 }
 
 void PlaylistView::goRand()
 {
-    eventHandler()->FindClear();
+    eventHandler().FindClear();
     onDoubleClick(m_proxyModel->index(QRandomGenerator::global()->bounded(m_proxyModel->rowCount()), 0));
 }
