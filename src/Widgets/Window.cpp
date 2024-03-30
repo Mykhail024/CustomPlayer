@@ -11,6 +11,7 @@
 
 #include "ControlsPanel.h"
 
+#include "Core/EventHandler.h"
 #include "Playlist/PlaylistControl.h"
 #include "Playlist/SongsWidget.h"
 
@@ -41,6 +42,15 @@ Window::Window()
     v_layout->addWidget(m_playlistControl);
 
     this->setLayout(v_layout);
+
+    connect(&eventHandler(), &EventHandler::onRaise, this, [&]{
+            if(!this->isActiveWindow()) {
+                this->hide();
+                this->show();
+                this->activateWindow();
+                this->raise();
+            }
+            });
 }
 
 Window::~Window() {}

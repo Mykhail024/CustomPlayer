@@ -268,7 +268,7 @@ void EventHandler::Seek(const unsigned long int &time)
 
 void EventHandler::Rise()
 {
-
+    emit onRaise();
 }
 
 void EventHandler::PlaylistFind(const QString &text)
