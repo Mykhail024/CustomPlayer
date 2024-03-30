@@ -13,7 +13,6 @@
 int main(int argc, char** argv)
 {
 #ifdef __linux__
-    qputenv("QT_QPA_PLATFORMTHEME", "flatpak");
     if(argc > 1) {
         if(sendPlayDBusSignal(argv[1])) {
             return 0;

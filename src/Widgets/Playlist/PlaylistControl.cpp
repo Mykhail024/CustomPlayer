@@ -91,7 +91,7 @@ void PlaylistControl::onAddFiles()
         this,
         tr("Select Music Files"),
         QStandardPaths::writableLocation(QStandardPaths::MusicLocation),
-        tr("Music Files (*.mp3)")
+        tr("Music Files (*.mp3)"), nullptr, QFileDialog::DontUseNativeDialog
     );
     if(fileNames.empty()) return;
 
