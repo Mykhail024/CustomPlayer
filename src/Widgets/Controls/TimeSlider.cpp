@@ -48,7 +48,7 @@ namespace Controls {
     {
         int delta = event->angleDelta().y();
         if(event->modifiers() == Qt::ControlModifier) {
-            eventHandler().Seek(globals()->songPosition() + ((delta > 0) ? 1000 : -1000));
+            eventHandler().Seek(globals().songPosition() + ((delta > 0) ? 1000 : -1000));
         } else {
             if(delta > 0) {
                 eventHandler().Forward();

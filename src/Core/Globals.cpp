@@ -167,22 +167,8 @@ void Globals::deinitAudioServer()
     }
 }
 
-
-Globals *_globals = nullptr;
-void initGlobals()
+Globals& globals()
 {
-    _globals = new Globals();
-}
-
-void deinitGlobals()
-{
-    if(_globals) {
-        delete _globals;
-        _globals = nullptr;
-    }
-}
-
-Globals* globals()
-{
-    return _globals;
+    static Globals INSTANCE;
+    return INSTANCE;
 }

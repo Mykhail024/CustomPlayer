@@ -10,8 +10,6 @@ struct SONG_METADATA;
 class EventHandler : public QObject
 {
     Q_OBJECT
-    public:
-
     public slots:
         void PlaylistFind(const QString &text);
         void FindClear();
@@ -103,9 +101,9 @@ class EventHandler : public QObject
 
     private:
         friend EventHandler& eventHandler();
-        EventHandler();
-        Globals *m_globals;
         float no_mute_volume;
+
+        EventHandler();
 };
 
 EventHandler& eventHandler();

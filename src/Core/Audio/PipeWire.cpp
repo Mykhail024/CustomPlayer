@@ -116,7 +116,7 @@ namespace Audio {
 
             if(current != n_frames) {
                 if (sf_seek(data->m_file, 0, SEEK_CUR) == data->m_fileinfo.frames) {
-                    if(globals()->loopState()) {
+                    if(globals().loopState()) {
                         if (sf_seek(data->m_file, 0, SEEK_SET) < 0) {
                             Log_Warning("file seek error");
                             goto error;
@@ -227,7 +227,7 @@ error:
             }
 
             pw_stream_add_listener(m_stream, &m_event_listener, &stream_events, this);
-            eventHandler().VolumeChange(globals()->volume());
+            eventHandler().VolumeChange(globals().volume());
         }
 
         uint8_t buffer[1024];
@@ -305,7 +305,7 @@ error:
 
     void PipeWire::setVolume(const float &volume)
     {
-        if(globals()->softwareVolumeControl()) {
+        if(globals().softwareVolumeControl()) {
             setSoftwareVolume(volume);
         } else {
             if(m_volume != 1.0f) {

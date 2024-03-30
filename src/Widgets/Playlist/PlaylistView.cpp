@@ -86,7 +86,7 @@ void PlaylistView::setupColumns()
     auto index = m_proxyModel->mapFromSource(m_model->index(0, Config::getSortColumn())).column();
     auto sortOrder = Config::isSortDescendingOrder() ? Qt::DescendingOrder : Qt::AscendingOrder;
 
-    auto columns = globals()->columns();
+    auto columns = globals().columns();
     if(!columns.Id) this->setColumnHidden(0, true);
     if(!columns.Title) this->setColumnHidden(1, true);
     if(!columns.Artist) this->setColumnHidden(2, true);
@@ -151,7 +151,7 @@ void PlaylistView::onDoubleClick(const QModelIndex &index)
 void PlaylistView::goNext()
 {
     eventHandler().FindClear();
-    auto index = m_proxyModel->mapFromSource(globals()->history()->entry());
+    auto index = m_proxyModel->mapFromSource(globals().history()->entry());
     onDoubleClick(index.siblingAtRow(index.row()+1));
 }
 

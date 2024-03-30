@@ -112,7 +112,7 @@ void MediaPlayer2::onPositionChanged(const unsigned long int &time)
 
 void MediaPlayer2::Seek(const long int &time)
 {
-    eventHandler().Seek(globals()->songPosition() + (time / 1e3));
+    eventHandler().Seek(globals().songPosition() + (time / 1e3));
 }
 
 void MediaPlayer2::SetPosition(QDBusObjectPath path, const unsigned long int &time)
@@ -122,12 +122,12 @@ void MediaPlayer2::SetPosition(QDBusObjectPath path, const unsigned long int &ti
 
 unsigned long int MediaPlayer2::position()
 {
-    return static_cast<unsigned long int>((globals()->songPosition()) / 1e3) * 1e6;
+    return static_cast<unsigned long int>((globals().songPosition()) / 1e3) * 1e6;
 }
 
 QString MediaPlayer2::loopStatus() const
 {
-    if(globals()->loopState()) {
+    if(globals().loopState()) {
         return QStringLiteral("Track");
     }
     return QStringLiteral("None");
@@ -145,7 +145,7 @@ void MediaPlayer2::setLoopStatus(const QString &status)
 
 bool MediaPlayer2::shuffle()
 {
-    return globals()->shuffleState();
+    return globals().shuffleState();
 }
 
 void MediaPlayer2::setShuffle(const bool &state)
@@ -166,7 +166,7 @@ void MediaPlayer2::onShuffleChanged()
 
 QString MediaPlayer2::playbackStatus() const
 {
-    switch (globals()->playbackState()) {
+    switch (globals().playbackState()) {
         case PLAYING:
             return QStringLiteral("Playing");
             break;
@@ -211,22 +211,22 @@ void MediaPlayer2::onVolumeChanged()
 
 float MediaPlayer2::volume() const
 {
-    return globals()->volume();
+    return globals().volume();
 }
 
 bool MediaPlayer2::canPlay() const
 {
-    return globals()->canPlay();
+    return globals().canPlay();
 }
 
 bool MediaPlayer2::canGoNext() const
 {
-    return globals()->canNext();
+    return globals().canNext();
 }
 
 bool MediaPlayer2::canGoPrevious() const
 {
-    return globals()->canPrev();
+    return globals().canPrev();
 }
 
 void MediaPlayer2::setVolume(float volume)
@@ -238,7 +238,7 @@ QVariantMap MediaPlayer2::metadata() const
 {
     QVariantMap metadataMap;
 
-    auto metadata = globals()->currentSong();
+    auto metadata = globals().currentSong();
     metadataMap.insert(QStringLiteral("mpris:trackid"), QDBusObjectPath(QStringLiteral("/org/mpris/MediaPlayer2/CurrentTrack")));
     metadataMap.insert(QStringLiteral("xesam:title"), metadata.Title);
     metadataMap.insert(QStringLiteral("xesam:artist"), QStringList{metadata.Artist});

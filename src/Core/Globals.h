@@ -45,12 +45,6 @@ class Globals : public QObject
 {
     Q_OBJECT
     public:
-        Globals();
-        ~Globals()
-        {
-            deinitAudioServer();
-            m_saveTimer->deleteLater();
-        }
         void initAudioServer();
         void deinitAudioServer();
 
@@ -115,8 +109,15 @@ class Globals : public QObject
         SONG_METADATA m_currentSong;
 
         QTimer *m_saveTimer;
+
+
+        friend Globals& globals();
+        Globals();
+        ~Globals()
+        {
+            deinitAudioServer();
+            delete m_saveTimer;
+        }
 };
 
-void initGlobals();
-void deinitGlobals();
-Globals* globals();
+Globals& globals();

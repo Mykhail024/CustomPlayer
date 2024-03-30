@@ -42,21 +42,21 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
     m_volumeSlider->setObjectName("VolumeSlider");
     m_volumeSlider->setMinimum(0);
     m_volumeSlider->setMaximum(100);
-    float volume = globals()->volume() * 100;
+    float volume = globals().volume() * 100;
     m_volumeSlider->setValue(volume);
     updateVolumeIcon(volume);
 
     m_repeatBtn = new QPushButton();
     m_repeatBtn->setObjectName("RepeatButton");
     m_repeatBtn->setCheckable(true);
-    m_repeatBtn->setChecked(globals()->loopState());
+    m_repeatBtn->setChecked(globals().loopState());
     m_repeatBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
     m_repeatBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
 
     m_shuffleBtn = new QPushButton();
     m_shuffleBtn->setObjectName("ShuffleButton");
     m_shuffleBtn->setCheckable(true);
-    m_shuffleBtn->setChecked(globals()->shuffleState());
+    m_shuffleBtn->setChecked(globals().shuffleState());
     m_shuffleBtn->setFixedSize(buttonSize * 0.5, buttonSize * 0.5);
     m_shuffleBtn->setIconSize(QSize(iconSize * 0.5, iconSize * 0.5));
 
