@@ -42,12 +42,6 @@ MediaPlayer2::MediaPlayer2() : QDBusAbstractAdaptor(&eventHandler())
     }
 }
 
-MediaPlayer2::~MediaPlayer2()
-{
-    delete mpris_root;
-    delete mpris_player;
-}
-
 void MediaPlayer2::sendPropertiesChanged(const QString &propertyName, const QVariant &propertyValue)
 {
     QVariantMap changedProperties;

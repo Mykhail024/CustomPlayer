@@ -103,7 +103,7 @@ class MediaPlayer2 : public QDBusAbstractAdaptor
     private:
         friend MediaPlayer2& dbusService();
         MediaPlayer2();
-        ~MediaPlayer2();
+
         MPrisRoot *mpris_root;
         MPrisPlayer *mpris_player;
 };
