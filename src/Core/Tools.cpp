@@ -27,4 +27,15 @@ bool sendPlayDBusSignal(const QString &filePath)
     }
     return false;
 }
+
+bool sendRiseDBusSignal()
+{
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusInterface mediaPlayer2("org.mpris.MediaPlayer2.CustomPlayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", bus);
+    if (mediaPlayer2.isValid()) {
+        mediaPlayer2.call("Raise");
+        return true;
+    }
+    return false;
+}
 #endif

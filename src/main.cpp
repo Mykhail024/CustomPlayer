@@ -1,13 +1,9 @@
 #include <QApplication>
 
 #include "Core/Tools.h"
-#include "Core/TagReaders/TagReader.h"
-#include "Core/Playlist/PlaylistManager.h"
-#include "Core/Playlist/PlaylistModel.h"
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
 
-#include "Widgets/GlobalEventFilter.h"
 #include "Widgets/Window.h"
 
 #ifdef __linux__
@@ -17,40 +13,33 @@
 int main(int argc, char** argv)
 {
 #ifdef __linux__
-    qputenv("QT_QPA_PLATFORMTHEME", "flatpak");
     if(argc > 1) {
         if(sendPlayDBusSignal(argv[1])) {
+            return 0;
+        }
+    } else {
+        if(sendRiseDBusSignal()) {
             return 0;
         }
     }
 #endif
     QApplication app(argc, argv);
-    GlobalEventFilter filter;
-    app.installEventFilter(&filter);
     app.setStyleSheet(readTextFile(":/Style.qss"));
     QCoreApplication::setOrganizationName(QStringLiteral("Mykhail024"));
     QCoreApplication::setApplicationName(QStringLiteral("CustomPlayer"));
 
-    initGlobals();
-    initEventHandler();
-    initPlaylistManager();
-#ifdef __linux__
-    initDBusService();
-#endif
     Window window;
     window.show();
 
     if(argc > 1) {
-        eventHandler()->PlayFile(argv[1]);
+        eventHandler().PlayFile(argv[1]);
     }
-    int exit_code = app.exec();
 
 #ifdef __linux__
-    deinitDBusService();
+    dbusService();
 #endif
-    deinitPlaylistManager();
-    deinitEventHandler();
-    deinitGlobals();
+
+    int exit_code = app.exec();
 
     return exit_code;
 }

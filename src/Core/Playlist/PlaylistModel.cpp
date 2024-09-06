@@ -254,9 +254,9 @@ void PlaylistModel::insertSong(const QString &filePath, const size_t &index)
         Log_Warning(QString("Unable add songs to playlist, playlist file %1 does not exist").arg(filePath));
         return;
     }
-    beginResetModel();
+    beginInsertRows(QModelIndex(), index, index + 1);
     m_songs.insert(m_songs.begin() + index, m_cache->getSong(filePath).value_or(SONG_METADATA{.Path = filePath}));
-    endResetModel();
+    endInsertRows();
 
     startIndexing();
     if(!file.open(QFile::Append | QFile::Text)) {

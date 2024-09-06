@@ -4,12 +4,9 @@
 #include <QWidget>
 
 #include "Controls/TimeSlider.h"
-#include "Controls/Slider.h"
 
 #include "Core/EventHandler.h"
 #include "Core/Globals.h"
-
-#include "Core/Playlist/PlaylistModel.h"
 
 #include "ControlsPanel.h"
 
@@ -41,25 +38,25 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
     m_muteBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
     m_muteBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
 
-    m_volumeSlider = new Controls::Slider(Qt::Horizontal);
+    m_volumeSlider = new QSlider(Qt::Horizontal);
     m_volumeSlider->setObjectName("VolumeSlider");
     m_volumeSlider->setMinimum(0);
     m_volumeSlider->setMaximum(100);
-    float volume = globals()->volume() * 100;
+    float volume = globals().volume() * 100;
     m_volumeSlider->setValue(volume);
     updateVolumeIcon(volume);
 
     m_repeatBtn = new QPushButton();
     m_repeatBtn->setObjectName("RepeatButton");
     m_repeatBtn->setCheckable(true);
-    m_repeatBtn->setChecked(globals()->loopState());
+    m_repeatBtn->setChecked(globals().loopState());
     m_repeatBtn->setFixedSize(buttonSize * 0.7, buttonSize * 0.7);
     m_repeatBtn->setIconSize(QSize(iconSize * 0.7, iconSize * 0.7));
 
     m_shuffleBtn = new QPushButton();
     m_shuffleBtn->setObjectName("ShuffleButton");
     m_shuffleBtn->setCheckable(true);
-    m_shuffleBtn->setChecked(globals()->shuffleState());
+    m_shuffleBtn->setChecked(globals().shuffleState());
     m_shuffleBtn->setFixedSize(buttonSize * 0.5, buttonSize * 0.5);
     m_shuffleBtn->setIconSize(QSize(iconSize * 0.5, iconSize * 0.5));
 
@@ -94,7 +91,7 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
 
     layout->setSpacing(0);
 
-    connect(eventHandler(), &EventHandler::onPlaySong, this, [&](const SONG_METADATA &metadata){
+    connect(&eventHandler(), &EventHandler::onPlaySong, this, [&](const SONG_METADATA &metadata){
                 m_length = metadata.Length;
                 m_timeSlider->setMaximum(m_length / 1e3);
                 m_timeSlider->setEnabled(true);
@@ -104,36 +101,36 @@ ControlsPanel::ControlsPanel(QWidget *parent) : QWidget(parent)
                     m_displayFormat = "hh:mm:ss";
                 }
             });
-    connect(eventHandler(), &EventHandler::onCanPlayChanged, m_playBtn, &QPushButton::setEnabled);
-    connect(eventHandler(), &EventHandler::onCanNextChanged, m_nextBtn, &QPushButton::setEnabled);
-    connect(eventHandler(), &EventHandler::onCanPrevChanged, m_prevBtn, &QPushButton::setEnabled);
-    connect(eventHandler(), &EventHandler::onPlaybackStateChanged, this, [&](const PLAYBACK_STATE &state){
+    connect(&eventHandler(), &EventHandler::onCanPlayChanged, m_playBtn, &QPushButton::setEnabled);
+    connect(&eventHandler(), &EventHandler::onCanNextChanged, m_nextBtn, &QPushButton::setEnabled);
+    connect(&eventHandler(), &EventHandler::onCanPrevChanged, m_prevBtn, &QPushButton::setEnabled);
+    connect(&eventHandler(), &EventHandler::onPlaybackStateChanged, this, [&](const PLAYBACK_STATE &state){
                 m_playBtn->setChecked(state == PLAYBACK_STATE::PLAYING ? true : false);
             });
-    connect(eventHandler(), &EventHandler::onStop, this, &ControlsPanel::reset);
-    connect(eventHandler(), &EventHandler::onEndSong, this, &ControlsPanel::reset);
-    connect(eventHandler(), &EventHandler::onPositionChange, this, &ControlsPanel::updateTime);
-    connect(eventHandler(), &EventHandler::onSeek, this, &ControlsPanel::updateTime);
+    connect(&eventHandler(), &EventHandler::onStop, this, &ControlsPanel::reset);
+    connect(&eventHandler(), &EventHandler::onEndSong, this, &ControlsPanel::reset);
+    connect(&eventHandler(), &EventHandler::onPositionChange, this, &ControlsPanel::updateTime);
+    connect(&eventHandler(), &EventHandler::onSeek, this, &ControlsPanel::updateTime);
     connect(m_timeSlider, &Controls::TimeSlider::sliderReleased, [&]{
-                eventHandler()->Seek(m_timeSlider->value() * 1e3);
+                eventHandler().Seek(m_timeSlider->value() * 1e3);
             });
-    connect(m_volumeSlider, &Controls::Slider::valueChanged, this, [&](int value){
-                eventHandler()->VolumeChange((float)value / 100.0f);
+    connect(m_volumeSlider, &QSlider::valueChanged, this, [&](int value){
+                eventHandler().VolumeChange((float)value / 100.0f);
             });
-    connect(m_muteBtn, &QPushButton::clicked, eventHandler(), &EventHandler::VolumeMuteUnmute);
-    connect(eventHandler(), &EventHandler::onVolumeChange, this, [&](const float &volume){
+    connect(m_muteBtn, &QPushButton::clicked, &eventHandler(), &EventHandler::VolumeMuteUnmute);
+    connect(&eventHandler(), &EventHandler::onVolumeChange, this, [&](const float &volume){
                 const int nVal = qRound(volume * 100.0f);
                 m_volumeSlider->setValue(nVal);
                 updateVolumeIcon(nVal);
             });
-    connect(m_repeatBtn, &QPushButton::clicked, eventHandler(), &EventHandler::LoopStateChange);
-    connect(eventHandler(), &EventHandler::onLoopStateChange, m_repeatBtn, &QPushButton::setChecked);
-    connect(m_shuffleBtn, &QPushButton::clicked, eventHandler(), &EventHandler::ShuffleStateChange);
-    connect(eventHandler(), &EventHandler::onShuffleStateChange, m_shuffleBtn, &QPushButton::setChecked);
+    connect(m_repeatBtn, &QPushButton::clicked, &eventHandler(), &EventHandler::LoopStateChange);
+    connect(&eventHandler(), &EventHandler::onLoopStateChange, m_repeatBtn, &QPushButton::setChecked);
+    connect(m_shuffleBtn, &QPushButton::clicked, &eventHandler(), &EventHandler::ShuffleStateChange);
+    connect(&eventHandler(), &EventHandler::onShuffleStateChange, m_shuffleBtn, &QPushButton::setChecked);
 
-    connect(m_playBtn, &QPushButton::clicked, eventHandler(), &EventHandler::PlayPause);
-    connect(m_nextBtn, &QPushButton::clicked, eventHandler(), &EventHandler::NextSong);
-    connect(m_prevBtn, &QPushButton::clicked, eventHandler(), &EventHandler::PrevSong);
+    connect(m_playBtn, &QPushButton::clicked, &eventHandler(), &EventHandler::PlayPause);
+    connect(m_nextBtn, &QPushButton::clicked, &eventHandler(), &EventHandler::NextSong);
+    connect(m_prevBtn, &QPushButton::clicked, &eventHandler(), &EventHandler::PrevSong);
 }
 
 ControlsPanel::~ControlsPanel() {}

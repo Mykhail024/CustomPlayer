@@ -15,7 +15,7 @@
 
 #include "moc_PlaylistManager.cpp"
 
-PlaylistManager::PlaylistManager() : QObject()
+PlaylistManager::PlaylistManager() : QObject(&eventHandler())
 {
     m_cache = new Cache(this);
     QDir pDir(Config::getPlaylistsPath());
@@ -74,13 +74,13 @@ void PlaylistManager::addPlaylist(const QString &filePath)
     PlaylistModel *playlist = new PlaylistModel(filePath, m_cache, this);
     m_playlists.push_back(playlist);
 
-    emit eventHandler()->onAddPlaylist();
+    emit eventHandler().onAddPlaylist();
 }
 
 void PlaylistManager::renamePlaylist(const size_t &index, const QString &newName)
 {
     m_playlists[index]->rename(newName);
-    emit eventHandler()->onRenamePlaylist(index, newName);
+    emit eventHandler().onRenamePlaylist(index, newName);
     m_playlists[index]->save();
 }
 
@@ -95,7 +95,7 @@ void PlaylistManager::removePlaylist(const size_t &index)
         Log_Info(QString("Playlist %1 (%2) removed").arg(p->name()).arg(p->filePath()));
     }
 
-    emit eventHandler()->onRemovePlaylist();
+    emit eventHandler().onRemovePlaylist();
     delete p;
 }
 
@@ -109,24 +109,9 @@ PlaylistModel* PlaylistManager::operator[](const size_t &index)
     return m_playlists[index];
 }
 
-
-PlaylistManager *_playlistManager = nullptr;
-void initPlaylistManager()
+PlaylistManager& playlistManager()
 {
-    _playlistManager = new PlaylistManager();
-}
-
-void deinitPlaylistManager()
-{
-    if(_playlistManager)
-    {
-        delete _playlistManager;
-        _playlistManager = nullptr;
-    }
-}
-
-PlaylistManager *playlistManager()
-{
-    return _playlistManager;
+    static PlaylistManager INSTANCE;
+    return INSTANCE;
 }
 

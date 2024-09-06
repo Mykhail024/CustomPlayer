@@ -60,10 +60,10 @@ PlaylistControl::PlaylistControl(QWidget *parent)
     m_layout->setContentsMargins(3, 3, 3, 3);
     m_layout->setSpacing(0);
 
-    connect(m_findLineEdit, &QLineEdit::textChanged, eventHandler(), &EventHandler::PlaylistFind);
-    connect(eventHandler(), &EventHandler::onFindClear, this, [&]{ m_findLineEdit->clear(); m_findLineEdit->clearFocus(); });
+    connect(m_findLineEdit, &QLineEdit::textChanged, &eventHandler(), &EventHandler::PlaylistFind);
+    connect(&eventHandler(), &EventHandler::onFindClear, this, [&]{ m_findLineEdit->clear(); m_findLineEdit->clearFocus(); });
     connect(m_addButton, &QPushButton::clicked, this, &PlaylistControl::onAddBtnClick);
-    connect(eventHandler(), &EventHandler::onFindActivate, this, [&]{ m_findLineEdit->setFocus(); });
+    connect(&eventHandler(), &EventHandler::onFindActivate, this, [&]{ m_findLineEdit->setFocus(); });
     connect(addFiles, &QAction::triggered, this, &PlaylistControl::onAddFiles);
     connect(newPlaylist, &QAction::triggered, this, &PlaylistControl::onNewPlaylist);
 }
@@ -83,17 +83,20 @@ void PlaylistControl::onAddBtnClick()
 
 void PlaylistControl::onAddFiles()
 {
-    if(playlistManager()->count() == 0) return;
+    if(playlistManager().count() == 0) {
+        if(!onNewPlaylist()) return;
+    }
+
     QStringList fileNames = QFileDialog::getOpenFileNames(
         this,
         tr("Select Music Files"),
         QStandardPaths::writableLocation(QStandardPaths::MusicLocation),
-        tr("Music Files (*.mp3)")
+        tr("Music Files (*.mp3)"), nullptr, QFileDialog::DontUseNativeDialog
     );
     if(fileNames.empty()) return;
 
-    int activeIndex = playlistManager()->active();
-    auto *playlist = playlistManager()->operator[](activeIndex);
+    int activeIndex = playlistManager().active();
+    auto *playlist = playlistManager().operator[](activeIndex);
 
     for(const QString &file : fileNames) {
         playlist->insertSong(file);
@@ -105,11 +108,12 @@ void PlaylistControl::onAddFolder()
 
 }
 
-void PlaylistControl::onNewPlaylist()
+bool PlaylistControl::onNewPlaylist()
 {
     bool ok;
     QString name = QInputDialog::getText(this, tr("New Playlist"), tr("Playlist Name:"), QLineEdit::Normal, "", &ok);
     if(ok && !name.isEmpty()) {
-        playlistManager()->createPlaylist(name);
+        playlistManager().createPlaylist(name);
     }
+    return ok;
 }

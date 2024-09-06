@@ -21,11 +21,11 @@ SongsWidget::SongsWidget(QWidget *parent) : QTabWidget(parent)
 
     setupTabs();
 
-    connect(eventHandler(), &EventHandler::onNextPlaylist, this, &SongsWidget::selectNextTab);
-    connect(eventHandler(), &EventHandler::onPrevPlaylist, this, &SongsWidget::selectPrevTab);
-    connect(eventHandler(), &EventHandler::onAddPlaylist, this, &SongsWidget::addPlaylist);
-    connect(eventHandler(), &EventHandler::onRenamePlaylist, this, &SongsWidget::setTabText);
-    connect(this, &QTabWidget::currentChanged, playlistManager(), &PlaylistManager::setActive);
+    connect(&eventHandler(), &EventHandler::onNextPlaylist, this, &SongsWidget::selectNextTab);
+    connect(&eventHandler(), &EventHandler::onPrevPlaylist, this, &SongsWidget::selectPrevTab);
+    connect(&eventHandler(), &EventHandler::onAddPlaylist, this, &SongsWidget::addPlaylist);
+    connect(&eventHandler(), &EventHandler::onRenamePlaylist, this, &SongsWidget::setTabText);
+    connect(this, &QTabWidget::currentChanged, &playlistManager(), &PlaylistManager::setActive);
     connect(this, &QTabWidget::tabCloseRequested, this, &SongsWidget::onTabClose);
     connect(this->tabBar(), &QTabBar::tabBarDoubleClicked, this, &SongsWidget::renameTab);
 }
@@ -43,7 +43,7 @@ void SongsWidget::selectPrevTab()
 
 void SongsWidget::addPlaylist()
 {
-    auto model = playlistManager()->operator[](playlistManager()->count() - 1);
+    auto model = playlistManager().operator[](playlistManager().count() - 1);
     PlaylistView *widget = new PlaylistView(model, this);
     this->addTab(widget, model->name());
 }
@@ -56,21 +56,21 @@ void SongsWidget::setupTabs()
 
     QIcon closeIcon = QIcon::fromTheme("window-close");
 
-    for(int i = 0; i < playlistManager()->count(); i++) {
-        auto model = playlistManager()->operator[](i);
+    for(int i = 0; i < playlistManager().count(); i++) {
+        auto model = playlistManager().operator[](i);
         PlaylistView *widget = new PlaylistView(model, this);
 
         this->addTab(widget, model->name());
     }
-    if(playlistManager()->count() != 0) {
-        this->setCurrentIndex(playlistManager()->active() % this->count());
+    if(playlistManager().count() != 0) {
+        this->setCurrentIndex(playlistManager().active() % this->count());
     }
 }
 
 void SongsWidget::onTabClose(const int &index)
 {
     this->removeTab(index);
-    playlistManager()->removePlaylist(index);
+    playlistManager().removePlaylist(index);
 }
 
 void SongsWidget::mousePressEvent(QMouseEvent *event)
@@ -107,6 +107,6 @@ void SongsWidget::renameTab(const int &index)
     bool ok;
     QString name = QInputDialog::getText(this, tr("Rename playlist"), tr("New playlist Name:"), QLineEdit::Normal, "", &ok);
     if(ok && !name.isEmpty()) {
-        playlistManager()->renamePlaylist(index, name);
+        playlistManager().renamePlaylist(index, name);
     }
 }

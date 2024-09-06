@@ -16,28 +16,9 @@ namespace Controls {
             void onFocusOut();
 
         protected:
-            void keyPressEvent(QKeyEvent *event) override {
-                if (event->key() == Qt::Key_Escape && event->modifiers() == Qt::NoModifier) {
-                    this->clearFocus();
-                    return;
-                }
-
-                QLineEdit::keyPressEvent(event);
-            }
-
-            void focusInEvent(QFocusEvent *e) override
-            {
-                emit onFocusIn();
-                eventHandler()->LineEditActivate();
-                QLineEdit::focusInEvent(e);
-            }
-
-            void focusOutEvent(QFocusEvent *e) override
-            {
-                emit onFocusOut();
-                eventHandler()->LineEditFinish();
-                QLineEdit::focusOutEvent(e);
-            }
+            void keyPressEvent(QKeyEvent *event) override;
+            void focusInEvent(QFocusEvent *e) override;
+            void focusOutEvent(QFocusEvent *e) override;
     };
 
 }

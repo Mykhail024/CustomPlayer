@@ -7,7 +7,6 @@
 
 namespace Controls{
     class TimeSlider;
-    class Slider;
 }
 
 class ControlsPanel : public QWidget
@@ -33,7 +32,7 @@ class ControlsPanel : public QWidget
         QString m_displayFormat;
 
         Controls::TimeSlider *m_timeSlider;
-        Controls::Slider *m_volumeSlider;
+        QSlider *m_volumeSlider;
         QLabel *m_timeLabel;
         QPushButton *m_muteBtn;
         QPushButton *m_repeatBtn;

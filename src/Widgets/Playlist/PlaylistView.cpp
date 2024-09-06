@@ -45,7 +45,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
         horizontalHeader->setSectionResizeMode(i, QHeaderView::Stretch);
     }
 
-    connect(eventHandler(), &EventHandler::onPlaylistFind, this, &PlaylistView::find);
+    connect(&eventHandler(), &EventHandler::onPlaylistFind, this, &PlaylistView::find);
     connect(this, &QTableView::doubleClicked, this, &PlaylistView::onDoubleClick);
     connect(this, &QTableView::customContextMenuRequested, this, [&](const QPoint &pos){
             QMenu contextMenu(this);
@@ -71,7 +71,7 @@ PlaylistView::PlaylistView(PlaylistModel *model, QWidget *parent)
                 if(proxy_index.isValid())
                 {
                     Log_Debug(QString("Selected row: proxy - %1, source - %2").arg(proxy_index.row()).arg(index.row()));
-                    this->select(proxy_index, flags);
+                    this->_select(proxy_index, flags);
                 }
             });
     connect(m_model, &PlaylistModel::onSelectNext, this, &PlaylistView::goNext);
@@ -86,7 +86,7 @@ void PlaylistView::setupColumns()
     auto index = m_proxyModel->mapFromSource(m_model->index(0, Config::getSortColumn())).column();
     auto sortOrder = Config::isSortDescendingOrder() ? Qt::DescendingOrder : Qt::AscendingOrder;
 
-    auto columns = globals()->columns();
+    auto columns = globals().columns();
     if(!columns.Id) this->setColumnHidden(0, true);
     if(!columns.Title) this->setColumnHidden(1, true);
     if(!columns.Artist) this->setColumnHidden(2, true);
@@ -126,11 +126,17 @@ void PlaylistView::keyPressEvent(QKeyEvent *event)
     QTableView::keyPressEvent(event);
 }
 
-inline void PlaylistView::select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection)
+inline void PlaylistView::_select(const QModelIndex &index, const QItemSelectionModel::SelectionFlags selection)
 {
-    if(index.isValid())
+    int column = m_proxyModel->columnCount()-1;
+    while(column >= 0 && this->isColumnHidden(column)) {
+        --column;
+    }
+
+    QModelIndex _index = m_proxyModel->index(index.row(), column);
+    if(_index.isValid())
     {
-        this->selectionModel()->setCurrentIndex(index, selection);
+        this->selectionModel()->setCurrentIndex(_index, selection);
     }
 }
 
@@ -138,19 +144,19 @@ void PlaylistView::onDoubleClick(const QModelIndex &index)
 {
     auto sourceIndex = m_proxyModel->mapToSource(index);
     if(sourceIndex.isValid()) {
-        eventHandler()->PlayPlaylistEntry(sourceIndex, true);
+        eventHandler().PlayPlaylistEntry(sourceIndex, true);
     }
 }
 
 void PlaylistView::goNext()
 {
-    eventHandler()->FindClear();
-    auto index = m_proxyModel->mapFromSource(globals()->history()->entry());
+    eventHandler().FindClear();
+    auto index = m_proxyModel->mapFromSource(globals().history()->entry());
     onDoubleClick(index.siblingAtRow(index.row()+1));
 }
 
 void PlaylistView::goRand()
 {
-    eventHandler()->FindClear();
+    eventHandler().FindClear();
     onDoubleClick(m_proxyModel->index(QRandomGenerator::global()->bounded(m_proxyModel->rowCount()), 0));
 }

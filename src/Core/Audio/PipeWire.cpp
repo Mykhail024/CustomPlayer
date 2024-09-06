@@ -116,15 +116,15 @@ namespace Audio {
 
             if(current != n_frames) {
                 if (sf_seek(data->m_file, 0, SEEK_CUR) == data->m_fileinfo.frames) {
-                    if(globals()->loopState()) {
+                    if(globals().loopState()) {
                         if (sf_seek(data->m_file, 0, SEEK_SET) < 0) {
                             Log_Warning("file seek error");
                             goto error;
                         }
-                        emit eventHandler()->FadeIn(false);
+                        emit eventHandler().FadeIn(false);
                     } else {
                         if(!data->m_end_request) {
-                            emit eventHandler()->EndSong();
+                            emit eventHandler().EndSong();
                             data->m_end_request = true;
                         }
                         b->buffer->datas[0].chunk->offset = 0;
@@ -138,7 +138,7 @@ namespace Audio {
             }
         }
         if(data->m_time_goto == -1) {
-            eventHandler()->PositionChange(sf_seek(data->m_file, 0, SEEK_CUR) * 1000 / data->m_fileinfo.samplerate);
+            eventHandler().PositionChange(sf_seek(data->m_file, 0, SEEK_CUR) * 1000 / data->m_fileinfo.samplerate);
         }
 
         for (uint32_t i = 0; i < n_frames * data->m_fileinfo.channels; i++) {
@@ -227,7 +227,7 @@ error:
             }
 
             pw_stream_add_listener(m_stream, &m_event_listener, &stream_events, this);
-            eventHandler()->VolumeChange(globals()->volume());
+            eventHandler().VolumeChange(globals().volume());
         }
 
         uint8_t buffer[1024];
@@ -305,7 +305,7 @@ error:
 
     void PipeWire::setVolume(const float &volume)
     {
-        if(globals()->softwareVolumeControl()) {
+        if(globals().softwareVolumeControl()) {
             setSoftwareVolume(volume);
         } else {
             if(m_volume != 1.0f) {

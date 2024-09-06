@@ -45,14 +45,11 @@ class Globals : public QObject
 {
     Q_OBJECT
     public:
-        Globals();
-        ~Globals()
-        {
-            deinitAudioServer();
-            m_saveTimer->deleteLater();
-        }
         void initAudioServer();
         void deinitAudioServer();
+
+        Globals(const Globals&) = delete;
+        Globals& operator=(const Globals&) = delete;
 
     public slots:
         void startVolumeSaveTimer();
@@ -85,8 +82,6 @@ class Globals : public QObject
         unsigned long int songPosition() const;
         SONG_METADATA currentSong() const;
 
-        unsigned int lineEditFocused() const;
-
         Audio::AudioServer* audioServer();
         History* history();
     private:
@@ -96,7 +91,6 @@ class Globals : public QObject
         History *m_history = nullptr;
 
         unsigned int m_historyCapacity;
-        unsigned int m_lineEditFocused;
         unsigned int m_Forward_Backward_Time;
         PLAYBACK_STATE m_playbackState;
         bool m_loopState;
@@ -118,8 +112,15 @@ class Globals : public QObject
         SONG_METADATA m_currentSong;
 
         QTimer *m_saveTimer;
+
+
+        friend Globals& globals();
+        Globals();
+        ~Globals()
+        {
+            deinitAudioServer();
+            delete m_saveTimer;
+        }
 };
 
-void initGlobals();
-void deinitGlobals();
-Globals* globals();
+Globals& globals();

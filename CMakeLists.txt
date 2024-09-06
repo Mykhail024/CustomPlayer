@@ -18,7 +18,6 @@ set(widgets_files
     res/Resources.qrc
     src/Widgets/ControlsPanel.cpp
     src/Widgets/Window.cpp
-    src/Widgets/GlobalEventFilter.h
     src/Widgets/InfoWidget.cpp
     src/Widgets/ImageWidget.cpp
 
@@ -27,8 +26,7 @@ set(widgets_files
     src/Widgets/Playlist/SongsWidget.cpp
 
     src/Widgets/Controls/TimeSlider.cpp
-    src/Widgets/Controls/LineEdit.h
-    src/Widgets/Controls/Slider.h
+    src/Widgets/Controls/LineEdit.cpp
 )
 
 set(core_files

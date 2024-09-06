@@ -59,7 +59,7 @@ QPersistentModelIndex History::entry()
 
 void History::adjustSize()
 {
-    auto capacity = globals()->historyCapacity() - 1;
+    auto capacity = globals().historyCapacity() - 1;
     if(m_currentIndex > capacity) {
         int elementsToRemove = m_currentIndex - capacity;
         m_entries.erase(m_entries.begin(), m_entries.begin() + elementsToRemove);

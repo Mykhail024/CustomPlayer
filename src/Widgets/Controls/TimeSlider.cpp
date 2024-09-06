@@ -48,22 +48,22 @@ namespace Controls {
     {
         int delta = event->angleDelta().y();
         if(event->modifiers() == Qt::ControlModifier) {
-            eventHandler()->Seek(globals()->songPosition() + ((delta > 0) ? 1000 : -1000));
+            eventHandler().Seek(globals().songPosition() + ((delta > 0) ? 1000 : -1000));
         } else {
             if(delta > 0) {
-                eventHandler()->Forward();
+                eventHandler().Forward();
             } else {
-                eventHandler()->Backward();
+                eventHandler().Backward();
             }
         }
     }
     void TimeSlider::keyPressEvent(QKeyEvent *event)
     {
         if(event->key() == Qt::Key_Left) {
-            eventHandler()->Backward();
+            eventHandler().Backward();
             return;
         } else if(event->key() == Qt::Key_Right) {
-            eventHandler()->Forward();
+            eventHandler().Forward();
             return;
         }
 

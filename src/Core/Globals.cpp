@@ -143,11 +143,6 @@ unsigned long int Globals::songPosition() const
     return m_songPosition;
 }
 
-unsigned int Globals::lineEditFocused() const
-{
-    return m_lineEditFocused;
-}
-
 History* Globals::history()
 {
     return m_history;
@@ -172,22 +167,8 @@ void Globals::deinitAudioServer()
     }
 }
 
-
-Globals *_globals = nullptr;
-void initGlobals()
+Globals& globals()
 {
-    _globals = new Globals();
-}
-
-void deinitGlobals()
-{
-    if(_globals) {
-        delete _globals;
-        _globals = nullptr;
-    }
-}
-
-Globals* globals()
-{
-    return _globals;
+    static Globals INSTANCE;
+    return INSTANCE;
 }

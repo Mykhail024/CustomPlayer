@@ -11,16 +11,14 @@ class EventHandler : public QObject
 {
     Q_OBJECT
     public:
-        EventHandler();
+        EventHandler(const EventHandler&) = delete;
+        EventHandler& operator=(const EventHandler&) = delete;
 
     public slots:
         void PlaylistFind(const QString &text);
         void FindClear();
         void NextPlaylist();
         void PrevPlaylist();
-
-        void LineEditActivate();
-        void LineEditFinish();
 
         void FindActivate();
 
@@ -106,10 +104,10 @@ class EventHandler : public QObject
         void onFadeInTimeChanged(const int &primary_time, const int &secondary_time);
 
     private:
-        Globals *m_globals;
+        friend EventHandler& eventHandler();
         float no_mute_volume;
+
+        EventHandler();
 };
 
-void initEventHandler();
-void deinitEventHandler();
-EventHandler* eventHandler();
+EventHandler& eventHandler();
