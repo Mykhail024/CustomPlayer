@@ -1,0 +1,7 @@
+.idea
+.cache
+*.kate-swp
+session.vim
+build
+Notes.txt
+debug
