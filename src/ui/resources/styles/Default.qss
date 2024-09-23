@@ -1,0 +1,8 @@
+#ControlsPanel {
+    background-color: #d57500;
+}
+
+#ControlsPanel QPushButton {
+    border: none;
+    background-color: transparent;
+}
