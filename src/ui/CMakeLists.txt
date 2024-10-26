@@ -1,16 +1,11 @@
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt6 COMPONENTS Core Widgets Qml Quick QuickControls2 REQUIRED)
 
 set(PROJECT_SOURCES
-    resources/Resources.qrc
-
     Application.cpp
-    MainWindow.cpp
-    ControlsPanel.cpp
-
-    Custom/PushButton.cpp
+    qml/QmlResources.qrc
 )
 
 qt_add_executable(ui
@@ -18,14 +13,13 @@ qt_add_executable(ui
     ${PROJECT_SOURCES}
 )
 
-target_link_libraries(ui PRIVATE Qt6::Core Qt6::Widgets)
+target_link_libraries(ui PRIVATE Qt6::Core Qt6::Widgets Qt6::Qml Qt6::Quick Qt6::QuickControls2)
 
 set_target_properties(ui PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     OUTPUT_NAME "customplayer"
     QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
 )
-
 
 if(ANDROID)
 add_custom_target(install_apk

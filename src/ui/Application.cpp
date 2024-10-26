@@ -1,27 +1,26 @@
 #include <QApplication>
-#include <QFile>
+#include <QQmlApplicationEngine>
+#include <QQuickStyle>
+#include <QQmlEngine>
+#include <QQuickStyle>
+#include <QQmlContext>
 
-#include "MainWindow.h"
-
-QString readTextFile(const QString &filePath)
+int main(int argc, char *argv[])
 {
-    QFile file(filePath);
-    if(file.open(QFile::ReadOnly | QFile::Text)) {
-        return QString::fromUtf8(file.readAll());
-    } else {
-        qWarning() << "Error reading: " << filePath.toStdString();
-        return "";
-    }
-}
-
-int main(int argc, char **argv) {
     QApplication app(argc, argv);
 
-    app.setStyle("Fusion");
-    app.setStyleSheet(readTextFile(":/Styles/Default.qss"));
 
-    MainWindow window;
-    window.show();
+    QQmlApplicationEngine engine;
+
+    const QUrl url(QStringLiteral("qrc:/Qml/main.qml"));
+
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+                         if (!obj && url == objUrl)
+                             QCoreApplication::exit(-1);
+                     }, Qt::QueuedConnection);
+
+    engine.load(url);
 
     return app.exec();
 }
