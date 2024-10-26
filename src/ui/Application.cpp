@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    app.setOrganizationName("CustomPlayer");
+    app.setApplicationName("customplayer");
 
     QQmlApplicationEngine engine;
 
