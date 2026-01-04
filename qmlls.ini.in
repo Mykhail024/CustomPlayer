@@ -1,0 +1,2 @@
+[General]
+buildDir=${QT_QML_OUTPUT_DIRECTORY}

@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/NetworkPlaylistProvider">
+        <file>NetworkPlaylistSetup.qml</file>
+    </qresource>
+</RCC>
+

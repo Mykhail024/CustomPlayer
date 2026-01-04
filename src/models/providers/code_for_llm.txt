@@ -1,0 +1,651 @@
+
+common/include/PlaylistFormat.h:
+#pragma once
+
+#include <QString>
+#include <QStringList>
+
+struct PlaylistFormat
+{
+        QString name;
+        QStringList nameFilters;
+};
+
+
+common/include/IEditablePlaylistProvider.h:
+#pragma once
+
+#include <QObject>
+#include <QString>
+
+#include "IPlaylistProvider.h"
+#include "SongMetadata.h"
+
+class IEditablePlaylistProvider : public IPlaylistProvider
+{
+        Q_OBJECT
+        Q_INTERFACES(IPlaylistProvider)
+    public:
+        explicit IEditablePlaylistProvider(QObject *parent = nullptr) : IPlaylistProvider(parent) {}
+        virtual ~IEditablePlaylistProvider() override = default;
+
+        virtual bool isReadOnly() const override { return false; }
+
+        virtual bool setPlaylistName(const QString &playlistName) = 0;
+
+        virtual bool setSongAt(int index, const SongMetadata &entry) = 0;
+        virtual bool addSongs(const QList<SongMetadata> &songs) = 0;
+        virtual bool removeSong(int index) = 0;
+
+        virtual bool save(QString uri = QString()) = 0;
+
+    signals:
+        void songsAdded(int index, int count);
+        void songRemoved(int index);
+        void songChanged(int index);
+};
+
+Q_DECLARE_INTERFACE(IEditablePlaylistProvider, "CustomPlayer.EditablePlaylistProvider")
+
+
+common/include/IPlaylistProviderInterface.h:
+#pragma once
+
+#include <QObject>
+#include <QQmlComponent>
+
+class IPlaylistProvider;
+
+class IPlaylistProviderInterface
+{
+    public:
+        virtual ~IPlaylistProviderInterface() = default;
+
+        Q_INVOKABLE virtual QObject *providerUi(QObject *qmlContextParent) = 0;
+        virtual bool isRequirementsProvided() const = 0;
+};
+
+#define IPlaylistProviderInterface_iid "CustomPlayer.PlaylistProviderInterface"
+Q_DECLARE_INTERFACE(IPlaylistProviderInterface, IPlaylistProviderInterface_iid)
+
+
+common/include/IPlaylistProviderFactory.h:
+#pragma once
+
+#include <QObject>
+
+#include "IPlaylistProvider.h"
+
+class IPlaylistProviderFactory : public QObject
+{
+        Q_OBJECT
+    public:
+        virtual ~IPlaylistProviderFactory() override = default;
+        virtual IPlaylistProvider *create(QObject *parent = nullptr) const = 0;
+        virtual int priority() const { return 0; };
+};
+
+#define IPlaylistProviderFactory_iid "CustomPlayer.PlaylistProviderFactory"
+Q_DECLARE_INTERFACE(IPlaylistProviderFactory, IPlaylistProviderFactory_iid)
+
+
+common/include/IPlaylistProvider.h:
+#pragma once
+
+#include <QObject>
+#include <QString>
+
+#include "PlaylistFormat.h"
+#include "SongMetadata.h"
+
+class IPlaylistProvider : public QObject
+{
+        Q_OBJECT
+    public:
+        explicit IPlaylistProvider(QObject *parent = nullptr) : QObject(parent) {}
+        virtual ~IPlaylistProvider() override = default;
+
+        virtual QList<PlaylistFormat> uriFormats() const = 0;
+        virtual QString uri() const = 0;
+        virtual bool setUri(const QString &uri) = 0;
+
+        virtual bool isReadOnly() const { return true; }
+
+        virtual QString playlistName() const = 0;
+
+        virtual int songsCount() const = 0;
+        virtual SongMetadata songAt(int index) const = 0;
+
+        virtual bool update() = 0;
+
+        virtual bool load(QString uri = QString()) = 0;
+
+    signals:
+        void nameChanged(const QString &name);
+
+        void reset();
+};
+
+Q_DECLARE_INTERFACE(IPlaylistProvider, "CustomPlayer.EPlaylistProvider")
+
+
+common/CMakeLists.txt:
+add_library(playlist_provider_plugin_common STATIC
+        include/IPlaylistProvider.h
+        include/IEditablePlaylistProvider.h
+        include/IPlaylistProviderFactory.h
+        include/IPlaylistProviderInterface.h
+        include/PlaylistFormat.h
+)
+set_target_properties(playlist_provider_plugin_common PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(playlist_provider_plugin_common PUBLIC include)
+target_link_libraries(playlist_provider_plugin_common PUBLIC common Qt6::Core Qt6::Gui)
+
+
+Network/NetworkPlaylistProvider.json:
+{
+  "PluginId": "CustomPlayer.NetworkPlaylistProvider",
+  "UriFormatName": "NPL",
+  "UriFormats": ["*.npl"]
+}
+
+
+Network/resources.qrc:
+<RCC>
+    <qresource prefix="/NetworkPlaylistProvider">
+        <file>NetworkPlaylistSetup.qml</file>
+    </qresource>
+</RCC>
+
+
+
+Network/NetworkBroadcaster.h:
+#pragma once
+
+#include <QObject>
+#include <QTimer>
+#include <QUdpSocket>
+#include <QStringList>
+
+class NetworkBroadcaster : public QObject
+{
+    Q_OBJECT
+public:
+    explicit NetworkBroadcaster(QObject *parent = nullptr);
+    ~NetworkBroadcaster();
+
+    Q_INVOKABLE void startBroadcasting(const QStringList &playlistNames);
+    Q_INVOKABLE void stopBroadcasting();
+    Q_INVOKABLE void addPlaylist(const QString &playlistName);
+    Q_INVOKABLE void removePlaylist(const QString &playlistName);
+
+private slots:
+    void broadcastDatagram();
+
+private:
+    QUdpSocket *m_broadcastSocket;
+    QTimer *m_broadcastTimer;
+    QStringList m_playlistNames;
+};
+
+
+Network/NetworkBroadcaster.cpp:
+#include "NetworkBroadcaster.h"
+#include <QHostAddress>
+
+NetworkBroadcaster::NetworkBroadcaster(QObject *parent)
+: QObject(parent)
+, m_broadcastSocket(new QUdpSocket(this))
+, m_broadcastTimer(new QTimer(this))
+{
+    connect(m_broadcastTimer, &QTimer::timeout, this, &NetworkBroadcaster::broadcastDatagram);
+}
+
+NetworkBroadcaster::~NetworkBroadcaster()
+{
+    stopBroadcasting();
+}
+
+void NetworkBroadcaster::startBroadcasting(const QStringList &playlistNames)
+{
+    m_playlistNames = playlistNames;
+    m_broadcastTimer->start(2000); // Broadcast every 2 seconds
+}
+
+void NetworkBroadcaster::stopBroadcasting()
+{
+    m_broadcastTimer->stop();
+}
+
+void NetworkBroadcaster::addPlaylist(const QString &playlistName)
+{
+    if (!m_playlistNames.contains(playlistName)) {
+        m_playlistNames.append(playlistName);
+    }
+}
+
+void NetworkBroadcaster::removePlaylist(const QString &playlistName)
+{
+    m_playlistNames.removeAll(playlistName);
+}
+
+void NetworkBroadcaster::broadcastDatagram()
+{
+    if (m_playlistNames.isEmpty())
+        return;
+
+    foreach (const QString &playlistName, m_playlistNames) {
+        QByteArray datagram = "CUSTOMPLAYER_BROADCAST:";
+        datagram.append(playlistName.toUtf8());
+        m_broadcastSocket->writeDatagram(datagram, QHostAddress::Broadcast, 45454);
+    }
+}
+
+
+Network/NetworkDiscoverer.h:
+#pragma once
+
+#include <QObject>
+#include <QTimer>
+#include <QUdpSocket>
+
+class NetworkDiscoverer : public QObject
+{
+        Q_OBJECT
+    public:
+        explicit NetworkDiscoverer(QObject *parent = nullptr);
+        ~NetworkDiscoverer();
+
+        Q_INVOKABLE void startDiscovering();
+        Q_INVOKABLE void stopDiscovering();
+
+    signals:
+        void peerDiscovered(const QString &address, quint16 port, const QString &playlistName);
+
+    private slots:
+        void readBroadcastDatagrams();
+        void sendDiscoveryRequest();
+
+    private:
+        QUdpSocket *m_listenSocket;
+        QUdpSocket *m_discoverSocket;
+        QTimer *m_discoveryTimer;
+};
+
+
+Network/NetworkDiscoverer.cpp:
+#include "NetworkDiscoverer.h"
+#include <QHostAddress>
+
+NetworkDiscoverer::NetworkDiscoverer(QObject *parent)
+    : QObject(parent)
+    , m_listenSocket(new QUdpSocket(this))
+    , m_discoverSocket(new QUdpSocket(this))
+    , m_discoveryTimer(new QTimer(this))
+{
+    connect(m_listenSocket, &QUdpSocket::readyRead, this, &NetworkDiscoverer::readBroadcastDatagrams);
+    connect(m_discoveryTimer, &QTimer::timeout, this, &NetworkDiscoverer::sendDiscoveryRequest);
+}
+
+NetworkDiscoverer::~NetworkDiscoverer() { stopDiscovering(); }
+
+void NetworkDiscoverer::startDiscovering()
+{
+    if (m_listenSocket->state() != QUdpSocket::BoundState) {
+        if (m_listenSocket->bind(QHostAddress::AnyIPv4, 45454, QUdpSocket::ShareAddress)) {
+            m_discoveryTimer->start(5000); // Send discovery every 5 seconds
+            sendDiscoveryRequest();        // Send immediate request
+        }
+    }
+}
+
+void NetworkDiscoverer::stopDiscovering()
+{
+    m_discoveryTimer->stop();
+    if (m_listenSocket->state() == QUdpSocket::BoundState) {
+        m_listenSocket->close();
+    }
+}
+
+void NetworkDiscoverer::sendDiscoveryRequest()
+{
+    QByteArray datagram = "DISCOVER_CUSTOMPLAYER";
+    m_discoverSocket->writeDatagram(datagram, QHostAddress::Broadcast, 45454);
+}
+
+void NetworkDiscoverer::readBroadcastDatagrams()
+{
+    while (m_listenSocket->hasPendingDatagrams()) {
+        QByteArray datagram;
+        datagram.resize(m_listenSocket->pendingDatagramSize());
+        QHostAddress sender;
+        quint16 senderPort;
+
+        m_listenSocket->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
+
+        if (datagram.startsWith("CUSTOMPLAYER_BROADCAST:")) {
+            QString playlistName = QString::fromUtf8(datagram.mid(23));
+            emit peerDiscovered(sender.toString(), senderPort, playlistName);
+        }
+    }
+}
+
+
+Network/NetworkPlaylistProvider.cpp:
+#include "NetworkPlaylistProvider.h"
+
+
+Network/NetworkPlaylistProvider.h:
+#pragma once
+
+
+Network/NetworkPlaylistSetup.qml:
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
+
+Item {
+    width: parent ? parent.width : 0
+    implicitHeight: layout.implicitHeight
+
+    ColumnLayout {
+        id: layout
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 12
+
+        ComboBox {
+            id: modeComb
+            model: factory.modes
+            Layout.fillWidth: true
+            onCurrentTextChanged: factory.mode = currentText
+        }
+
+        // Кнопка пошуку пристроїв
+        // Button {
+        //     text: "Discover Devices"
+        //     Layout.fillWidth: true
+        //     onClicked: factory.networkDiscovery.discoverPeers()
+        //     background: Rectangle {
+        //         color: "#272b3c"
+        //         border.color: "#574b6c"
+        //         border.width: 1
+        //         radius: 8
+        //     }
+        // }
+
+        TextField {
+            id: createPassword
+            Layout.fillWidth: true
+            echoMode: TextInput.Password
+            placeholderText: "password"
+            onTextChanged: factory.password = text
+            visible: factory.mode == "Create"
+        }
+
+        // Заголовок списку
+        Label {
+            text: "Discovered Devices:"
+            font.bold: true
+            Layout.topMargin: 10
+            visible: modeComb.currentText == "Connect"
+        }
+
+        // Список знайдених пристроїв
+        Frame {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            background: Rectangle {
+                color: "#272b3c"
+            }
+
+            visible: modeComb.currentText == "Connect"
+
+            ScrollView {
+                anchors.fill: parent
+                clip: true
+
+                Column {
+                    id: devicesColumn
+                    width: parent.width
+                    spacing: 5
+
+                    // Модель для зберігання пристроїв
+                    ListModel {
+                        id: devicesModel
+                    }
+
+                    // Відображення елементів моделі
+                    Repeater {
+                        model: devicesModel
+                        delegate: Rectangle {
+                            width: devicesColumn.width
+                            height: deviceInfo.implicitHeight + 10
+                            color: factory.ipAddress == ip ? "#5B76BC" : "#6A76AA"
+                            radius: 3
+
+                            ColumnLayout {
+                                id: deviceInfo
+                                anchors.fill: parent
+                                anchors.margins: 5
+
+                                Text {
+                                    text: `<b>${name}</b>`
+                                    font.pixelSize: 14
+                                    Layout.fillWidth: true
+                                }
+
+                                Text {
+                                    text: `IP: ${ip}:${port}`
+                                    font.pixelSize: 12
+                                    color: "#555555"
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            // Кнопка вибору пристрою
+                            Button {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.rightMargin: 5
+                                text: "Select"
+                                onClicked: {
+                                    factory.ipAddress = ip
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        TextField {
+            id: connectPassword
+            Layout.fillWidth: true
+            echoMode: TextInput.Password
+            placeholderText: "password"
+            onTextChanged: factory.password = text
+            visible: factory.mode == "Connect" && factory.ipAddress.length > 0
+        }
+    }
+
+
+    // Підключення сигналу знайденого пристрою
+    Connections {
+        target: factory.networkDiscovery
+        function onPeerDiscovered(address, port, playlistName) {
+            // Перевірка на дублікати
+            for (var i = 0; i < devicesModel.count; i++) {
+                if (devicesModel.get(i).name === playlistName) {
+                    devicesModel.set(i, {
+                        "ip": address,
+                        "port": port,
+                        "name": playlistName
+                    })
+                    return
+                }
+            }
+            
+            // Додавання нового пристрою
+            devicesModel.append({
+                "ip": address,
+                "port": port,
+                "name": playlistName
+            })
+        }
+    }
+}
+
+
+Network/NetworkPlaylistProviderFactory.cpp:
+#include <QObject>
+#include <QQmlContext>
+#include <QtQml/QQmlComponent>
+#include <QtQml/QQmlEngine>
+
+#include "IPlaylistProviderFactory.h"
+#include "IPlaylistProviderInterface.h"
+#include "Log.h"
+#include "NetworkDiscoverer.h"
+
+class NetworkPlaylistProviderFactory : public IPlaylistProviderFactory, public IPlaylistProviderInterface
+{
+        Q_OBJECT
+        Q_PLUGIN_METADATA(IID IPlaylistProviderFactory_iid FILE "NetworkPlaylistProvider.json")
+        Q_INTERFACES(IPlaylistProviderFactory IPlaylistProviderInterface)
+        Q_PROPERTY(bool isRequirementsProvided READ isRequirementsProvided NOTIFY isRequirementsProvidedChanged)
+        Q_PROPERTY(QString ipAddress READ ipAddress WRITE setIpAddress NOTIFY ipAddressChanged)
+        Q_PROPERTY(NetworkDiscoverer *networkDiscovery READ networkDiscovery CONSTANT)
+        Q_PROPERTY(QString mode READ mode WRITE setMode NOTIFY modeChanged)
+        Q_PROPERTY(QStringList modes READ modes CONSTANT)
+        Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+
+    public:
+        NetworkPlaylistProviderFactory(QObject *parent = nullptr)
+        {
+            connect(this, &NetworkPlaylistProviderFactory::modeChanged, &NetworkPlaylistProviderFactory::onModeChanged);
+        }
+        IPlaylistProvider *create(QObject *parent = nullptr) const override
+        {
+            return nullptr; /* DeepSeek: додай сюди логіку повернення провайдера та його налаштування на основі заданих данних */
+        }
+        Q_INVOKABLE QObject *providerUi(QObject *qmlContextParent) override
+        {
+            QQmlEngine *engine = qmlEngine(qmlContextParent);
+            if (!engine)
+                return nullptr;
+
+            if (!m_component || m_component->isNull()) {
+                m_component.reset(new QQmlComponent(engine, QUrl("qrc:/NetworkPlaylistProvider/NetworkPlaylistSetup.qml")));
+                if (m_component->isError()) {
+                    Log_Error(m_component->errors());
+                    return nullptr;
+                }
+            }
+
+            QQmlContext *context = new QQmlContext(engine->rootContext());
+            context->setContextProperty("factory", this);
+
+            QObject *ui = m_component->create(context);
+            ui->setParent(qmlContextParent);
+
+            return ui;
+        }
+
+        bool isRequirementsProvided() const override { return m_isRequirementsProvided; }
+
+        QString ipAddress() const { return m_ipAddress; }
+        NetworkDiscoverer *networkDiscovery() { return &m_netDiscovery; }
+
+        QString mode() const { return m_mode; }
+
+        constexpr QStringList modes() const { return {"Create", "Connect"}; }
+        QString password() const { return m_password; }
+
+    public slots:
+        void setIpAddress(const QString &ip)
+        {
+            if (ip != m_ipAddress) {
+                m_ipAddress = ip;
+                updateRequirements();
+                emit ipAddressChanged(m_ipAddress);
+            }
+        }
+        void setMode(const QString &mode)
+        {
+            if (mode != m_mode) {
+                m_mode = mode;
+                updateRequirements();
+                emit modeChanged(mode);
+            }
+        }
+        void onModeChanged(const QString &mode)
+        {
+            if (mode == "Create") {
+                m_netDiscovery.stopDiscovering();
+            } else [[likely]] {
+                m_netDiscovery.startDiscovering();
+            }
+            Log_Debug(QString("Mode: %1").arg(m_mode));
+        }
+        void setPassword(const QString &password)
+        {
+            if (m_password != password) {
+                m_password = password;
+                updateRequirements();
+                emit passwordChanged(m_password);
+                Log_Debug(m_password);
+            }
+        }
+
+    signals:
+        void isRequirementsProvidedChanged(bool val);
+        void ipAddressChanged(const QString &ip);
+        void modeChanged(const QString &mode);
+        void passwordChanged(const QString &password);
+
+    private:
+        bool updateRequirements()
+        {
+            const bool old = m_isRequirementsProvided;
+            m_isRequirementsProvided = (!m_ipAddress.isEmpty() || m_mode == "Create") && !m_password.isEmpty();
+
+            if (old != m_isRequirementsProvided) {
+                emit isRequirementsProvidedChanged(m_isRequirementsProvided);
+            }
+            return m_isRequirementsProvided;
+        }
+
+        QString m_password;
+        QString m_mode = "Create";
+        QScopedPointer<QQmlComponent> m_component;
+        QString m_ipAddress;
+        bool m_isRequirementsProvided = false;
+        NetworkDiscoverer m_netDiscovery;
+};
+
+#include "NetworkPlaylistProviderFactory.moc"
+
+CMakeLists.txt:
+add_subdirectory(common)
+
+include(cmake/PlaylistProviderPlugin.cmake)
+
+add_playlist_provider(
+  PROVIDER_NAME UPL 
+  PROVIDER_SOURCES UPL/UPLPlaylistProvider.h UPL/UPLPlaylistProvider.cpp UPL/UPLPlaylistProviderFactory.cpp 
+  INSTALL_DIR ${PLAYLIST_PROVIDER_PLUGIN_INSTALL_DIR}
+)
+
+add_playlist_provider(
+  PROVIDER_NAME Network
+  PROVIDER_SOURCES Network/NetworkPlaylistProvider.h 
+                   Network/NetworkPlaylistProvider.cpp 
+                   Network/NetworkPlaylistProviderFactory.cpp 
+                   Network/NetworkDiscoverer.cpp
+                   Network/NetworkDiscoverer.h
+                   Network/NetworkBroadcaster.cpp
+                   Network/NetworkBroadcaster.h
+                   Network/resources.qrc
+  INSTALL_DIR ${PLAYLIST_PROVIDER_PLUGIN_INSTALL_DIR}
+)
+

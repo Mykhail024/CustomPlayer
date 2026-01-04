@@ -1,0 +1,5 @@
+{
+  "PluginId": "CustomPlayer.NetworkPlaylistProvider",
+  "UriFormatName": "NPL",
+  "UriFormats": ["*.npl"]
+}

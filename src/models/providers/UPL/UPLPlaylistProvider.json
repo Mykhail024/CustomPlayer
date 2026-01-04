@@ -1,0 +1,5 @@
+{
+  "PluginId": "CustomPlayer.UPLPlaylistProvider",
+  "UriFormatName": "UPL",
+  "UriFormats": ["*.upl"]
+}

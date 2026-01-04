@@ -1,0 +1,5 @@
+module CustomPlayer.Style
+Button 1.0 Button.qml
+Slider 1.0 Slider.qml
+
+singleton Colors Colors.qml

@@ -1,0 +1,2 @@
+module gui
+singleton Colors Colors.qml
