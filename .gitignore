@@ -175,3 +175,4 @@ compile_commands.json
 # Custom
 build
 .cache
+.*

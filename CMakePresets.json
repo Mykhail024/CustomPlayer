@@ -1,0 +1,75 @@
+{
+	"version": 3,
+	"configurePresets": [
+		{
+			"name": "debug",
+			"displayName": "Debug",
+			"description": "Debug build",
+			"binaryDir": "${sourceDir}/build/debug",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "tsan",
+			"displayName": "Debug with TSAN",
+			"description": "Debug build with TSAN support",
+			"binaryDir": "${sourceDir}/build/tsan",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"TSAN": "ON"
+			}
+		},
+		{
+			"name": "coverage",
+			"displayName": "Coverage Debug",
+			"description": "Debug + code coverage",
+			"binaryDir": "${sourceDir}/build/coverage",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3 -fprofile-arcs -ftest-coverage",
+                "CMAKE_EXE_LINKER_FLAGS_DEBUG": "-fprofile-arcs -ftest-coverage"
+            }
+        },
+        {
+            "name": "clang-tidy",
+            "displayName": "Clang-Tidy Analysis",
+            "description": "Static analysis with clang-tidy",
+            "binaryDir": "${sourceDir}/build/clang-tidy",
+            "cacheVariables": {
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;-checks=clang-analyzer-*,modernize-*,readability-*,bugprone-*,performance-*,-modernize-use-trailing-return-type,-llvmlibc-implementation-in-namespace;--enable-check-profile;--warnings-as-errors=-*"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Optimized release build",
+			"binaryDir": "${sourceDir}/build/release",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "debug",
+			"configurePreset": "debug"
+		},
+		{
+			"name": "tsan",
+			"configurePreset": "tsan"
+		},
+		{
+			"name": "coverage",
+			"configurePreset": "coverage"
+		},
+        {
+            "name": "clang-tidy",
+            "configurePreset": "clang-tidy"
+        },
+		{
+			"name": "release",
+			"configurePreset": "release"
+		}
+	]
+}
