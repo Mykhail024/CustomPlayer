@@ -1,0 +1,74 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: 'Preset (release/clang-tidy)'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - release
+        - clang-tidy
+      os:
+        description: 'OS for build'
+        required: false
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+        - ubuntu-latest
+        - windows-latest
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+            preset: release
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+            preset: release
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+            preset: release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          --preset ${{ matrix.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy ninja-build
+
+      - name: Configure (clang-tidy)
+        run: cmake --preset clang-tidy
+
+      - name: Build (clang-tidy)
+        run: cmake --build build/clang-tidy
