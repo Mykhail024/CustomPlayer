@@ -77,6 +77,14 @@ jobs:
       - name: Build
         run: cmake --build --preset ${{ matrix.preset }}
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: customplayer-${{ matrix.os }}-${{ matrix.c_compiler }}
+          path: |
+            build/**/customplayer*
+
+
   clang-tidy:
     runs-on: ubuntu-latest
     steps:
@@ -103,4 +111,10 @@ jobs:
         run: cmake --preset clang-tidy
 
       - name: Build (clang-tidy)
-        run: cmake --build build/clang-tidy
+        run: cmake --build build/clang-tidy 2>&1 | tee clang-tidy.log
+
+      - name: Upload clang-tidy log
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-tidy-report
+          path: clang-tidy.log
