@@ -31,7 +31,6 @@ else()
     )
 endif()
 
-
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 set(QT_QML_GENERATE_QMLLS_INI ON)
@@ -77,4 +76,10 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui QuickControls2 LinguistTools)
 
 add_subdirectory(src)
 
-configure_file(qmlls.ini.in ${CMAKE_SOURCE_DIR}/.qmlls.ini) 
+configure_file(qmlls.ini.in ${CMAKE_SOURCE_DIR}/.qmlls.ini)
+
+if(EXISTS "${CMAKE_BINARY_DIR}/compile_commands.json")
+    file(COPY "${CMAKE_BINARY_DIR}/compile_commands.json"
+        DESTINATION "${CMAKE_SOURCE_DIR}")
+    message(STATUS "Copied compile_commands.json to source dir")
+endif()
