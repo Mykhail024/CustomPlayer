@@ -17,7 +17,9 @@
 			"binaryDir": "${sourceDir}/build/tsan",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
-				"TSAN": "ON"
+				"TSAN": "ON",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
 			}
 		},
 		{
@@ -28,7 +30,9 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_CXX_FLAGS_DEBUG": "-O0 -g3 -fprofile-arcs -ftest-coverage",
-                "CMAKE_EXE_LINKER_FLAGS_DEBUG": "-fprofile-arcs -ftest-coverage"
+                "CMAKE_EXE_LINKER_FLAGS_DEBUG": "-fprofile-arcs -ftest-coverage",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
             }
         },
         {
@@ -37,7 +41,9 @@
             "description": "Static analysis with clang-tidy",
             "binaryDir": "${sourceDir}/build/clang-tidy",
             "cacheVariables": {
-                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;-checks=clang-analyzer-*,modernize-*,readability-*,bugprone-*,performance-*,-modernize-use-trailing-return-type,-llvmlibc-implementation-in-namespace;--enable-check-profile;--warnings-as-errors=-*"
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;-checks=clang-analyzer-*,modernize-*,readability-*,bugprone-*,performance-*,-modernize-use-trailing-return-type,-llvmlibc-implementation-in-namespace;--enable-check-profile;--warnings-as-errors=-*",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER": "clang"
             }
         },
         {

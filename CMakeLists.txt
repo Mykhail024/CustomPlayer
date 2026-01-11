@@ -2,17 +2,35 @@ cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 project(CustomPlayer VERSION 0.1 LANGUAGES CXX)
 
 include(GNUInstallDirs)
-# include(CMakePresets)
 
 project(CustomPlayer)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic-errors -Werror")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3 -fno-omit-frame-pointer")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+
+if (MSVC)
+    add_compile_options(
+        /W4
+        /WX
+        /permissive-
+        $<$<CONFIG:Debug>:/Od>
+        $<$<CONFIG:Debug>:/Zi>
+        $<$<CONFIG:Release>:/O2>
+    )
+else()
+    add_compile_options(
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Werror
+        $<$<CONFIG:Debug>:-O0>
+        $<$<CONFIG:Debug>:-g3>
+        $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
+        $<$<CONFIG:Release>:-O2>
+    )
+endif()
+
 
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
@@ -28,6 +46,8 @@ set(TSAN OFF CACHE STRING "ThreadSanitizer support")
 string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type_lower)
 if(build_type_lower STREQUAL "debug")
   message(STATUS "Building in debug mode")
+
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
   find_program(CCACHE_PROGRAM ccache)
   if(CCACHE_PROGRAM)

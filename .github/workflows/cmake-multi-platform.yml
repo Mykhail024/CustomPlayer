@@ -35,22 +35,37 @@ jobs:
             c_compiler: gcc
             cpp_compiler: g++
             preset: release
+            qt_arch: linux_gcc_64
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
             preset: release
+            qt_arch: linux_gcc_64
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
             preset: release
+            qt_arch: win64_msvc2022_64
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Test arch (Linux)
+        if: runner.os == 'Linux'
+        run: uname -a
 
       - name: Install Qt6
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
+          target: 'desktop'
+          arch: ${{ matrix.qt_arch }}
+
+      - name: Install Clang (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang
 
       - name: Configure
         run: >
@@ -67,16 +82,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Test arch (Linux)
+        if: runner.os == 'Linux'
+        run: uname -a
+
       - name: Install Qt6
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
+          target: 'desktop'
+          arch: linux_gcc_64
 
       - name: Install dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-tidy ninja-build
+          sudo apt-get install -y clang-tidy clang
 
       - name: Configure (clang-tidy)
         run: cmake --preset clang-tidy
